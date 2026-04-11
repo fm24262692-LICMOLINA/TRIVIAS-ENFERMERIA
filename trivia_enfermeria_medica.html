@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia de Enfermería Médica — Lic. Francisco Molina</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75; --green-light: #EAF3DE; --green-dark: #0F6E56;
+    --red: #E24B4A; --red-light: #FCEBEB;
+    --blue: #185FA5; --blue-light: #E6F1FB;
+    --purple: #7c3aed; --purple-light: #ede9fe;
+    --gray: #f4f6f8; --card: #ffffff;
+    --text: #1a1a2e; --muted: #6b7280; --border: #e5e7eb;
+    --radius: 16px; --radius-sm: 10px;
+  }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 50%, #e8f5f0 100%);
+    min-height: 100vh;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 1.5rem 1rem 3rem;
+  }
+  #app { width: 100%; max-width: 680px; }
+
+  .header {
+    background: var(--card); border-radius: var(--radius);
+    padding: 1.5rem 1.5rem 1.25rem; margin-bottom: 1.25rem;
+    text-align: center; box-shadow: 0 4px 24px rgba(24,95,165,0.10);
+    position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, #185FA5, #7c3aed, #1D9E75);
+  }
+  .header-icon { font-size: 2.5rem; margin-bottom: 0.4rem; display: block; }
+  .header h1 {
+    font-family: 'Montserrat', sans-serif; font-size: 1.55rem;
+    font-weight: 900; color: var(--text); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .header .prof { font-size: 1rem; font-weight: 700; color: var(--blue); margin-top: 0.3rem; }
+  .header .inst { font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.6; }
+  .header .badge {
+    display: inline-block; margin-top: 0.75rem;
+    background: var(--purple-light); color: var(--purple);
+    font-size: 0.78rem; font-weight: 700; padding: 4px 16px;
+    border-radius: 99px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .progress-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    border-radius: 99px; transition: width 0.4s ease;
+  }
+  .progress-label { font-size: 0.82rem; color: var(--muted); font-weight: 700; min-width: 52px; text-align: right; }
+
+  .question-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .q-meta { font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 0.6rem; }
+  .q-text { font-size: 1rem; color: var(--text); font-weight: 700; line-height: 1.55; }
+
+  .timer-row {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 1rem;
+    background: var(--card); border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .timer-circle { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+  .timer-circle svg { transform: rotate(-90deg); }
+  .timer-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 800; color: var(--text); }
+  .timer-info { flex: 1; }
+  .timer-info .t-label { font-size: 0.85rem; color: var(--muted); }
+  .timer-info .t-msg { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .opt-btn {
+    padding: 12px 14px; font-size: 0.88rem; font-family: 'Nunito', sans-serif;
+    font-weight: 700; border: 2px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--card); color: var(--text); cursor: pointer;
+    text-align: left; line-height: 1.45; transition: all 0.15s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--blue); background: var(--blue-light); transform: translateY(-1px); }
+  .opt-btn.correct { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+  .opt-btn.wrong { background: var(--red-light); border-color: var(--red); color: #7f1d1d; }
+  .opt-btn:disabled { cursor: default; transform: none; }
+
+  .feedback {
+    min-height: 40px; font-size: 0.9rem; font-weight: 700;
+    margin-bottom: 0.75rem; padding: 0 0.25rem;
+    color: var(--muted); display: flex; align-items: center; gap: 6px;
+  }
+  .feedback.ok { color: var(--green-dark); }
+  .feedback.fail { color: #b91c1c; }
+
+  .nav-btn {
+    width: 100%; padding: 13px; font-size: 1rem; font-family: 'Nunito', sans-serif;
+    font-weight: 800; border: none; border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    color: #fff; cursor: pointer; letter-spacing: 0.3px;
+    box-shadow: 0 4px 14px rgba(24,95,165,0.3);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .nav-btn:hover { opacity: 0.93; transform: translateY(-1px); }
+
+  .start-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 2rem 1.5rem; text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .start-card h2 { font-family: 'Montserrat', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); margin-bottom: 0.75rem; }
+  .start-card p { font-size: 0.95rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.7; }
+  .start-card strong { color: var(--text); }
+  .info-chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 1.75rem; }
+  .chip { background: var(--gray); color: var(--muted); font-size: 0.8rem; font-weight: 700; padding: 5px 14px; border-radius: 99px; }
+  .chip.blue { background: var(--blue-light); color: var(--blue); }
+  .chip.purple { background: var(--purple-light); color: var(--purple); }
+
+  .result-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 2.25rem 1.5rem; text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .result-card h2 { font-family: 'Montserrat', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); margin-bottom: 0.5rem; }
+  .score-big { font-family: 'Montserrat', sans-serif; font-size: 4rem; font-weight: 900; color: var(--blue); line-height: 1; margin: 1rem 0 0.25rem; }
+  .score-sub { font-size: 0.95rem; color: var(--muted); margin-bottom: 1rem; }
+  .result-msg { font-size: 1rem; font-weight: 700; color: var(--text); padding: 0.75rem 1rem; background: var(--gray); border-radius: var(--radius-sm); margin-bottom: 1.5rem; }
+  .result-footer { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+  @media (max-width: 480px) {
+    .options { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.2rem; }
+    .score-big { font-size: 3rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <span class="header-icon">🏥</span>
+    <h1>Trivia de Enfermería</h1>
+    <div class="prof">Lic. Francisco Molina — Lic. Ana Collante</div>
+    <div class="inst">CENT N° 74 — ATSA<br>Carrera de Enfermero Profesional — 3° Año</div>
+    <div class="badge">📋 Repaso · Enfermería Médica</div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+const TIME = 23;
+
+const allQ = [
+  // TEMA 1 — Clínica Médica y Semiología
+  { tema:"Tema 1 — Clínica Médica", q:"¿Qué es la semiología en el contexto de la enfermería médica?", opts:["Rama que estudia los medicamentos y su administración","Rama de la medicina que estudia signos y síntomas para obtener un diagnóstico sindromatico","Técnica de exploración física exclusivamente visual","Método para registrar datos en la historia clínica"], a:1 },
+  { tema:"Tema 1 — Semiología", q:"¿Cuál es la diferencia entre signo y síntoma?", opts:["Son términos sinónimos y se usan indistintamente","El síntoma es objetivo y el signo es subjetivo","El síntoma es subjetivo (lo refiere el paciente) y el signo es objetivo (observable)","Ambos son datos objetivos medibles por el profesional"], a:2 },
+  { tema:"Tema 1 — Semiología", q:"¿Qué es un síndrome en semiología?", opts:["Una enfermedad con causa única y bien definida","Un síntoma aislado de gran intensidad","Un conjunto de signos y síntomas de variada etiología que evolucionan siempre igual","Un dato subjetivo referido por el paciente"], a:2 },
+  { tema:"Tema 1 — Examen Físico", q:"¿Cuáles son las etapas del examen físico en orden correcto?", opts:["Auscultación, palpación, percusión e inspección","Inspección, palpación, percusión y auscultación","Palpación, inspección, auscultación y percusión","Percusión, auscultación, inspección y palpación"], a:1 },
+  { tema:"Tema 1 — Signos", q:"¿Qué es el edema y cómo se clasifica su causa?", opts:["Coloración azulada de la piel, puede ser central o periférico","Hinchazón de tejidos por aumento de agua y sales, con causas locales y generales","Coloración amarillenta de piel y mucosas por bilirrubina elevada","Dolor torácico de origen inflamatorio"], a:1 },
+  { tema:"Tema 1 — Signos", q:"¿Qué es la cianosis y a qué se debe?", opts:["Coloración amarillenta de la piel por bilirrubina mayor a 2mg%","Hinchazón de los tejidos por retención de líquidos","Coloración azulada de la piel y mucosas por aumento de hemoglobina reducida por arriba del 5%","Sensación de dolor torácico agudo con irradiación al brazo"], a:2 },
+  { tema:"Tema 1 — Signos", q:"¿Qué es la ictericia y cuáles son sus tipos según origen?", opts:["Coloración azulada de piel por hemoglobina reducida, tipo central y periférica","Coloración amarillenta de piel y mucosas por bilirrubina elevada, tipo prehepática, hepática y posthepática","Acumulación de líquido en el espacio intersticial, tipo venoso y linfático","Dolor abdominal difuso de origen visceral, tipo agudo y crónico"], a:1 },
+
+  // TEMA 2 — Historia Natural de la Enfermedad
+  { tema:"Tema 2 — Historia Natural", q:"¿Cuáles son los dos grandes períodos de la historia natural de la enfermedad según Leavell y Clark?", opts:["Período agudo y período crónico","Período prepatogénico y período patogénico","Período de incubación y período de convalecencia","Período primario y período secundario"], a:1 },
+  { tema:"Tema 2 — Triada Ecológica", q:"¿Qué componentes forman la triada ecológica en el período prepatogénico?", opts:["Diagnóstico, tratamiento y rehabilitación","Prevención primaria, secundaria y terciaria","Agente, huésped y ambiente","Signo, síntoma y síndrome"], a:2 },
+  { tema:"Tema 2 — Niveles de Prevención", q:"¿Qué incluye la prevención primaria y a quién está dirigida?", opts:["Diagnóstico precoz del enfermo y tratamiento oportuno para evitar secuelas","Rehabilitación del paciente discapacitado para reintegrarlo a la sociedad","Acciones al hombre sano para disminuir riesgo de enfermar: promoción y protección específica","Aislamiento del paciente infectado para evitar propagación de enfermedades"], a:2 },
+  { tema:"Tema 2 — Niveles de Prevención", q:"¿En qué consiste la prevención terciaria?", opts:["Vacunación y educación sanitaria para población sana","Diagnóstico precoz y tratamiento oportuno para evitar complicaciones","Rehabilitación para reducir secuelas y lograr la reintegración del individuo a la sociedad","Protección específica contra agentes causantes de enfermedad"], a:2 },
+
+  // TEMA 3 — Teorías de Enfermería
+  { tema:"Tema 3 — Virginia Henderson", q:"¿Cuántas necesidades básicas define Virginia Henderson y cuál es la función de la enfermera según ella?", opts:["10 necesidades; la enfermera reemplaza siempre al médico en sus funciones","14 necesidades; ayudar al individuo sano o enfermo a realizar actividades que contribuyan a su salud o recuperación","12 necesidades; administrar medicamentos y controlar signos vitales únicamente","16 necesidades; supervisar al equipo de salud en todas sus acciones"], a:1 },
+  { tema:"Tema 3 — Teorías", q:"¿Qué afirmó Florence Nightingale sobre los cinco puntos esenciales para la salubridad?", opts:["Medicación correcta, higiene, reposo, dieta y vacunación","Aire puro, agua pura, desagüe eficaz, limpieza y luz","Temperatura adecuada, alimentación, actividad física, sueño y comunicación","Aislamiento, esterilización, cirugía, rehabilitación y nutrición"], a:1 },
+  { tema:"Tema 3 — Modelos", q:"¿Qué plantea el modelo de Virginia Henderson respecto a la dependencia e independencia del paciente?", opts:["El paciente siempre debe depender del enfermero para todas sus actividades","La independencia es cuando la persona logra satisfacer sus necesidades por sí misma; la dependencia es la incapacidad para hacerlo sin ayuda","El médico decide el grado de dependencia del paciente sin intervención del enfermero","La dependencia se aplica solo en pacientes geriátricos y con discapacidades físicas"], a:1 },
+
+  // TEMA 4 — PAE
+  { tema:"Tema 4 — PAE", q:"¿Cuáles son las 5 etapas del Proceso de Atención de Enfermería (PAE) en orden?", opts:["Diagnóstico, planificación, valoración, evaluación y ejecución","Valoración, diagnóstico, planificación, ejecución y evaluación","Ejecución, valoración, diagnóstico, evaluación y planificación","Planificación, diagnóstico, valoración, ejecución y evaluación"], a:1 },
+  { tema:"Tema 4 — PAE", q:"¿Qué es el diagnóstico de enfermería y qué tipos existen?", opts:["Es una orden médica que el enfermero ejecuta; solo existe tipo real","Es el juicio clínico que resulta de la valoración; existen tipos real, potencial, de alto riesgo, posible y de bienestar","Es el conjunto de cuidados planificados por el equipo interdisciplinario sin distinción de roles","Es la evaluación final del estado del paciente al momento del alta hospitalaria"], a:1 },
+  { tema:"Tema 4 — PAE", q:"¿Cómo se redacta correctamente un diagnóstico de enfermería real (PES)?", opts:["Primero el tratamiento médico, luego las complicaciones y finalmente el pronóstico","Problema relacionado con la etiología manifestado por signos y síntomas","Solo el síntoma principal que refiere el paciente en la entrevista inicial","Diagnóstico médico seguido de las intervenciones de enfermería planificadas"], a:1 },
+
+  // TEMA 5 — Medio Interno
+  { tema:"Tema 5 — Medio Interno", q:"¿Cómo se distribuye el agua en el organismo adulto?", opts:["El 50% es intracelular y el 50% es extracelular","El 70% del peso corporal es agua: 40% intracelular y 30% extracelular","El 80% es extracelular y el 20% es intracelular","El 60% es intravascular y el 40% es intersticial"], a:1 },
+  { tema:"Tema 5 — Deshidratación", q:"¿Cuál es el cuadro clínico de la deshidratación por pérdida de agua?", opts:["Edema, aumento de peso, tensión arterial elevada y taquicardia","Sed intensa, lengua roja y seca, ojos hundidos, oliguria, fiebre e hipotensión postural","Bradicardia, piel húmeda, aumento de la presión venosa y sibilancias","Nauseas, vómitos, ictericia y dolor en hipocondrio derecho"], a:1 },
+  { tema:"Tema 5 — Homeostasis", q:"¿Qué es la homeostasis y qué mecanismos la regulan?", opts:["Es la enfermedad que produce cambios en el medio interno; regulada por la insulina","Equilibrio del medio interno frente a un entorno cambiante; regulada por hormona antidiurética, aldosterona y la sed","Proceso de absorción de nutrientes en el intestino; regulado por enzimas digestivas","Mecanismo de defensa ante infecciones; regulado por anticuerpos y linfocitos"], a:1 },
+
+  // TEMA 6 — Adulto Mayor
+  { tema:"Tema 6 — Adulto Mayor", q:"¿Cuáles son los principales cambios fisiológicos que sufre el sistema musculoesquelético en el anciano?", opts:["Aumento de la masa muscular, mayor flexibilidad articular y densidad ósea alta","Marcha senil, osteoporosis, tendencia a fracturas, debilidad muscular y disminución de la talla","Mejora en la coordinación motora, mayor velocidad de reflejos y huesos más resistentes","Rigidez articular leve, aumento de peso muscular y mayor tolerancia al ejercicio"], a:1 },
+  { tema:"Tema 6 — Úlceras", q:"¿Cómo se clasifican los estadios de las úlceras por presión?", opts:["Solo dos estadios: superficial y profundo","Cuatro estadios: desde eritema que no palidece hasta lesión con destrucción de músculo y hueso","Tres estadios: leve, moderado y severo según el tamaño de la úlcera","Un solo estadio universal con tratamiento igual para todos los casos"], a:1 },
+
+  // TEMA 7 — Gastrointestinal
+  { tema:"Tema 7 — Digestivo", q:"¿Cuál es la diferencia entre esofagitis y gastritis en cuanto a su etiología?", opts:["Son la misma enfermedad con distinto nombre según el médico tratante","La esofagitis se produce por reflujo, infecciones y cáusticos; la gastritis por AINES, H. pylori y exceso de ácido","La esofagitis es siempre crónica y la gastritis siempre aguda y curable","La gastritis afecta solo a adultos mayores y la esofagitis a niños y adolescentes"], a:1 },
+  { tema:"Tema 7 — Digestivo", q:"¿En qué consiste la fibroendoscopía y para qué se utiliza?", opts:["Es un estudio que usa rayos X con bario para visualizar el esófago y estómago","Es un procedimiento que introduce un tubo flexible con fibra óptica para visualizar el interior del aparato digestivo","Es un análisis de sangre para detectar Helicobacter pylori y niveles de enzimas hepáticas","Es una técnica de imagen que usa ultrasonidos para observar órganos abdominales"], a:1 },
+  { tema:"Tema 7 — Digestivo", q:"¿Qué cuidados de enfermería son esenciales en pacientes con esofagitis o gastritis?", opts:["Reposo absoluto, ayuno total y administración de analgésicos fuertes por vía endovenosa","Control de signos vitales, venoclisis, control de ingesta, medicación indicada y vigilar aparición de síntomas","Solo control del peso y registrar la ingesta oral diaria sin otras intervenciones","Fisioterapia respiratoria, cambios posturales y balance hidroelectrolítico estricto"], a:1 },
+
+  // TEMA 8 — Diabetes
+  { tema:"Tema 8 — Diabetes", q:"¿Cuáles son los tres síntomas cardinales de la diabetes mellitus y por qué ocurren?", opts:["Fiebre, cansancio y pérdida de peso por infección bacteriana del páncreas","Poliuria, polidipsia y polifagia: por glucosuria, pérdida de líquidos y alteración del metabolismo de grasas y proteínas","Bradicardia, hipertensión y edema por retención de sodio en los túbulos renales","Cefalea, visión doble y convulsiones por compromiso del sistema nervioso central"], a:1 },
+  { tema:"Tema 8 — Diabetes", q:"¿Cuáles son los pilares del tratamiento de la diabetes mellitus tipo 2?", opts:["Solo insulina y dieta estricta sin actividad física para evitar hipoglucemias","Plan nutricional, actividad física, educación diabetológica, automonitoreo glucémico y tratamiento farmacológico","Únicamente medicación oral hipoglucemiante sin cambios en el estilo de vida","Cirugía pancreática y trasplante de islotes como primera línea de tratamiento"], a:1 },
+  { tema:"Tema 8 — Insulina", q:"¿Cuáles son los tipos de insulina según su acción y cuáles son sus vías de administración?", opts:["Solo existe insulina rápida y lenta, ambas solo por vía subcutánea","Ultrarápida, rápida, intermedia (NPH) y prolongada; vías subcutánea, intramuscular y endovenosa según el tipo","Solo existen insulinas animales y humanas, sin diferencia en velocidad de acción","Todas las insulinas tienen la misma duración de acción y solo se diferencian por su concentración"], a:1 },
+
+  // TEMA 9 — Tiroides
+  { tema:"Tema 9 — Tiroides", q:"¿Cuáles son las diferencias clínicas principales entre hipertiroidismo e hipotiroidismo?", opts:["Ambos producen los mismos síntomas y solo se diferencian por el nivel de TSH en sangre","El hipertiroidismo produce nerviosismo, pérdida de peso y palpitaciones; el hipotiroidismo produce apatía, aumento de peso y sensibilidad al frío","El hipertiroidismo solo afecta a niños y el hipotiroidismo exclusivamente a ancianos","Ninguno produce síntomas hasta que hay daño cardíaco irreversible"], a:1 },
+  { tema:"Tema 9 — Tiroides", q:"¿Qué es la crisis tireotóxica y cuáles son sus manifestaciones clínicas principales?", opts:["Descenso brusco de hormonas tiroideas con hipotermia, bradicardia y somnolencia profunda","Complicación grave del hipertiroidismo con deshidratación, taquicardia, arritmia severa e insuficiencia cardíaca","Inflamación aguda de la glándula tiroides por infección bacteriana con dolor cervical intenso","Bocio multinodular que comprime la tráquea causando dificultad para respirar y deglutir"], a:1 },
+
+  // TEMA 10 — Hepáticas
+  { tema:"Tema 10 — Hígado", q:"¿Cuáles son las diferencias entre hepatitis A, B y C en cuanto a transmisión y pronóstico?", opts:["Las tres se transmiten por vía sanguínea y todas pueden cronificarse","La hepatitis A se transmite fecal-oral y raramente cronifica; la B y C se transmiten por sangre y contacto sexual con mayor riesgo de cronicidad","Son idénticas en transmisión y pronóstico, solo difieren en el agente viral causante","La hepatitis C se transmite solo por vía respiratoria y siempre se cura espontáneamente"], a:1 },
+  { tema:"Tema 10 — Hígado", q:"¿Qué cuidados de enfermería requiere la preparación y seguimiento de una biopsia hepática?", opts:["No requiere preparación previa ni cuidados especiales posteriores al procedimiento","Preparación física y mental, ayuno previo, decúbito lateral derecho post-procedimiento, control de signos vitales y apósitos cada 30 minutos","Solo control de signos vitales durante el procedimiento y alta inmediata al finalizar","Ayuno por 24 horas, sedación total del paciente y hospitalización por una semana mínimo"], a:1 },
+
+  // TEMA 11 — Respiratorio
+  { tema:"Tema 11 — Respiratorio", q:"¿Cuáles son los grados de disnea y cómo se clasifican?", opts:["Solo dos grados: disnea leve de esfuerzo y disnea de reposo","Cuatro grados: ante grandes esfuerzos, esfuerzos habituales, mínimos esfuerzos y disnea de reposo (ortopnea)","Tres grados según la saturación de oxígeno: mayor a 95%, entre 90-95% y menor al 90%","Un solo tipo de disnea que se mide por la frecuencia respiratoria por minuto"], a:1 },
+  { tema:"Tema 11 — Respiratorio", q:"¿Para qué se usa la espirometría y qué mide exactamente?", opts:["Se usa para diagnosticar infecciones pulmonares y mide los niveles de bacterias en el esputo","Mide la capacidad ventilatoria pulmonar: cuánto aire retienen los pulmones y la velocidad de inspiración/espiración","Se usa para visualizar el interior de los pulmones con un tubo flexible de fibra óptica","Detecta tumores pulmonares mediante radiación ionizante en forma de rayos X"], a:1 },
+  { tema:"Tema 11 — Pleuritis", q:"¿Qué es la pleuritis, cuál es su cuadro clínico y qué complicaciones puede presentar?", opts:["Infección viral de los pulmones con fiebre alta, tos productiva y expectoración herrumbrosa","Inflamación de la pleura que produce dolor en punta de costado, tos irritativa y dificultad respiratoria; puede complicarse con atelectasia","Obstrucción crónica de las vías aéreas con sibilancias, tos nocturna y broncoespasmo recurrente","Acumulación de pus en la cavidad pleural causada por bacterias gram negativas"], a:1 },
+
+  // TEMA 12 — EPOC y Asma
+  { tema:"Tema 12 — EPOC", q:"¿Cuáles son las cuatro enfermedades pulmonares obstructivas crónicas y qué las caracteriza?", opts:["Neumonía, TBC, pleuritis y neumotórax; todas con inicio agudo y tratamiento antibiótico","Enfisema, bronquitis, asma bronquial y bronquiectasia; todas con obstrucción del flujo aéreo de distinta causa y evolución","Sinusitis, otitis, laringitis y traqueítis; todas de origen infeccioso y buena respuesta al tratamiento","Edema pulmonar, embolia, hipertensión pulmonar e infarto; todas de origen cardiovascular"], a:1 },
+  { tema:"Tema 12 — Asma", q:"¿Cuál es la fisiopatología del asma bronquial y cuál es su cuadro clínico típico?", opts:["Destrucción de alvéolos por infección bacteriana con fiebre alta y expectoración purulenta","Contracción de músculos bronquiales, edema de mucosa y obstrucción por moco espeso; clínica de sibilancias, tos seca, disnea y cianosis de inicio brusco","Dilatación crónica de bronquios con producción de esputo purulento en grandes cantidades y hemoptisis","Inflamación de pleura parietal con dolor en punta de costado que aumenta con la inspiración"], a:1 },
+
+  // TEMA 13 — Infecciones respiratorias
+  { tema:"Tema 13 — Neumonía", q:"¿Cuál es la fisiopatología de la neumonía bacteriana y cuáles son sus principales complicaciones?", opts:["Destrucción alveolar crónica por tabaquismo con hipoxemia progresiva y reducción de capacidad vital","El neumococo provoca inflamación alveolar con exudado, hipoxemia y mezcla de sangre oxigenada y no oxigenada; complicaciones: empiema, sepsis e insuficiencia renal","Obstrucción bronquial por moco espeso con atrapamiento de aire y sibilancias; sin complicaciones graves","Inflamación pleural con derrame que comprime el pulmón afectado sin afectar el intercambio gaseoso"], a:1 },
+  { tema:"Tema 13 — TBC", q:"¿Cómo se transmite la tuberculosis y cuáles son sus criterios diagnósticos?", opts:["Se transmite por contacto con superficies contaminadas; diagnóstico solo por radiografía de tórax","Se transmite 95% por inhalación de gotitas de Flügge; diagnóstico por PPD, baciloscopia, cultivo de esputo y radiografía de tórax","Se transmite por vía fecal-oral y el diagnóstico se realiza únicamente con cultivo de orina","Se transmite por picadura de insectos vectores; diagnóstico con prueba ELISA y hemocultivo"], a:1 },
+  { tema:"Tema 13 — TBC", q:"¿En qué consiste la Categoría 1 del tratamiento de la tuberculosis y cuánto dura?", opts:["Solo rifampicina por 3 meses sin controles de baciloscopia intermedios","Dura 6 meses: fase inicial con triple/cuádruple asociación por 2 meses, y fase de continuación con doble asociación por 4 meses","Únicamente isoniacida de por vida sin otra medicación asociada","Ocho meses con la misma combinación de fármacos sin distinción de fases"], a:1 },
+
+  // TEMA 14 — Cardiovascular
+  { tema:"Tema 14 — Insuficiencia Cardíaca", q:"¿Cuál es la diferencia clínica entre insuficiencia cardíaca izquierda y derecha?", opts:["Ambas producen los mismos síntomas y no hay diferencia en el cuadro clínico","La IC izquierda produce congestión pulmonar, disnea y tos seca; la IC derecha produce edema de miembros inferiores, hepatomegalia y ascitis","La IC izquierda solo afecta a jóvenes y la IC derecha exclusivamente a adultos mayores","La IC derecha produce edema pulmonar y la IC izquierda produce edema de miembros inferiores"], a:1 },
+  { tema:"Tema 14 — Cardiovascular", q:"¿Cuáles son los cuidados de enfermería esenciales en el paciente con insuficiencia cardíaca?", opts:["Solo administración de diuréticos y control del peso, sin otras intervenciones específicas","Posición semifowler, monitoreo, administración de O2 húmedo, balance hidroelectrolítico, control de medicamentos y peso diario","Reposo absoluto en decúbito dorsal, dieta hipercalórica y restricción total de líquidos","Fisioterapia respiratoria intensa, movilización temprana y dieta hiperproteica"], a:1 },
+
+  // TEMA 15 — HTA
+  { tema:"Tema 15 — HTA", q:"¿Cómo se clasifica la hipertensión arterial según sus valores y cuál es el tratamiento farmacológico principal?", opts:["Solo se clasifica en leve y severa; se trata únicamente con dieta hiposódica sin fármacos","Se clasifica en óptima, normal, normal elevada, leve, moderada, severa y muy severa; se trata con diuréticos, betabloqueantes, bloqueantes cálcicos, IECA y antagonistas de angiotensina","Se clasifica solo por la tensión diastólica; se trata exclusivamente con un fármaco elegido por el médico","Solo se clasifica como controlada o no controlada; el tratamiento es igual para todos los pacientes"], a:1 },
+  { tema:"Tema 15 — HTA", q:"¿Qué es una crisis hipertensiva y en qué órganos puede producir daño?", opts:["Descenso brusco de la tensión arterial con síncope y pérdida de conciencia transitoria","Elevación aguda de la TA por encima de 200-220/120 mmHg capaz de producir daño estructural en cerebro, corazón, riñón y ojos","Aumento leve de la tensión que se resuelve solo con reposo sin tratamiento médico","Arritmia cardíaca causada por estrés emocional intenso con elevación transitoria de la tensión"], a:1 },
+
+  // TEMA 16 — Colagenopatías
+  { tema:"Tema 16 — Fiebre Reumática", q:"¿Qué es la fiebre reumática, cuáles son sus criterios mayores y qué órganos puede afectar?", opts:["Infección bacteriana directa del corazón por estafilococo con fiebre, escalofríos y bacteriemia","Enfermedad inflamatoria secuela de infección faríngea estreptocócica que afecta corazón, articulaciones y SNC; criterios mayores: artritis, carditis, corea, nódulos y eritema marginado","Enfermedad autoinmune que afecta exclusivamente la piel con erupción en alas de mariposa","Vasculitis crónica de causa genética que afecta principalmente los vasos renales y pulmonares"], a:1 },
+  { tema:"Tema 16 — Lupus y Artritis", q:"¿Cuál es la diferencia entre lupus eritematoso y artritis reumatoidea?", opts:["Son la misma enfermedad con distinto nombre según el órgano afectado principalmente","El lupus es una vasculopatía del colágeno que afecta múltiples sistemas con erupción en alas de mariposa; la artritis reumatoidea inflama la membrana sinovial con dolor, rigidez e inmovilidad progresiva","Ambas se curan espontáneamente sin tratamiento específico a largo plazo","La artritis es exclusiva de mujeres jóvenes y el lupus solo afecta a varones mayores de 60 años"], a:1 },
+
+  // TEMA 17 — Renales
+  { tema:"Tema 17 — Renal", q:"¿Cuál es la diferencia entre pielonefritis y glomerulonefritis en su origen y cuadro clínico?", opts:["Son la misma enfermedad: ambas causadas por estreptococo del grupo A con el mismo tratamiento","La pielonefritis es una infección bacteriana de la pelvis renal con fiebre, escalofríos y piuria; la glomerulonefritis es una reacción inmunológica del glomérulo con edema, hematuria e HTA","La pielonefritis afecta los glomérulos y la glomerulonefritis afecta los túbulos renales","Ambas se tratan igual con antibióticos y no requieren balance hidroelectrolítico"], a:1 },
+  { tema:"Tema 17 — Renal", q:"¿Cuáles son los principales síntomas urinarios que pueden indicar enfermedad renal?", opts:["Solo fiebre y dolor lumbar sin alteraciones en la orina ni en la micción","Polaquiuria, disuria, incontinencia, enuresis, hematuria, poliuria y oliguria, junto a síntomas sistémicos como edema y náuseas","Únicamente cambios en el color de la orina sin alteración en la frecuencia ni en la cantidad","Solo aumento de la frecuencia urinaria nocturna sin otros síntomas asociados"], a:1 },
+
+  // TEMA 18 — Hematología
+  { tema:"Tema 18 — Anemia", q:"¿Qué es la anemia, cuál es su etiología más frecuente y cuáles son sus síntomas principales?", opts:["Exceso de glóbulos rojos por sobreproducción medular; síntomas: rubicundez y cefalea","Concentración subnormal de hemoglobina por hemorragia, déficit de hierro u otras causas; síntomas: debilidad, fatiga, irritabilidad y trastornos del apetito","Infección de la médula ósea por bacterias; síntomas: fiebre alta, dolor óseo y petequias","Disminución de plaquetas en sangre; síntomas: hemorragias y equimosis en extremidades"], a:1 },
+  { tema:"Tema 18 — Leucemia", q:"¿Cómo se clasifican las leucemias y cuál es el pronóstico general de cada tipo?", opts:["Solo existe un tipo de leucemia que afecta a todas las edades por igual con el mismo pronóstico","Se clasifican en linfocítica y mielogénica; cada una en aguda o crónica; el pronóstico varía de meses a años según el tipo y la madurez celular afectada","Son todas iguales en cuanto a su evolución y se diferencian solo por el tratamiento elegido","La leucemia aguda tiene mejor pronóstico que la crónica y afecta únicamente a adultos mayores"], a:1 },
+  { tema:"Tema 18 — Púrpura", q:"¿Qué es la púrpura trombocitopénica y cuáles son sus manifestaciones clínicas?", opts:["Exceso de plaquetas con tendencia a la trombosis y fenómenos vasculares oclusivos","Disminución de plaquetas que se manifiesta con petequias, equimosis, epistaxis y riesgo de hemorragia; la etiología suele ser desconocida","Infección bacteriana que destruye los glóbulos rojos con hemólisis masiva e ictericia grave","Aumento de linfocitos en sangre periférica con adenopatías generalizadas y esplenomegalia"], a:1 },
+
+  // TEMA 19 — ETS
+  { tema:"Tema 19 — ETS", q:"¿Cuáles son las etapas de la sífilis y sus principales manifestaciones clínicas?", opts:["Solo tiene dos etapas: primaria con chancro y terciaria con daño neurológico","Cuatro etapas: incubación sin síntomas, primaria con chancro, secundaria con lesiones cutáneas generalizadas, y terciaria con compromiso cardiovascular y del sistema nervioso","Solo una etapa sintomática con lesiones en el área genital que desaparecen solas","Tres etapas con los mismos síntomas pero de diferente intensidad sin compromiso sistémico"], a:1 },
+  { tema:"Tema 19 — VIH/SIDA", q:"¿Qué es el VIH, cómo afecta al sistema inmunológico y cuál es el tratamiento actual?", opts:["Es una bacteria que destruye los eritrocitos; se trata con antibióticos de amplio espectro","Es un retrovirus que invade y destruye los linfocitos T4 deteriorando la inmunidad; se trata con antirretrovirales en combinación para mantener controlada la infección","Es un hongo oportunista que solo afecta a pacientes desnutridos; se trata con antifúngicos orales","Es un parásito intracelular que afecta el páncreas; se trata con antiparasitarios e inmunosupresores"], a:1 },
+
+  // TEMA 20 — Piel (aunque es Tema 20 en el programa original, el PDF lo llama Tema 20)
+  { tema:"Tema 20 — Pénfigo, Lepra y Psoriasis", q:"¿Qué caracteriza al pénfigo como enfermedad de la piel y cómo se diferencia de la psoriasis?", opts:["Son la misma enfermedad con distinto nombre regional; ambas se tratan igual con corticoides tópicos","El pénfigo es una enfermedad ampollosa autoinmune que afecta piel y mucosas; la psoriasis es una enfermedad crónica no infecciosa con placas descamativas eritematosas","Ambas son infecciosas, contagiosas y se transmiten por contacto directo con la piel afectada","El pénfigo solo afecta la boca y la psoriasis solo afecta el cuero cabelludo"], a:1 },
+
+  // TEMA 21 — Epidemiología
+  { tema:"Tema 21 — Epidemiología", q:"¿Cuál es el objeto de estudio de la epidemiología y qué métodos de investigación utiliza?", opts:["Estudia solo las enfermedades infecciosas en hospitales; usa únicamente cultivos bacteriológicos","Estudia los factores asociados a enfermedades en poblaciones, su prevalencia, incidencia y distribución; usa métodos descriptivos, analíticos observacionales y experimentales","Estudia exclusivamente la anatomía y fisiología humana para prevenir enfermedades crónicas","Estudia solo el tratamiento farmacológico de enfermedades y su eficacia en ensayos clínicos"], a:1 },
+  { tema:"Tema 21 — Epidemiología", q:"¿Qué es la vigilancia epidemiológica y cuáles son sus etapas principales?", opts:["Es el tratamiento masivo de enfermedades endémicas sin análisis estadístico previo","Observación y análisis de la distribución de enfermedades para que la prevención sea oportuna; etapas: recolección de datos, análisis, ejecución de medidas y diseminación de información","Es la aplicación de vacunas a toda la población sin distinción de grupos de riesgo","Es el control policial de personas enfermas para evitar la propagación de enfermedades"], a:1 },
+  { tema:"Tema 21 — Epidemiología", q:"¿Cuál es la diferencia entre incidencia y prevalencia en epidemiología?", opts:["Son conceptos sinónimos y se usan de manera intercambiable en todos los estudios","La incidencia mide los casos nuevos en un período dado; la prevalencia mide todos los casos existentes en un momento determinado","La prevalencia mide solo enfermedades agudas y la incidencia solo enfermedades crónicas","La incidencia se mide en hospitales y la prevalencia solo en comunidades rurales"], a:1 },
+];
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function prepareQuestions() {
+  return shuffleArray(allQ).slice(0, 13).map(q => {
+    const correctText = q.opts[q.a];
+    const shuffled = shuffleArray([...q.opts]);
+    return { ...q, shuffledOpts: shuffled, correctText };
+  });
+}
+
+let questions = [], current = 0, score = 0, timer = null, timeLeft = TIME, answered = false;
+
+function renderStart() {
+  document.getElementById('content').innerHTML = `
+    <div class="start-card">
+      <h2>¿Listos para el repaso? 🎯</h2>
+      <p>Respondé <strong>13 preguntas</strong> aleatorias sobre los contenidos de<br><strong>Enfermería Médica</strong>.<br>Cada pregunta tiene <strong>23 segundos</strong> para responder.</p>
+      <div class="info-chips">
+        <span class="chip blue">13 preguntas</span>
+        <span class="chip purple">23 seg / pregunta</span>
+        <span class="chip">Respuestas aleatorias</span>
+      </div>
+      <button class="nav-btn" onclick="startTrivia()">Comenzar trivia ▶</button>
+    </div>`;
+}
+
+function startTrivia() {
+  questions = prepareQuestions();
+  current = 0; score = 0;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false; timeLeft = TIME;
+  clearInterval(timer);
+  const q = questions[current];
+  const pct = Math.round((current / 13) * 100);
+  const C = 2 * Math.PI * 24;
+
+  document.getElementById('content').innerHTML = `
+    <div class="progress-row">
+      <div class="progress-wrap"><div class="progress-fill" id="pbar" style="width:${pct}%"></div></div>
+      <div class="progress-label">${current + 1} / 13</div>
+    </div>
+    <div class="question-card">
+      <div class="q-meta">${q.tema}</div>
+      <div class="q-text">${q.q}</div>
+    </div>
+    <div class="timer-row">
+      <div class="timer-circle">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle cx="28" cy="28" r="24" fill="none" stroke="#e5e7eb" stroke-width="5"/>
+          <circle id="timer-arc" cx="28" cy="28" r="24" fill="none" stroke="#185FA5" stroke-width="5"
+            stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="0" stroke-linecap="round"/>
+        </svg>
+        <div class="timer-num" id="tnum">${TIME}</div>
+      </div>
+      <div class="timer-info">
+        <div class="t-label" id="tl-label">Segundos restantes</div>
+        <div class="t-msg">¡Elegí tu respuesta!</div>
+      </div>
+    </div>
+    <div class="options" id="opts">
+      ${q.shuffledOpts.map((o, i) => `<button class="opt-btn" onclick="choose(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="feedback" id="fb"></div>
+    <button class="nav-btn" id="next-btn" style="display:none" onclick="next()">${current + 1 < 13 ? 'Siguiente pregunta →' : 'Ver resultados'}</button>`;
+
+  timer = setInterval(() => {
+    timeLeft--;
+    const el = document.getElementById('tnum');
+    const arc = document.getElementById('timer-arc');
+    const lbl = document.getElementById('tl-label');
+    if (el) el.textContent = timeLeft;
+    if (arc) {
+      arc.style.strokeDashoffset = (C * (1 - timeLeft / TIME)).toFixed(1);
+      arc.style.stroke = timeLeft <= 7 ? '#E24B4A' : '#185FA5';
+    }
+    if (lbl) lbl.style.color = timeLeft <= 7 ? '#b91c1c' : '';
+    if (timeLeft <= 0) { clearInterval(timer); if (!answered) timeUp(); }
+  }, 1000);
+}
+
+function choose(idx) {
+  if (answered) return;
+  answered = true; clearInterval(timer);
+  const q = questions[current];
+  const btns = document.querySelectorAll('.opt-btn');
+  const fb = document.getElementById('fb');
+  const nextBtn = document.getElementById('next-btn');
+  btns.forEach(b => b.disabled = true);
+  btns.forEach((b, i) => { if (q.shuffledOpts[i] === q.correctText) b.classList.add('correct'); });
+  if (q.shuffledOpts[idx] === q.correctText) {
+    score++;
+    btns[idx].classList.add('correct');
+    fb.innerHTML = '✅ ¡Correcto!';
+    fb.className = 'feedback ok';
+  } else {
+    btns[idx].classList.add('wrong');
+    fb.innerHTML = '❌ Incorrecto. La respuesta correcta está marcada en verde.';
+    fb.className = 'feedback fail';
+  }
+  nextBtn.style.display = 'block';
+}
+
+function timeUp() {
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.opt-btn');
+  const fb = document.getElementById('fb');
+  const nextBtn = document.getElementById('next-btn');
+  btns.forEach(b => b.disabled = true);
+  btns.forEach((b, i) => { if (q.shuffledOpts[i] === q.correctText) b.classList.add('correct'); });
+  fb.innerHTML = '⏱️ ¡Tiempo! La respuesta correcta está marcada en verde.';
+  fb.className = 'feedback fail';
+  nextBtn.style.display = 'block';
+}
+
+function next() {
+  current++;
+  if (current >= 13) renderResult();
+  else renderQuestion();
+}
+
+function renderResult() {
+  clearInterval(timer);
+  const pct = Math.round((score / 13) * 100);
+  let msg = '';
+  if (pct >= 85) msg = '🏆 ¡Excelente! Estás muy preparado/a para el examen.';
+  else if (pct >= 60) msg = '👍 Buen repaso. Revisá los temas donde fallaste.';
+  else msg = '📖 Seguí estudiando, ¡podés mejorar mucho!';
+
+  document.getElementById('content').innerHTML = `
+    <div class="result-card">
+      <h2>Trivia finalizada</h2>
+      <div class="score-big">${score}/13</div>
+      <div class="score-sub">${pct}% de respuestas correctas</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-footer">Enfermería Médica · Lic. Francisco Molina — Lic. Ana Collante<br>CENT N° 74 — ATSA — 3° Año</div>
+      <button class="nav-btn" onclick="renderStart()">Jugar de nuevo 🔄</button>
+    </div>`;
+}
+
+renderStart();
+</script>
+</body>
+</html>
