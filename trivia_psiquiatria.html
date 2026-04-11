@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TriviaEnfer 🧠 | Enfermería Psiquiátrica</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --morado: #6a1b9a;
+    --morado2: #8e24aa;
+    --verde: #2e7d32;
+    --rojo: #b71c1c;
+    --amarillo: #f9a825;
+    --naranja: #e65100;
+    --fondo: #0d0a1a;
+    --card: #150f2a;
+    --card2: #1a1435;
+    --texto: #ede7f6;
+    --gris: #9575cd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--fondo); color: var(--texto); min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 20% 20%, rgba(106,27,154,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(46,125,50,0.08) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+  .container { width: 100%; max-width: 760px; padding: 20px; position: relative; z-index: 1; }
+
+  /* INICIO */
+  #pantalla-inicio { text-align: center; animation: fadeInUp 0.6s ease; }
+  .logo-emoji { font-size: 3rem; display: block; margin-bottom: 8px; animation: pulse 2s infinite; }
+  .logo { font-family: 'Fredoka One', cursive; font-size: 2.8rem; background: linear-gradient(135deg, #8e24aa, #2e7d32); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; }
+  .profesor-badge { display: inline-block; background: linear-gradient(135deg, #4a148c, #6a1b9a); padding: 8px 22px; border-radius: 30px; font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; color: white; }
+  .inst-badge { display: inline-block; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 4px 14px; border-radius: 20px; font-size: 0.78rem; color: var(--gris); margin-bottom: 10px; }
+  .subtitulo { font-size: 0.97rem; color: var(--gris); margin-bottom: 16px; }
+  .badge-materia { display: inline-block; background: linear-gradient(135deg, #6a1b9a, #8e24aa); padding: 6px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; margin-bottom: 20px; letter-spacing: 1px; }
+  .temas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 20px; }
+  @media(max-width:520px){ .temas-grid { grid-template-columns: repeat(2,1fr); } }
+  .tema-chip { background: var(--card); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 7px 5px; text-align: center; font-size: 0.68rem; font-weight: 700; line-height: 1.3; color: #ce93d8; }
+  .tema-chip .ic { font-size: 1rem; display: block; margin-bottom: 2px; }
+  .stats-inicio { display: flex; justify-content: center; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
+  .stat-item { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 20px; text-align: center; }
+  .stat-num { font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--amarillo); }
+  .stat-label { font-size: 0.75rem; color: var(--gris); margin-top: 2px; }
+  .btn-jugar { background: linear-gradient(135deg, #6a1b9a, #2e7d32); color: white; border: none; padding: 17px 56px; font-size: 1.2rem; font-family: 'Fredoka One', cursive; border-radius: 50px; cursor: pointer; letter-spacing: 1px; box-shadow: 0 8px 30px rgba(106,27,154,0.5); transition: transform 0.2s, box-shadow 0.2s; }
+  .btn-jugar:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 40px rgba(106,27,154,0.7); }
+  .firma { margin-top: 16px; font-size: 0.78rem; color: rgba(255,255,255,0.2); }
+
+  /* JUEGO */
+  #pantalla-juego { display: none; animation: fadeInUp 0.5s ease; }
+  .header-juego { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .progreso-texto { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--gris); }
+  .progreso-texto span { color: var(--amarillo); font-size: 1.3rem; }
+  .puntaje-display { background: var(--card); border: 1px solid rgba(249,168,37,0.3); border-radius: 12px; padding: 7px 15px; font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--amarillo); }
+  .barra-progreso { background: rgba(255,255,255,0.08); border-radius: 10px; height: 7px; margin-bottom: 14px; overflow: hidden; }
+  .barra-fill { height: 100%; background: linear-gradient(90deg, #8e24aa, #2e7d32); border-radius: 10px; transition: width 0.5s ease; }
+  .timer-container { display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .timer-circle { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka One', cursive; font-size: 1.4rem; border: 3px solid #8e24aa; background: var(--card); transition: border-color 0.3s, color 0.3s; }
+  .timer-circle.urgente { border-color: var(--rojo); color: var(--rojo); animation: tiembla 0.3s infinite; }
+  .categoria-tag { display: inline-block; background: rgba(106,27,154,0.25); border: 1px solid rgba(142,36,170,0.4); color: #ce93d8; padding: 4px 14px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .pregunta-card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 24px; margin-bottom: 16px; }
+  .pregunta-texto { font-size: 1.1rem; font-weight: 700; line-height: 1.5; color: #ede7f6; }
+  .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  @media(max-width:480px){ .opciones { grid-template-columns: 1fr; } }
+  .opcion-btn { background: var(--card2); border: 2px solid rgba(255,255,255,0.09); color: var(--texto); padding: 14px 15px; border-radius: 13px; font-size: 0.93rem; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.2s; line-height: 1.4; }
+  .opcion-btn:hover:not(:disabled) { border-color: #8e24aa; background: rgba(106,27,154,0.2); transform: translateY(-2px); }
+  .opcion-btn.correcta { background: rgba(46,125,50,0.2); border-color: #2e7d32; color: #a5d6a7; animation: correctaAnim 0.4s ease; }
+  .opcion-btn.incorrecta { background: rgba(183,28,28,0.15); border-color: var(--rojo); color: #ef9a9a; }
+  .opcion-btn.resaltar { background: rgba(46,125,50,0.15); border-color: #2e7d32; }
+  .opcion-btn:disabled { cursor: default; }
+  .letra-opcion { display: inline-block; width: 24px; height: 24px; border-radius: 7px; background: rgba(255,255,255,0.1); text-align: center; line-height: 24px; margin-right: 7px; font-size: 0.8rem; }
+  .feedback { text-align: center; padding: 12px 16px; border-radius: 13px; font-weight: 800; font-size: 0.97rem; margin-bottom: 12px; display: none; animation: fadeInUp 0.3s ease; }
+  .feedback.correcto { background: rgba(46,125,50,0.15); border: 1px solid rgba(46,125,50,0.4); color: #a5d6a7; }
+  .feedback.incorrecto { background: rgba(183,28,28,0.12); border: 1px solid rgba(183,28,28,0.3); color: #ef9a9a; }
+  .btn-siguiente { width: 100%; background: linear-gradient(135deg, #6a1b9a, #4a148c); color: white; border: none; padding: 14px; border-radius: 13px; font-size: 1rem; font-family: 'Fredoka One', cursive; cursor: pointer; display: none; transition: opacity 0.2s, transform 0.2s; }
+  .btn-siguiente:hover { opacity: 0.9; transform: translateY(-2px); }
+  .prof-mini { text-align: center; font-size: 0.72rem; color: rgba(255,255,255,0.18); margin-top: 10px; }
+
+  /* RESULTADO */
+  #pantalla-resultado { display: none; text-align: center; animation: fadeInUp 0.6s ease; }
+  .trofeo { font-size: 5rem; margin-bottom: 12px; animation: bounce 1s ease; }
+  .resultado-titulo { font-family: 'Fredoka One', cursive; font-size: 2.2rem; margin-bottom: 8px; }
+  .resultado-sub { color: var(--gris); font-size: 0.97rem; margin-bottom: 22px; }
+  .puntaje-final { font-family: 'Fredoka One', cursive; font-size: 4.2rem; background: linear-gradient(135deg, var(--amarillo), var(--naranja)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 6px; }
+  .puntaje-de { color: var(--gris); font-size: 0.92rem; margin-bottom: 22px; }
+  .stats-res { display: flex; justify-content: center; gap: 13px; margin-bottom: 22px; flex-wrap: wrap; }
+  .stat-r { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 13px 18px; min-width: 105px; }
+  .stat-r-num { font-family: 'Fredoka One', cursive; font-size: 1.8rem; }
+  .stat-r-num.v { color: #2e7d32; }
+  .stat-r-num.r { color: var(--rojo); }
+  .stat-r-num.a { color: var(--amarillo); }
+  .stat-r-label { font-size: 0.76rem; color: var(--gris); margin-top: 3px; }
+  .barra-res { background: rgba(255,255,255,0.08); border-radius: 10px; height: 13px; margin-bottom: 22px; overflow: hidden; }
+  .barra-res-fill { height: 100%; border-radius: 10px; transition: width 1s ease 0.3s; background: linear-gradient(90deg, var(--rojo), var(--amarillo), #2e7d32); }
+  .btn-reiniciar { background: linear-gradient(135deg, #6a1b9a, #2e7d32); color: white; border: none; padding: 14px 46px; font-size: 1.1rem; font-family: 'Fredoka One', cursive; border-radius: 50px; cursor: pointer; box-shadow: 0 8px 28px rgba(106,27,154,0.45); transition: transform 0.2s; }
+  .btn-reiniciar:hover { transform: translateY(-3px) scale(1.03); }
+  .firma-res { margin-top: 16px; font-size: 0.78rem; color: rgba(255,255,255,0.2); }
+
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);} }
+  @keyframes pulse { 0%,100%{transform:scale(1);}50%{transform:scale(1.1);} }
+  @keyframes bounce { 0%,100%{transform:translateY(0);}30%{transform:translateY(-20px);}60%{transform:translateY(-10px);} }
+  @keyframes correctaAnim { 0%{transform:scale(1);}50%{transform:scale(1.04);}100%{transform:scale(1);} }
+  @keyframes tiembla { 0%,100%{transform:rotate(0);}25%{transform:rotate(-3deg);}75%{transform:rotate(3deg);} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div id="pantalla-inicio">
+    <span class="logo-emoji">🧠</span>
+    <div class="logo">TriviaEnfer</div>
+    <div class="profesor-badge">👨‍🏫 Lic. Francisco Molina</div><br>
+    <div class="inst-badge">CENT N°74 · ATSA · Carrera de Enfermero Profesional · 3° Año</div>
+    <p class="subtitulo">Repaso para el final de Enfermería Psiquiátrica y Salud Mental</p>
+    <div class="badge-materia">🧠 ENFERMERÍA PSIQUIÁTRICA Y SALUD MENTAL</div>
+    <div class="temas-grid">
+      <div class="tema-chip"><span class="ic">📖</span>T1: Historia Psiquiatría</div>
+      <div class="tema-chip"><span class="ic">👥</span>T2: Equipo Psiquiátrico</div>
+      <div class="tema-chip"><span class="ic">⚖️</span>T3: Enfermedad Mental</div>
+      <div class="tema-chip"><span class="ic">🔍</span>T4: Exploración Mental</div>
+      <div class="tema-chip"><span class="ic">💬</span>T5: Lenguaje y Pensamiento</div>
+      <div class="tema-chip"><span class="ic">🎙️</span>T6: Entrevista Psiquiátrica</div>
+      <div class="tema-chip"><span class="ic">🤝</span>T7: Relación Enf-Paciente</div>
+      <div class="tema-chip"><span class="ic">⚠️</span>T8: Problemas de Relación</div>
+      <div class="tema-chip"><span class="ic">📋</span>T9: PAE Psiquiátrico</div>
+      <div class="tema-chip"><span class="ic">🛋️</span>T10: Terapia Psicológica</div>
+      <div class="tema-chip"><span class="ic">💊</span>T11: Psicofarmacología</div>
+      <div class="tema-chip"><span class="ic">🌀</span>T12: Esquizofrenia</div>
+      <div class="tema-chip"><span class="ic">😔</span>T13: Trastornos Afectivos</div>
+      <div class="tema-chip"><span class="ic">🧩</span>T14: Retraso Mental</div>
+      <div class="tema-chip"><span class="ic">👴</span>T15: Demencia / Alzheimer</div>
+      <div class="tema-chip"><span class="ic">🍷</span>T16: Abuso de Sustancias</div>
+      <div class="tema-chip"><span class="ic">🚨</span>T17: Urgencia Psiquiátrica</div>
+      <div class="tema-chip"><span class="ic">🧒</span>T18: Psiquiatría Infantil</div>
+      <div class="tema-chip"><span class="ic">🎭</span>T19: Trastornos Personalidad</div>
+      <div class="tema-chip"><span class="ic">💜</span>T20: Trastornos Sexuales</div>
+    </div>
+    <div class="stats-inicio">
+      <div class="stat-item"><div class="stat-num">120</div><div class="stat-label">Preguntas</div></div>
+      <div class="stat-item"><div class="stat-num">20</div><div class="stat-label">Temas</div></div>
+      <div class="stat-item"><div class="stat-num">20s</div><div class="stat-label">Por pregunta</div></div>
+    </div>
+    <button class="btn-jugar" onclick="iniciarJuego()">¡EMPEZAR REPASO! 🚀</button>
+    <p class="firma">© Lic. Francisco Molina · CENT N°74 ATSA · Enfermería Psiquiátrica y Salud Mental 3° Año</p>
+  </div>
+
+  <div id="pantalla-juego">
+    <div class="header-juego">
+      <div class="progreso-texto">Pregunta <span id="num-pregunta">1</span> de 120</div>
+      <div class="puntaje-display">⭐ <span id="puntaje-actual">0</span> pts</div>
+    </div>
+    <div class="barra-progreso"><div class="barra-fill" id="barra" style="width:0%"></div></div>
+    <div class="timer-container"><div class="timer-circle" id="timer">20</div></div>
+    <div style="text-align:center;margin-bottom:10px;"><span class="categoria-tag" id="categoria-tag">Tema</span></div>
+    <div class="pregunta-card"><p class="pregunta-texto" id="pregunta-texto">Cargando...</p></div>
+    <div class="opciones" id="opciones-container"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-siguiente" id="btn-siguiente" onclick="siguientePregunta()">Siguiente pregunta →</button>
+    <p class="prof-mini">Lic. Francisco Molina · CENT N°74 ATSA · Psiquiátrica y Salud Mental 3° Año</p>
+  </div>
+
+  <div id="pantalla-resultado">
+    <div class="trofeo" id="trofeo">🏆</div>
+    <div class="resultado-titulo" id="res-titulo">¡Excelente!</div>
+    <div class="resultado-sub" id="res-sub">Completaste el repaso de Enfermería Psiquiátrica y Salud Mental</div>
+    <div class="puntaje-final" id="puntaje-final">0</div>
+    <div class="puntaje-de">puntos obtenidos</div>
+    <div class="stats-res">
+      <div class="stat-r"><div class="stat-r-num v" id="res-c">0</div><div class="stat-r-label">✅ Correctas</div></div>
+      <div class="stat-r"><div class="stat-r-num r" id="res-i">0</div><div class="stat-r-label">❌ Incorrectas</div></div>
+      <div class="stat-r"><div class="stat-r-num a" id="res-p">0%</div><div class="stat-r-label">📊 Precisión</div></div>
+    </div>
+    <div class="barra-res"><div class="barra-res-fill" id="barra-res" style="width:0%"></div></div>
+    <button class="btn-reiniciar" onclick="reiniciar()">🔄 Jugar de nuevo</button>
+    <p class="firma-res">Material preparado por el Lic. Francisco Molina · CENT N°74 ATSA · Enfermería Psiquiátrica y Salud Mental</p>
+  </div>
+
+</div>
+<script>
+const preguntas = [
+  // T1: HISTORIA Y CONCEPTO
+  {cat:"T1: Psiquiatría – Historia y Concepto", texto:"¿Cómo define la OMS a la salud mental?", opciones:["Estado de bienestar donde el individuo es consciente de sus capacidades y puede afrontar tensiones normales","Ausencia total de enfermedades mentales","Estado de equilibrio entre mente y cuerpo sin conflictos","Capacidad de adaptarse a situaciones extremas sin ayuda"], correcta:0},
+  {cat:"T1: Psiquiatría – Historia y Concepto", texto:"¿Cuál es el objetivo principal de la Psiquiatría?", opciones:["Prevenir, diagnosticar, tratar y rehabilitar los trastornos de la mente","Solo diagnosticar enfermedades mentales graves","Administrar medicamentos psiquiátricos","Internar pacientes con conductas peligrosas"], correcta:0},
+  {cat:"T1: Psiquiatría – Historia y Concepto", texto:"¿Cuántas épocas históricas abarca la historia de la Psiquiatría según Regis?", opciones:["4 épocas: Primitiva, Antigua, Transición y Moderna","2 épocas: Antigua y Moderna","3 épocas: Medieval, Renacentista y Contemporánea","5 épocas incluyendo la Digital"], correcta:0},
+  {cat:"T1: Psiquiatría – Historia y Concepto", texto:"¿Qué es la resiliencia según el módulo?", opciones:["Capacidad de adaptarse positivamente a situaciones adversas potencialmente traumáticas","Sinónimo de normalidad psicológica","Mecanismo de defensa ante el estrés","Método de tratamiento psiquiátrico"], correcta:0},
+  {cat:"T1: Psiquiatría – Historia y Concepto", texto:"En la Época Primitiva de la Psiquiatría, ¿cómo se consideraba a los alienados?", opciones:["Influenciados o poseídos por deidades del bien o del mal","Enfermos físicos con alteraciones cerebrales","Personas perezosas que simulaban enfermedad","Criminales que debían ser encarcelados"], correcta:0},
+  {cat:"T1: Psiquiatría – Historia y Concepto", texto:"¿Qué es la Psiquiatría como ciencia?", opciones:["Ciencia dedicada al estudio y tratamiento de las enfermedades mentales que estudia alteraciones de la conciencia y conducta","Ciencia que solo estudia el comportamiento normal","Rama de la neurología que estudia el cerebro","Especialidad médica que solo atiende psicosis graves"], correcta:0},
+
+  // T2: EQUIPO PSIQUIÁTRICO
+  {cat:"T2: El Equipo Psiquiátrico", texto:"¿Qué significa que el equipo psiquiátrico sea 'multidisciplinario'?", opciones:["Está integrado por personas de diversas disciplinas: médicos, psicólogos, enfermeros, asistentes sociales","Solo lo integran médicos psiquiatras especializados","Trabajan de manera independiente sin coordinación","Solo atiende un tipo de patología mental"], correcta:0},
+  {cat:"T2: El Equipo Psiquiátrico", texto:"¿Cuántas horas mínimas diarias debe dedicar el médico jefe de la UCI psiquiátrica?", opciones:["No menor a 6 horas diarias con al menos 36 horas semanales","4 horas diarias","8 horas con guardias de 24 horas","Solo presencia cuando hay urgencias"], correcta:0},
+  {cat:"T2: El Equipo Psiquiátrico", texto:"¿Cuál es la función del Asistente Social dentro del equipo psiquiátrico?", opciones:["Atender aspectos sociales del paciente: situación familiar, laboral, judicial y reinserción social","Solo realizar trámites administrativos del hospital","Administrar medicación psiquiátrica","Realizar diagnóstico clínico psiquiátrico"], correcta:0},
+  {cat:"T2: El Equipo Psiquiátrico", texto:"¿Cuáles son las funciones del enfermero psiquiátrico?", opciones:["Asistencial, docente, investigación y administrativa","Solo asistencial y administrativa","Únicamente docente e investigación","Solo administrar medicación"], correcta:0},
+  {cat:"T2: El Equipo Psiquiátrico", texto:"¿Qué característica es esencial para el jefe del equipo psiquiátrico?", opciones:["Ser aceptado por los miembros como autoridad, ser íntegro y tratar a los demás como colaboradores","Tener actitud autoritaria para mantener orden","Ser el único que toma decisiones sin consultar al equipo","Evitar la comunicación con el personal de enfermería"], correcta:0},
+  {cat:"T2: El Equipo Psiquiátrico", texto:"¿Qué profesional se dedica al tratamiento físico y rehabilitación motora y respiratoria en psiquiatría?", opciones:["Kinesiólogo / Fisioterapeuta","Terapeuta Ocupacional","Psicólogo clínico","Trabajador Social"], correcta:0},
+
+  // T3: ENFERMEDAD MENTAL Y NORMALIDAD
+  {cat:"T3: Enfermedad Mental – Normalidad", texto:"¿Qué dijo Sigmund Freud sobre la normalidad?", opciones:["'La normalidad es una ficción ideal'","'La normalidad es la ausencia de enfermedad mental'","'La normalidad es la adaptación perfecta al medio'","'La normalidad equivale a la salud mental plena'"], correcta:0},
+  {cat:"T3: Enfermedad Mental – Normalidad", texto:"¿Cuáles son los cuatro criterios generales de normalidad y anormalidad?", opciones:["Subjetivo, estadístico, biológico y sociocultural","Cognitivo, afectivo, conductual y social","Genético, ambiental, cultural y económico","Médico, psicológico, social y espiritual"], correcta:0},
+  {cat:"T3: Enfermedad Mental – Normalidad", texto:"¿Qué sistema de clasificación internacional de enfermedades mentales desarrolló la OMS?", opciones:["CIE-10 (Clasificación Internacional de Enfermedades)","DSM-IV desarrollado por la OMS","Manual de Psiquiatría de Jaspers","Clasificación de Kraepelin"], correcta:0},
+  {cat:"T3: Enfermedad Mental – Normalidad", texto:"¿Cuál es la diferencia principal entre Neurosis y Psicosis?", opciones:["En la neurosis hay conciencia de la enfermedad y contacto con la realidad; en la psicosis hay ruptura con la realidad","No hay diferencia clínica relevante entre ambas","La neurosis es más grave que la psicosis","La psicosis se trata solo con psicoterapia"], correcta:0},
+  {cat:"T3: Enfermedad Mental – Normalidad", texto:"¿Qué es el criterio estadístico de normalidad?", opciones:["Clasifica como normal lo que se ubica dentro de la curva de normalidad de una población y anormal lo que está en los extremos","Considera normal todo lo que la mayoría hace","Define normalidad según criterios biológicos únicamente","Usa solo parámetros culturales para definir normalidad"], correcta:0},
+  {cat:"T3: Enfermedad Mental – Normalidad", texto:"¿Cuál es la definición de enfermedad mental según el módulo?", opciones:["Condición o trastorno que afecta el pensamiento normal con gran impacto en emotividad, estado de ánimo, función cognitiva y conducta","Solo la presencia de alucinaciones y delirios","Cualquier conducta que se desvíe de la norma social","Exclusivamente trastornos con base neurológica demostrable"], correcta:0},
+
+  // T4: EXPLORACIÓN DEL ESTADO MENTAL
+  {cat:"T4: Exploración del Estado Mental", texto:"¿Qué trastorno de la conciencia se caracteriza por incapacidad de respuesta incluso ante estímulos dolorosos con pérdida de reflejos?", opciones:["Coma profundo","Obnubilación","Estado crepuscular","Estupor"], correcta:0},
+  {cat:"T4: Exploración del Estado Mental", texto:"¿Qué es la Catalepsia?", opciones:["Rigidez muscular con mantenimiento de posiciones impuestas (flexibilidad cérea)","Aumento de la actividad motora con agitación","Disminución total de la actividad motora voluntaria","Imitación de los movimientos de otra persona"], correcta:0},
+  {cat:"T4: Exploración del Estado Mental", texto:"¿Qué explora la orientación en el examen del estado mental?", opciones:["Orientación temporal, espacial y personal","Solo la orientación en tiempo","Únicamente la orientación en espacio","Orientación vocacional y social"], correcta:0},
+  {cat:"T4: Exploración del Estado Mental", texto:"¿Qué puede indicar una apariencia excesivamente arreglada y llamativa de aparición reciente en un paciente?", opciones:["Autoestima elevada orientando hacia un cuadro maníaco o hipomaníaco","Buen estado de salud mental","Trastorno obsesivo-compulsivo","Inicio de un síndrome depresivo"], correcta:0},
+  {cat:"T4: Exploración del Estado Mental", texto:"¿Qué es la Acatisia?", opciones:["Inquietud motora intensa con incapacidad de mantenerse quieto, efecto adverso frecuente de antipsicóticos","Disminución de los movimientos voluntarios","Estado de rigidez muscular total","Movimientos involuntarios de la cara"], correcta:0},
+  {cat:"T4: Exploración del Estado Mental", texto:"¿Qué es la Despersonalización?", opciones:["Sensación de extrañeza respecto a uno mismo, como si fuera irreal o un observador externo de sus propios procesos","Pérdida total de la identidad personal","Trastorno de orientación temporal","Falta de reconocimiento del propio cuerpo"], correcta:0},
+
+  // T5: LENGUAJE Y PENSAMIENTO
+  {cat:"T5: Lenguaje y Pensamiento", texto:"¿Qué es la Ecolalia?", opciones:["Repetición involuntaria e innecesaria de palabras o frases pronunciadas por el interlocutor","Dificultad para articular palabras","Hablar solo y con aceleración del discurso","Incapacidad total para hablar"], correcta:0},
+  {cat:"T5: Lenguaje y Pensamiento", texto:"¿Cómo se define el Delirio en psiquiatría?", opciones:["Convicción errónea de origen patológico que persiste a pesar de razones contrarias y sensatas con ruptura de la realidad","Percepción sin objeto real externo","Pensamiento acelerado e incoherente","Tristeza profunda con ideas de muerte"], correcta:0},
+  {cat:"T5: Lenguaje y Pensamiento", texto:"¿Qué son las Alucinaciones?", opciones:["Percepciones sin estímulo externo real que el paciente experimenta como verdaderas","Ideas delirantes de persecución","Ilusiones producidas por estímulos externos distorsionados","Recuerdos falsos del pasado"], correcta:0},
+  {cat:"T5: Lenguaje y Pensamiento", texto:"¿Qué es la Amnesia Anterógrada?", opciones:["Incapacidad para formar nuevos recuerdos después de un evento o lesión","Pérdida de recuerdos anteriores a un evento","Recuerdo exagerado de hechos pasados","Confusión entre recuerdos reales y fantaseados"], correcta:0},
+  {cat:"T5: Lenguaje y Pensamiento", texto:"¿Qué es la Logorrea como trastorno del lenguaje?", opciones:["Flujo verbal excesivo, acelerado e incontrolable difícil de interrumpir","Dificultad para articular palabras","Silencio total y mutismo","Repetición de palabras sin sentido"], correcta:0},
+  {cat:"T5: Lenguaje y Pensamiento", texto:"¿Qué es la Confabulación?", opciones:["Fabricación inconsciente de recuerdos falsos para llenar lagunas mnésicas, sin intención de mentir","Mentira consciente sobre el pasado","Ilusión de haber vivido algo antes","Recuerdo muy vívido de eventos traumáticos"], correcta:0},
+
+  // T6: ENTREVISTA PSIQUIÁTRICA
+  {cat:"T6: La Entrevista Psiquiátrica", texto:"¿Cuál es el objetivo principal de la entrevista psiquiátrica?", opciones:["Establecer una relación terapéutica, obtener información diagnóstica y planificar el tratamiento","Solo recolectar datos para la historia clínica","Aplicar tests psicológicos estandarizados","Únicamente realizar el diagnóstico diferencial"], correcta:0},
+  {cat:"T6: La Entrevista Psiquiátrica", texto:"¿Con quién debe hablar primero el profesional en una urgencia psiquiátrica?", opciones:["Primero con el paciente y luego con los acompañantes","Primero con la familia para obtener datos objetivos","Con ambos al mismo tiempo","Con el médico derivante antes que con el paciente"], correcta:0},
+  {cat:"T6: La Entrevista Psiquiátrica", texto:"¿Qué tipo de preguntas se recomiendan para explorar el estado de ánimo subjetivo?", opciones:["Preguntas abiertas como '¿Qué tal se ha encontrado de ánimo últimamente?'","Preguntas cerradas con respuesta sí/no","Escalas numéricas del 1 al 10 únicamente","Cuestionarios escritos autoaplicados"], correcta:0},
+  {cat:"T6: La Entrevista Psiquiátrica", texto:"¿Qué debe tenerse listo en la sala de urgencias psiquiátricas antes de la entrevista?", opciones:["Mecanismos de contención química y física bien ubicados y actitud tranquilizadora","Solo medicación disponible","Policía dentro de la sala","Grabadora para registrar la entrevista"], correcta:0},
+  {cat:"T6: La Entrevista Psiquiátrica", texto:"¿Cuáles son las características de una buena entrevista psiquiátrica en cuanto al ambiente?", opciones:["Lugar tranquilo, sin interferencias, con actitud profesional calmada y generadora de confianza","Sala grande con otros pacientes presentes","Entorno con estímulos para evaluar la atención","Siempre acompañado de la familia durante toda la entrevista"], correcta:0},
+  {cat:"T6: La Entrevista Psiquiátrica", texto:"¿Qué es el 'Triage' en la urgencia psiquiátrica?", opciones:["Clasificación inicial del paciente en tres categorías: Emergencia, Aguda y No Aguda según el riesgo","Sistema de registro de historias clínicas","Escala de evaluación del riesgo suicida","Protocolo de contención mecánica"], correcta:0},
+
+  // T7: RELACIÓN ENFERMERO-PACIENTE
+  {cat:"T7: Relación Enfermero–Paciente", texto:"¿Cuáles son las fases de la relación terapéutica enfermero-paciente?", opciones:["Fase de orientación, de trabajo y de resolución","Fase inicial, media y de alta","Fase diagnóstica, terapéutica y de seguimiento","Solo hay una fase continua sin etapas"], correcta:0},
+  {cat:"T7: Relación Enfermero–Paciente", texto:"¿Qué es la Empatía en el contexto de la enfermería psiquiátrica?", opciones:["Capacidad de comprender los sentimientos del paciente sin necesidad de vivirlos uno mismo","Compartir el sufrimiento del paciente completamente","Indiferencia terapéutica ante el sufrimiento","Simpatía y afecto hacia el paciente"], correcta:0},
+  {cat:"T7: Relación Enfermero–Paciente", texto:"¿Qué es la comunicación no verbal en la relación terapéutica?", opciones:["Expresión facial, postura, gestos, tono de voz y contacto visual que comunican mensajes al paciente","Solo el lenguaje escrito","Comunicación a través de terceros","Uso de instrumentos tecnológicos para comunicarse"], correcta:0},
+  {cat:"T7: Relación Enfermero–Paciente", texto:"¿Por qué es importante la relación enfermero-paciente en psiquiatría?", opciones:["Porque el enfermero pasa más tiempo con el paciente que cualquier otro profesional y es agente terapéutico fundamental","Solo para cumplir funciones administrativas","Para obtener información diagnóstica únicamente","Para controlar la medicación y las internaciones"], correcta:0},
+  {cat:"T7: Relación Enfermero–Paciente", texto:"¿Qué debe evitar el enfermero psiquiátrico en la relación con el paciente?", opciones:["Que sus sentimientos, creencias personales y prejuicios interfieran (falta de objetividad)","La comunicación verbal con el paciente","El contacto visual prolongado","Expresar comprensión ante el sufrimiento"], correcta:0},
+  {cat:"T7: Relación Enfermero–Paciente", texto:"¿Qué característica psicológica debe tener el enfermero de salud mental según el módulo?", opciones:["Psicológicamente estable con vocación de servicio y capacidad empática","Alta tolerancia al estrés sin necesidad de apoyo","Distancia emocional total con los pacientes","Personalidad extrovertida exclusivamente"], correcta:0},
+
+  // T8: PROBLEMAS DE LA RELACIÓN
+  {cat:"T8: Problemas de la Relación Enfermero–Paciente", texto:"¿Qué es la Manipulación como problema en la relación enfermero-paciente?", opciones:["Conducta del paciente que intenta controlar al enfermero para obtener beneficios alterando los límites terapéuticos","Técnica de comunicación del enfermero","Forma de terapia conductual","Estrategia diagnóstica en psiquiatría"], correcta:0},
+  {cat:"T8: Problemas de la Relación Enfermero–Paciente", texto:"¿Cómo debe actuar el enfermero ante un paciente con ideas delirantes?", opciones:["No reforzar el delirio, no discutirlo confrontalmente ni fingir que es real, mantener contacto con la realidad","Seguirle la corriente al delirio para ganar confianza","Ignorar completamente al paciente cuando delira","Aislar al paciente inmediatamente"], correcta:0},
+  {cat:"T8: Problemas de la Relación Enfermero–Paciente", texto:"¿Qué es el 'Fracaso en la acción de escuchar' como problema del enfermero?", opciones:["No prestar atención real al paciente: distraerse, interrumpir o no captar el mensaje con sus componentes verbales y no verbales","Escuchar demasiado tiempo al paciente","No registrar en la historia clínica lo que dice el paciente","Repetir al paciente lo que dice para confirmar"], correcta:0},
+  {cat:"T8: Problemas de la Relación Enfermero–Paciente", texto:"¿Cómo debe abordarse al paciente con idea suicida?", opciones:["Escuchar activamente, no dejar al paciente solo, avisar al equipo y adoptar medidas de seguridad inmediatas","Evitar hablar del tema para no reforzarlo","Dejarlo en su habitación con supervisión periódica","Solo administrar medicación sedante"], correcta:0},
+  {cat:"T8: Problemas de la Relación Enfermero–Paciente", texto:"¿Qué es la 'Indiferencia' como problema en la relación enfermero-paciente?", opciones:["Falta de interés del enfermero hacia el paciente que deteriora el vínculo terapéutico y la calidad del cuidado","Técnica terapéutica de distancia controlada","Actitud normal ante pacientes difíciles","Mecanismo de defensa del enfermero aceptable"], correcta:0},
+  {cat:"T8: Problemas de la Relación Enfermero–Paciente", texto:"¿Qué es el 'abatimiento' como problema del paciente en la relación terapéutica?", opciones:["Estado de profunda tristeza y desesperanza que dificulta la comunicación y el tratamiento","Agitación psicomotriz intensa","Rechazo agresivo al tratamiento","Estado de euforia que altera la dinámica terapéutica"], correcta:0},
+
+  // T9: PAE PSIQUIÁTRICO
+  {cat:"T9: Proceso de Atención en Enfermería Psiquiátrica", texto:"¿En qué se diferencia el PAE psiquiátrico del PAE general?", opciones:["Los diagnósticos son personalizados según la necesidad del paciente, no estandarizados, ya que cada paciente es único","Son exactamente iguales en su metodología","El PAE psiquiátrico no usa diagnósticos de enfermería","Solo difiere en la terminología utilizada"], correcta:0},
+  {cat:"T9: Proceso de Atención en Enfermería Psiquiátrica", texto:"¿Qué debe poseer un buen observador del enfermo mental?", opciones:["Conocimientos, objetividad y tacto para observar sin molestar al paciente","Solo intuición y experiencia clínica","Únicamente conocimientos teóricos de psicopatología","Solo capacidad de registro escrito"], correcta:0},
+  {cat:"T9: Proceso de Atención en Enfermería Psiquiátrica", texto:"¿Qué es la Observación Especial en psiquiatría?", opciones:["Vigilancia continua de pacientes que representan peligro para sí mismos o para otros, como pacientes con tendencia suicida","Observación de pacientes que no requieren cuidados específicos","Revisión periódica de la historia clínica","Control de medicación por parte de enfermería"], correcta:0},
+  {cat:"T9: Proceso de Atención en Enfermería Psiquiátrica", texto:"¿Cuál es la finalidad de la valoración de enfermería en salud mental?", opciones:["Asistir, curar, evaluar el bienestar del paciente, identificar necesidades y prevenir complicaciones","Solo cumplimentar la historia clínica","Únicamente realizar el diagnóstico médico","Controlar la adherencia al tratamiento farmacológico"], correcta:0},
+  {cat:"T9: Proceso de Atención en Enfermería Psiquiátrica", texto:"¿Por qué la objetividad es fundamental en la observación del enfermo mental?", opciones:["Para que los sentimientos y creencias personales del enfermero no interfieran ni distorsionen la evaluación del paciente","Para distanciarse emocionalmente del paciente","Para no involucrarse en la relación terapéutica","Para registrar solo datos cuantitativos"], correcta:0},
+  {cat:"T9: Proceso de Atención en Enfermería Psiquiátrica", texto:"¿Cómo se basa la valoración de enfermería en salud mental?", opciones:["En la observación del paciente y en la entrevista para identificar signos, síntomas, necesidades y problemas","Solo en la revisión de estudios complementarios","Únicamente en los datos referidos por la familia","Solo en la administración de tests psicológicos estandarizados"], correcta:0},
+
+  // T10: TERAPIA PSICOLÓGICA
+  {cat:"T10: Terapia Psicológica", texto:"¿En qué se basa la Terapia Psicoanalítica según Freud?", opciones:["Análisis de conflictos inconscientes originados en la niñez a través de sueños, actos fallidos y asociación libre","Solo en la modificación de conductas observables","En el uso de medicación para tratar síntomas","En la reestructuración de pensamientos distorsionados"], correcta:0},
+  {cat:"T10: Terapia Psicológica", texto:"¿Qué es la 'Asociación Libre' en psicoanálisis?", opciones:["Técnica en que el paciente expresa todas sus ideas, emociones y pensamientos tal como se presentan sin reprimirlos","Método de relajación progresiva","Técnica de grupo donde los pacientes se asocian libremente","Proceso de selección de pacientes para psicoterapia"], correcta:0},
+  {cat:"T10: Terapia Psicológica", texto:"¿Cuáles son los tres factores que intervienen en crear un ambiente terapéutico hospitalario?", opciones:["Estructura de la sala, actitud del personal y la moral de todos los integrantes de la sala","Solo la medicación y el diagnóstico médico","Únicamente la infraestructura del hospital","El número de enfermeros y médicos disponibles"], correcta:0},
+  {cat:"T10: Terapia Psicológica", texto:"¿Qué condiciones debe cumplir el paciente para iniciar psicoanálisis según Freud?", opciones:["Tener conciencia de la enfermedad, desear curarse y poseer inteligencia suficiente para comprender al terapeuta","Solo tener voluntad de iniciar el tratamiento","Estar en un periodo de estabilidad total","No haber recibido medicación psiquiátrica previa"], correcta:0},
+  {cat:"T10: Terapia Psicológica", texto:"¿Qué es la Terapia de Grupo en salud mental?", opciones:["Modalidad terapéutica donde varios pacientes trabajan juntos con un terapeuta aprovechando el efecto multiplicador del grupo","Reunión informal de pacientes sin conducción profesional","Visitas familiares programadas","Solo actividades recreativas grupales"], correcta:0},
+  {cat:"T10: Terapia Psicológica", texto:"¿Qué establece el módulo sobre el comedor en el ambiente terapéutico hospitalario?", opciones:["Debe ser una experiencia placentera donde los pacientes puedan compartir, siendo un espacio importante del ambiente terapéutico","Solo debe cumplir función nutricional","Debe tener separación estricta entre pacientes","No tiene relevancia terapéutica"], correcta:0},
+
+  // T11: PSICOFARMACOLOGÍA (del Anexo)
+  {cat:"T11: Psicofarmacología", texto:"¿Cuál es el grupo de antidepresivos considerado tratamiento de primera línea para la depresión?", opciones:["IRSS (Inhibidores Selectivos de la Recaptación de Serotonina): Fluoxetina, Paroxetina, Sertralina, Citalopram, Escitalopram","Antidepresivos tricíclicos","IMAO (Inhibidores de la MAO)","Benzodiacepinas"], correcta:0},
+  {cat:"T11: Psicofarmacología", texto:"¿Por qué la Clozapina no es antipsicótico de primera línea a pesar de ser muy eficaz?", opciones:["Puede producir agranulocitosis en el 1% de casos, requiriendo recuento leucocitario semanal durante las primeras 18 semanas","Produce muchos síntomas extrapiramidales","Es muy cara y difícil de conseguir","Solo existe en presentación inyectable"], correcta:0},
+  {cat:"T11: Psicofarmacología", texto:"¿Cuál es el principal efecto adverso del Litio que requiere control regular?", opciones:["Índice terapéutico estrecho con riesgo de intoxicación: temblor grueso, ataxia, confusión, convulsiones y coma","Solo produce náuseas leves al inicio","Principalmente sedación intensa","Solo hipotensión ortostática"], correcta:0},
+  {cat:"T11: Psicofarmacología", texto:"¿Qué síndrome grave puede ocurrir al combinar IRSS con IMAO sin respetar el periodo de washout?", opciones:["Síndrome serotoninérgico: taquicardia, hipertensión, fiebre, convulsiones y potencialmente la muerte","Síndrome neuroléptico maligno","Agranulocitosis grave","Síndrome del hombre rojo"], correcta:0},
+  {cat:"T11: Psicofarmacología", texto:"¿Cuáles son las benzodiacepinas de alta potencia y para qué se indican?", opciones:["Alprazolam, Clonazepam, Lorazepam: indicadas en ataque de pánico, ansiedad generalizada, agitación y manía","Diazepam y Clordiazepóxido para ansiedad leve","Solo Diazepam para insomnio","Todas las benzodiacepinas tienen la misma potencia"], correcta:0},
+  {cat:"T11: Psicofarmacología", texto:"¿Cuál es el mecanismo de acción de los Antipsicóticos Típicos o de 1° generación?", opciones:["Bloqueo de receptores dopaminérgicos D2 en zona mesolímbica y mesocortical, eficaces para síntomas positivos","Bloqueo de serotonina exclusivamente","Inhibición de la recaptación de noradrenalina","Aumento de los niveles de GABA sináptico"], correcta:0},
+
+  // T12: ESQUIZOFRENIA
+  {cat:"T12: Esquizofrenia", texto:"¿Quién introdujo el término 'Esquizofrenia' y en qué año?", opciones:["Eugen Bleuler en 1911; antes Kraepelin la llamó 'demencia precoz' en 1896","Emil Kraepelin en 1850","Sigmund Freud en 1900","Philippe Pinel en 1800"], correcta:0},
+  {cat:"T12: Esquizofrenia", texto:"¿Cuál es la diferencia entre síntomas positivos y negativos de la esquizofrenia?", opciones:["Positivos: lo que el paciente hace o experimenta de más (alucinaciones, delirios); Negativos: lo que deja de hacer (apatía, alogia, abulia)","Positivos son buenos y negativos son malos para el paciente","Positivos se tratan con medicación y negativos con psicoterapia únicamente","No hay diferencia clínica entre ambos tipos"], correcta:0},
+  {cat:"T12: Esquizofrenia", texto:"¿Cuál es la edad de aparición más frecuente de la esquizofrenia?", opciones:["Entre los 15 y 45 años, con inicio habitual al final de la adolescencia","Solo en la infancia antes de los 10 años","Principalmente en mayores de 60 años","Solo en adultos entre 30 y 50 años"], correcta:0},
+  {cat:"T12: Esquizofrenia", texto:"¿Cuáles son los cinco tipos clínicos de esquizofrenia?", opciones:["Paranoide, Desorganizada (Hebefrénica), Catatónica, Simple y Residual","Solo Paranoide y Catatónica","Aguda, crónica, reactiva, maligna y simple","Solo Paranoide y Desorganizada"], correcta:0},
+  {cat:"T12: Esquizofrenia", texto:"¿Cuál es el cuidado de enfermería prioritario ante un paciente con alucinaciones activas?", opciones:["No reforzar las alucinaciones, orientar en la realidad, mantener un ambiente tranquilo y garantizar la seguridad del paciente","Aislar al paciente inmediatamente","Administrar medicación sin consultar al médico","Seguirle la corriente para tranquilizarlo"], correcta:0},
+  {cat:"T12: Esquizofrenia", texto:"¿Qué medicación constituye el pilar del tratamiento de la esquizofrenia?", opciones:["Antipsicóticos (neurolépticos) típicos y atípicos","Solo antidepresivos IRSS","Benzodiacepinas de alta potencia","Estabilizadores del ánimo exclusivamente"], correcta:0},
+
+  // T13: TRASTORNOS AFECTIVOS
+  {cat:"T13: Trastornos Afectivos", texto:"¿Cuáles son los cuatro componentes de la valoración del estado de ánimo?", opciones:["Humor subjetivo, humor observado, actividad autonómica y contenido del pensamiento","Solo humor subjetivo y humor observado","Tristeza, euforia, ansiedad e irritabilidad","Solo el humor referido por el paciente"], correcta:0},
+  {cat:"T13: Trastornos Afectivos", texto:"¿Cuáles son las cuatro características de la tristeza reactiva?", opciones:["No se habría presentado sin el factor desencadenante, aparece poco después, evoluciona paralela a la vivencia y su contenido coincide con ella","Solo que aparece después de un evento negativo","Que dura más de dos semanas sin causa aparente","Que no responde a antidepresivos"], correcta:0},
+  {cat:"T13: Trastornos Afectivos", texto:"¿Qué es la Manía como trastorno del estado de ánimo?", opciones:["Estado de ánimo elevado o irritable persistente con aumento de la energía, disminución de la necesidad de sueño, grandiosidad y conducta impulsiva","Tristeza profunda con enlentecimiento psicomotor","Estado de ansiedad generalizada sin causa aparente","Solo aumento de la actividad motora"], correcta:0},
+  {cat:"T13: Trastornos Afectivos", texto:"¿Cuál es el síntoma esencial del trastorno depresivo mayor?", opciones:["Tristeza patológica persistente con pérdida de interés o placer (anhedonia) que interfiere en la vida cotidiana","Solo el insomnio y la fatiga","Únicamente las ideas suicidas","La ansiedad como síntoma principal"], correcta:0},
+  {cat:"T13: Trastornos Afectivos", texto:"¿Qué es la Anhedonia?", opciones:["Incapacidad para experimentar placer en actividades que anteriormente eran fuente de satisfacción","Aumento exagerado del placer en actividades cotidianas","Indiferencia afectiva ante situaciones sociales","Incapacidad para sentir dolor físico"], correcta:0},
+  {cat:"T13: Trastornos Afectivos", texto:"¿Cuál es el cuidado de enfermería fundamental en el paciente con depresión severa?", opciones:["Evaluar el riesgo suicida, nunca dejar al paciente solo, crear un ambiente seguro y establecer una relación terapéutica de confianza","Solo administrar antidepresivos según prescripción","Únicamente control de signos vitales","Restringir el movimiento del paciente"], correcta:0},
+
+  // T14: RETRASO MENTAL
+  {cat:"T14: Retraso Mental", texto:"¿Cómo se clasifica el Retraso Mental según el CI?", opciones:["Leve (CI 50-70), Moderado (CI 35-50), Severo (CI 20-35) y Profundo (CI menor a 20)","Solo leve y grave","Leve, moderado y profundo únicamente","Solo por edad de presentación"], correcta:0},
+  {cat:"T14: Retraso Mental", texto:"¿Cuál es la causa cromosómica más frecuente de Retraso Mental?", opciones:["Síndrome de Down (Trisomía 21)","Síndrome de Turner","Fenilcetonuria","Síndrome de Klinefelter"], correcta:0},
+  {cat:"T14: Retraso Mental", texto:"¿Qué es la Fenilcetonuria y cómo se previene su daño neurológico?", opciones:["Error congénito del metabolismo de la fenilalanina que produce retraso mental; se previene con dieta sin fenilalanina desde el nacimiento","Enfermedad genética sin tratamiento disponible","Infección viral que daña el cerebro en el nacimiento","Trastorno cromosómico similar al Síndrome de Down"], correcta:0},
+  {cat:"T14: Retraso Mental", texto:"¿Cuáles son los criterios diagnósticos del Retraso Mental?", opciones:["Limitaciones significativas en el funcionamiento intelectual (CI menor a 70), limitaciones en conducta adaptativa y aparición antes de los 18 años","Solo un CI menor a 70 sin otros criterios","Solo dificultades de aprendizaje escolar","Únicamente diagnóstico clínico sin evaluación del CI"], correcta:0},
+  {cat:"T14: Retraso Mental", texto:"¿Cuál es la característica física más reconocible del Síndrome de Down?", opciones:["Facies característica con epicanto, lengua prominente, cuello corto y braquicefalia","Solo retraso mental sin características físicas","Talla muy elevada con extremidades largas","Solo anomalías cardíacas sin alteraciones del desarrollo"], correcta:0},
+  {cat:"T14: Retraso Mental", texto:"¿Cuál es el cuidado de enfermería en el paciente con retraso mental severo?", opciones:["Supervisión constante de la seguridad, estimulación sensorial y cognitiva, comunicación adaptada y apoyo a la familia","Solo administración de medicación","Control periódico sin intervención activa","Únicamente prevención de infecciones"], correcta:0},
+
+  // T15: DEMENCIA / ALZHEIMER
+  {cat:"T15: Demencia – Alzheimer", texto:"¿Cuál es la causa más frecuente de demencia en el anciano?", opciones:["Enfermedad de Alzheimer, asociada al envejecimiento y a factores genéticos","Demencia vascular por hipertensión","Demencia alcohólica","Parkinson con demencia"], correcta:0},
+  {cat:"T15: Demencia – Alzheimer", texto:"¿Cuáles son los cambios psicológicos del envejecimiento normal según el módulo?", opciones:["Declive de funciones intelectuales, deterioro de memoria a corto plazo y lentitud a partir de la edad media de la vida","Pérdida total de la memoria en todos los casos","Solo cambios afectivos sin alteración cognitiva","Deterioro cognitivo grave antes de los 60 años"], correcta:0},
+  {cat:"T15: Demencia – Alzheimer", texto:"¿Qué es la actitud 'viejista' o 'senectista' que debe evitarse?", opciones:["Atribuir todas las enfermedades mentales del anciano al envejecimiento, considerándolas irreversibles y de mal pronóstico","Respetar la autonomía del anciano","Aplicar tratamientos específicos a los ancianos","Reconocer las capacidades residuales del anciano"], correcta:0},
+  {cat:"T15: Demencia – Alzheimer", texto:"¿Cuáles son las tres etapas clínicas de la Enfermedad de Alzheimer?", opciones:["Leve (olvidos y desorientación), Moderada (dependencia e incapacidad funcional), Grave (total dependencia, mutismo y encamamiento)","Solo leve y grave","Inicial, intermedia y terminal con duración fija","Solo dos etapas según la OMS"], correcta:0},
+  {cat:"T15: Demencia – Alzheimer", texto:"¿Cuál es la segunda patología psiquiátrica más frecuente en el anciano después de la demencia?", opciones:["Trastornos depresivos, ligados a enfermedad física, trastornos de personalidad y falta de soporte social","Esquizofrenia tardía","Trastorno bipolar de inicio tardío","Ansiedad generalizada"], correcta:0},
+  {cat:"T15: Demencia – Alzheimer", texto:"¿Cuál es el cuidado de enfermería más importante en el paciente con demencia avanzada?", opciones:["Prevención de caídas, úlceras por presión, mantener rutinas, orientar en realidad y apoyar a la familia cuidadora","Solo administrar medicación antipsicotica","Control de glucemia únicamente","Únicamente estimulación cognitiva intensa"], correcta:0},
+
+  // T16: ABUSO DE SUSTANCIAS
+  {cat:"T16: Abuso de Sustancias", texto:"¿Cómo define la OMS a una 'droga'?", opciones:["Toda sustancia que introducida en el organismo puede modificar sus funciones alterando pensamientos, emociones, percepciones y conductas pudiendo provocar tolerancia y dependencia","Solo sustancias ilegales como la cocaína y heroína","Solo alcohol y tabaco","Cualquier medicamento con prescripción médica"], correcta:0},
+  {cat:"T16: Abuso de Sustancias", texto:"¿Qué es el 'Craving'?", opciones:["Deseo intenso e incontrolable de consumir drogas, componente esencial de la abstinencia","Síndrome de abstinencia completo","Tolerancia aumentada a la droga","Recaída después de un periodo de abstinencia"], correcta:0},
+  {cat:"T16: Abuso de Sustancias", texto:"¿Cuál es la diferencia entre 'Uso', 'Abuso' y 'Adicción'?", opciones:["Uso: consumo sin consecuencias; Abuso: consumo excesivo que daña la salud; Adicción: enfermedad crónica del cerebro con búsqueda compulsiva","No hay diferencia clínica entre ellos","Solo difieren en la sustancia consumida","La adicción es solo psicológica sin base orgánica"], correcta:0},
+  {cat:"T16: Abuso de Sustancias", texto:"¿Qué es la Tolerancia en el abuso de sustancias?", opciones:["Necesidad de aumentar progresivamente la dosis para conseguir el mismo efecto como resultado del uso continuado","Disminución del deseo de consumir la droga","Capacidad de dejar la droga sin síntomas","Efecto positivo del tratamiento de desintoxicación"], correcta:0},
+  {cat:"T16: Abuso de Sustancias", texto:"¿Cuáles son los cuidados de enfermería al paciente con intoxicación alcohólica aguda?", opciones:["Posición segura lateral, control de signos vitales, prevenir aspiración, hidratación EV, tiamina y control neurológico","Solo administrar anticonvulsivos","Únicamente hidratación oral","Contención mecánica inmediata sin evaluación previa"], correcta:0},
+  {cat:"T16: Abuso de Sustancias", texto:"¿Cómo afecta la adicción a la familia del paciente?", opciones:["La familia pasa de ser protagonista de su propia vida a ser espectadora de la vida del adicto, generando codependencia y disfunción familiar","La familia no se ve afectada por la adicción del paciente","Solo produce problemas económicos sin impacto emocional","Solo afecta al paciente adicto directamente"], correcta:0},
+
+  // T17: URGENCIA PSIQUIÁTRICA
+  {cat:"T17: Urgencia Psiquiátrica", texto:"¿Qué es la Agitación Psicomotriz?", opciones:["Estado de aumento de la actividad motora acompañado de ansiedad severa, pánico u otros estados emocionales intensos, que puede preceder conducta violenta","Disminución de la actividad motora con mutismo","Estado de somnolencia profunda","Solo agitación secundaria a causas orgánicas"], correcta:0},
+  {cat:"T17: Urgencia Psiquiátrica", texto:"¿Cuál es el primer recurso en la agitación psicomotriz antes de usar contención química o física?", opciones:["Medidas conductuales: actitud firme y tranquilizadora, ambiente calmo y contención verbal","Contención física inmediata con al menos 5 personas","Administración de Haloperidol como primera medida","Llamar a la policía inmediatamente"], correcta:0},
+  {cat:"T17: Urgencia Psiquiátrica", texto:"¿Cuántas personas mínimo deben intervenir en una contención mecánica?", opciones:["Al menos cinco personas entrenadas previamente","Solo dos personas de guardia","Tres enfermeros sin entrenamiento específico","Cualquier número de personas disponibles"], correcta:0},
+  {cat:"T17: Urgencia Psiquiátrica", texto:"¿Cuál es el fármaco de elección para la agitación psicomotriz en el paciente anciano?", opciones:["Haloperidol 2-10 mg","Diazepam a dosis alta","Clozapina oral","Lorazepam IV"], correcta:0},
+  {cat:"T17: Urgencia Psiquiátrica", texto:"¿Qué es la Intervención en Crisis?", opciones:["Atención inmediata ante la imposibilidad de adaptación de un individuo a una situación estresante que supera sus mecanismos psicológicos","Solo hospitalización psiquiátrica de urgencia","Administración de medicación de emergencia","Contención mecánica del paciente agitado"], correcta:0},
+  {cat:"T17: Urgencia Psiquiátrica", texto:"¿Cuáles son los objetivos de la contención mecánica?", opciones:["Evitar autoagresión o heteroagresión, daños en la sala, posibilitar el tratamiento farmacológico e impedir fugas de pacientes que requieren tratamiento","Solo inmovilizar al paciente agresivo","Principalmente aplicar medicación sedante","Solo proteger al personal de salud"], correcta:0},
+
+  // T18: PSIQUIATRÍA INFANTIL
+  {cat:"T18: Psiquiatría Infantil", texto:"¿Cuáles son los criterios diagnósticos del Trastorno por Déficit de Atención e Hiperactividad (TDAH)?", opciones:["Inatención persistente y/o hiperactividad-impulsividad que interfiere en el funcionamiento en dos o más contextos antes de los 12 años","Solo hiperactividad sin inatención","Únicamente en niños varones","Solo a partir de la adolescencia"], correcta:0},
+  {cat:"T18: Psiquiatría Infantil", texto:"¿Cuáles son las tres áreas afectadas en el Trastorno del Espectro Autista (TEA)?", opciones:["Comunicación social, interacción social y patrones restrictivos y repetitivos de conducta","Solo el lenguaje verbal","Únicamente la conducta social","Solo el desarrollo cognitivo e intelectual"], correcta:0},
+  {cat:"T18: Psiquiatría Infantil", texto:"¿Qué es el Síndrome de Tourette?", opciones:["Trastorno neurológico caracterizado por tics motores y vocales múltiples crónicos, de inicio en la infancia","Solo tics motores sin componente vocal","Trastorno exclusivamente del lenguaje","Trastorno del espectro autista con tics"], correcta:0},
+  {cat:"T18: Psiquiatría Infantil", texto:"¿Qué factores etiológicos biológicos influyen en la psicopatología infantil?", opciones:["Genéticos, congénitos (prenatales: hormonales, infecciones, tóxicos) y postnatales (tóxicos, infecciosos, traumáticos, ambientales)","Solo factores genéticos","Únicamente factores ambientales","Solo el núcleo familiar"], correcta:0},
+  {cat:"T18: Psiquiatría Infantil", texto:"¿Qué importancia tiene el juego en el desarrollo psicológico del niño?", opciones:["Es el modo natural de expresión, aprendizaje y exploración del mundo, fundamental para el desarrollo cognitivo, emocional y social","Solo entretenimiento sin valor terapéutico","Solo importante en la primera infancia hasta los 3 años","Tiene valor únicamente para el desarrollo motor"], correcta:0},
+  {cat:"T18: Psiquiatría Infantil", texto:"¿Qué establece el módulo sobre el logro de un desarrollo psicosexual sano?", opciones:["Requiere presencia de padres adecuados que nutran afectivamente, proporcionen orientación, seguridad, modelo y protección equilibrada sin sobreproteger ni abusar","Solo depende de factores genéticos","Únicamente de la estimulación escolar temprana","No depende del ambiente familiar"], correcta:0},
+
+  // T19: TRASTORNOS DE LA PERSONALIDAD
+  {cat:"T19: Trastornos de la Personalidad", texto:"¿En cuántos grupos se clasifican los trastornos de personalidad y cuáles son?", opciones:["Tres grupos: A (excéntrico), B (dramático/errático) y C (ansioso/temeroso)","Solo dos grupos: neurótico y psicótico","Cuatro grupos según el DSM-5","Un solo grupo de trastornos relacionados"], correcta:0},
+  {cat:"T19: Trastornos de la Personalidad", texto:"¿Cuáles son las características del Trastorno de Personalidad Borderline (Límite)?", opciones:["Vacío interior, miedo al abandono, relaciones inestables, dificultad para controlar emociones y comportamiento impulsivo","Solo impulsividad sin inestabilidad emocional","Únicamente conductas antisociales","Solo desconfianza y recelo hacia los demás"], correcta:0},
+  {cat:"T19: Trastornos de la Personalidad", texto:"¿Qué diferencia al Trastorno Disocial del Trastorno Antisocial?", opciones:["El trastorno disocial SOLO se diagnostica hasta los 18 años; si tiene 18 años o más, es trastorno antisocial de la personalidad","No hay diferencia diagnóstica entre ambos","Solo difieren en la gravedad de las conductas","El disocial ocurre en adultos y el antisocial en menores"], correcta:0},
+  {cat:"T19: Trastornos de la Personalidad", texto:"¿Cuál es el tratamiento principal de los trastornos de la personalidad?", opciones:["Psicoterapia individual y de grupo; los medicamentos ayudan a aliviar síntomas como depresión y ansiedad pero no curan el trastorno","Solo medicación sin psicoterapia","Únicamente hospitalización prolongada","No tienen tratamiento efectivo conocido"], correcta:0},
+  {cat:"T19: Trastornos de la Personalidad", texto:"¿Cuáles son las causas de los trastornos de personalidad?", opciones:["Interacción de genes y ambiente en proporciones aproximadamente iguales","Solo factores genéticos hereditarios","Únicamente experiencias traumáticas en la infancia","Solo factores ambientales sin base genética"], correcta:0},
+  {cat:"T19: Trastornos de la Personalidad", texto:"¿Qué es el Trastorno de Personalidad Narcisista?", opciones:["Necesidad de ser admirado, falta de empatía hacia los demás y visión exagerada de la propia valía (grandiosidad)","Miedo extremo al rechazo social","Perfeccionismo y rigidez extrema","Conductas manipuladoras sin empatía con patrón antisocial"], correcta:0},
+
+  // T20: TRASTORNOS SEXUALES
+  {cat:"T20: Trastornos Sexuales", texto:"¿Cuáles son los tres grandes grupos de trastornos sexuales según el módulo?", opciones:["Disfunciones sexuales, Parafilias y Trastornos de la Identidad de Género","Solo disfunciones sexuales y parafilias","Únicamente orientación sexual e identidad de género","Solo trastornos de la conducta sexual"], correcta:0},
+  {cat:"T20: Trastornos Sexuales", texto:"¿Qué son las Parafilias?", opciones:["Patrones de excitación sexual recurrentes e intensos ante objetos, situaciones o individuos atípicos que causan malestar o daño","Variaciones normales de la sexualidad humana","Solo orientaciones sexuales no heterosexuales","Disfunciones del deseo sexual"], correcta:0},
+  {cat:"T20: Trastornos Sexuales", texto:"¿Qué son los trastornos psiquiátricos del puerperio o fase reproductiva?", opciones:["Alteraciones mentales que ocurren durante el embarazo, parto o puerperio como depresión posparto, psicosis puerperal y otros","Solo depresión posparto leve transitoria","Únicamente ansiedad durante el embarazo","Solo cambios de humor sin significancia clínica"], correcta:0},
+  {cat:"T20: Trastornos Sexuales", texto:"¿Qué es la Disfunción Sexual?", opciones:["Alteración en alguna fase del ciclo de respuesta sexual (deseo, excitación, orgasmo) que causa malestar significativo al individuo","Solo problemas anatómicos genitales","Cualquier variación en la frecuencia sexual","Solo trastornos del deseo sexual"], correcta:0},
+  {cat:"T20: Trastornos Sexuales", texto:"¿Cuál es la posición actual de la OMS respecto a la homosexualidad?", opciones:["No es una enfermedad ni un trastorno mental; fue eliminada de la CIE-10 en 1990 como categoría diagnóstica","Es un trastorno de la personalidad tratable","Sigue siendo considerada un trastorno de identidad de género","Es clasificada como parafilia en el DSM-5"], correcta:0},
+  {cat:"T20: Trastornos Sexuales", texto:"¿Cuál es el rol de enfermería ante un paciente con trastornos sexuales?", opciones:["Brindar atención sin juicios de valor, respetar la privacidad, educar sobre salud sexual y derivar al especialista cuando corresponda","Solo administrar medicación hormonal","Evitar el tema por considerarlo delicado","Orientar al paciente a cambiar su conducta sexual"], correcta:0},
+];
+
+let indice = 0, puntaje = 0, correctas = 0, incorrectas = 0;
+let timerInterval = null, tiempoRestante = 20, respondida = false;
+let opcionesMezcladas = [], indiceCorrecto = 0;
+let preguntasMezcladas = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function iniciarJuego() {
+  document.getElementById('pantalla-inicio').style.display = 'none';
+  document.getElementById('pantalla-juego').style.display = 'block';
+  indice = 0; puntaje = 0; correctas = 0; incorrectas = 0;
+  preguntasMezcladas = shuffle(preguntas);
+  mostrarPregunta();
+}
+
+function mostrarPregunta() {
+  respondida = false;
+  const p = preguntasMezcladas[indice];
+  const rc = p.opciones[p.correcta];
+  const idx = shuffle([0,1,2,3]);
+  opcionesMezcladas = idx.map(i => p.opciones[i]);
+  indiceCorrecto = opcionesMezcladas.indexOf(rc);
+
+  document.getElementById('num-pregunta').textContent = indice + 1;
+  document.getElementById('puntaje-actual').textContent = puntaje;
+  document.getElementById('barra').style.width = ((indice / 120) * 100) + '%';
+  document.getElementById('categoria-tag').textContent = p.cat;
+  document.getElementById('pregunta-texto').textContent = p.texto;
+
+  const letras = ['A','B','C','D'];
+  const container = document.getElementById('opciones-container');
+  container.innerHTML = '';
+  opcionesMezcladas.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opcion-btn';
+    btn.innerHTML = `<span class="letra-opcion">${letras[i]}</span>${op}`;
+    btn.onclick = () => seleccionar(i, btn);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('btn-siguiente').style.display = 'none';
+  iniciarTimer();
+}
+
+function iniciarTimer() {
+  clearInterval(timerInterval);
+  tiempoRestante = 20;
+  const el = document.getElementById('timer');
+  el.textContent = tiempoRestante;
+  el.classList.remove('urgente');
+  timerInterval = setInterval(() => {
+    tiempoRestante--;
+    el.textContent = tiempoRestante;
+    if (tiempoRestante <= 5) el.classList.add('urgente');
+    if (tiempoRestante <= 0) { clearInterval(timerInterval); if (!respondida) tiempoAgotado(); }
+  }, 1000);
+}
+
+function tiempoAgotado() {
+  respondida = true; incorrectas++;
+  const btns = document.querySelectorAll('.opcion-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[indiceCorrecto].classList.add('resaltar');
+  mostrarFeedback(false, '⏰ ¡Tiempo agotado! La respuesta correcta está resaltada.');
+  document.getElementById('btn-siguiente').style.display = 'block';
+}
+
+function seleccionar(i, btn) {
+  if (respondida) return;
+  respondida = true;
+  clearInterval(timerInterval);
+  const btns = document.querySelectorAll('.opcion-btn');
+  btns.forEach(b => b.disabled = true);
+  if (i === indiceCorrecto) {
+    btn.classList.add('correcta');
+    const pts = Math.max(50, tiempoRestante * 5);
+    puntaje += pts; correctas++;
+    mostrarFeedback(true, `✅ ¡Correcto! +${pts} puntos`);
+  } else {
+    btn.classList.add('incorrecta');
+    btns[indiceCorrecto].classList.add('resaltar');
+    incorrectas++;
+    mostrarFeedback(false, `❌ Incorrecto. La correcta era: "${opcionesMezcladas[indiceCorrecto]}"`);
+  }
+  document.getElementById('puntaje-actual').textContent = puntaje;
+  document.getElementById('btn-siguiente').style.display = 'block';
+}
+
+function mostrarFeedback(ok, msg) {
+  const fb = document.getElementById('feedback');
+  fb.textContent = msg;
+  fb.className = 'feedback ' + (ok ? 'correcto' : 'incorrecto');
+  fb.style.display = 'block';
+}
+
+function siguientePregunta() {
+  indice++;
+  if (indice >= preguntasMezcladas.length) mostrarResultado();
+  else mostrarPregunta();
+}
+
+function mostrarResultado() {
+  clearInterval(timerInterval);
+  document.getElementById('pantalla-juego').style.display = 'none';
+  document.getElementById('pantalla-resultado').style.display = 'block';
+  const pct = Math.round((correctas / 120) * 100);
+  document.getElementById('puntaje-final').textContent = puntaje;
+  document.getElementById('res-c').textContent = correctas;
+  document.getElementById('res-i').textContent = incorrectas;
+  document.getElementById('res-p').textContent = pct + '%';
+  let trofeo, titulo, sub;
+  if (pct >= 90) { trofeo='🏆'; titulo='¡Sobresaliente!'; sub='¡Estás más que preparado/a para el final! Dominio excelente de la materia.'; }
+  else if (pct >= 70) { trofeo='🥇'; titulo='¡Muy bien!'; sub='Gran manejo de los contenidos. Repasá los temas donde fallaste y estarás perfecto/a.'; }
+  else if (pct >= 50) { trofeo='🥈'; titulo='¡Buen intento!'; sub='Algunos temas para reforzar. Revisá el módulo del Lic. Molina y volvé a intentarlo.'; }
+  else { trofeo='📚'; titulo='¡A repasar más!'; sub='Revisá el módulo completo. ¡Podés consultarle al Lic. Molina cualquier duda!'; }
+  document.getElementById('trofeo').textContent = trofeo;
+  document.getElementById('res-titulo').textContent = titulo;
+  document.getElementById('res-sub').textContent = sub;
+  setTimeout(() => { document.getElementById('barra-res').style.width = pct + '%'; }, 100);
+}
+
+function reiniciar() {
+  document.getElementById('pantalla-resultado').style.display = 'none';
+  document.getElementById('pantalla-inicio').style.display = 'block';
+}
+</script>
+</body>
+</html>
