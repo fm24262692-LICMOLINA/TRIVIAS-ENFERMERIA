@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia · Biofísica Química · 1° Año · CENT N°74 ATSA</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07090f;
+    --surface: #0f1320;
+    --card: #141928;
+    --border: #1e2640;
+    --accent: #00c9a7;
+    --accent2: #0077ff;
+    --gold: #ffd166;
+    --green: #06d6a0;
+    --red: #ef476f;
+    --purple: #9b5de5;
+    --text: #dde3f5;
+    --muted: #5a6384;
+    --radius: 16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 14px 50px;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse 70% 45% at 10% 5%, rgba(0,201,167,.09) 0%, transparent 55%),
+      radial-gradient(ellipse 55% 40% at 90% 90%, rgba(0,119,255,.08) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(155,93,229,.05) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  .wrap { position:relative; z-index:1; width:100%; max-width:780px; }
+
+  /* ── HEADER ── */
+  header { text-align:center; padding: 30px 0 26px; }
+  .inst-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background: rgba(0,201,167,.1); border:1px solid rgba(0,201,167,.25);
+    color:var(--accent); font-size:11px; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase;
+    padding:5px 16px; border-radius:50px; margin-bottom:16px;
+  }
+  .inst-badge::before { content:'●'; font-size:7px; }
+  header h1 {
+    font-family:'Unbounded',sans-serif;
+    font-size:clamp(22px,4.5vw,38px); font-weight:900;
+    line-height:1.1; letter-spacing:-.02em;
+    background: linear-gradient(130deg, #fff 20%, var(--accent));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:8px;
+  }
+  header p { color:var(--muted); font-size:13px; line-height:1.6; }
+
+  /* ── CHIPS STATS ── */
+  .score-row { display:flex; gap:10px; margin-bottom:18px; }
+  .chip {
+    flex:1; background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:10px 12px; text-align:center;
+  }
+  .chip .v { font-family:'Unbounded',sans-serif; font-size:20px; font-weight:700; }
+  .chip .l { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+  .v.c { color:var(--green); }
+  .v.w { color:var(--red); }
+  .v.p { color:var(--gold); }
+
+  /* ── PROGRESS ── */
+  .prog-wrap { margin-bottom:16px; }
+  .prog-top { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .prog-bar { height:3px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .prog-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; transition:width .4s ease; }
+
+  /* ── TIPO BADGE ── */
+  .tipo-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .tipo-badge {
+    font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    padding:3px 12px; border-radius:50px;
+  }
+  .tipo-badge.corta { background:rgba(0,201,167,.15); color:var(--accent); border:1px solid rgba(0,201,167,.3); }
+  .tipo-badge.larga { background:rgba(155,93,229,.15); color:var(--purple); border:1px solid rgba(155,93,229,.3); }
+  .tipo-tema { font-size:11px; color:var(--muted); }
+
+  /* ── TIMER ── */
+  .timer-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .timer-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+  .timer-bar { flex:1; height:5px; background:var(--border); border-radius:5px; overflow:hidden; }
+  .timer-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--green),var(--gold)); transition:width .1s linear, background .3s; }
+  .timer-fill.urgent { background:linear-gradient(90deg,var(--red),var(--gold)); }
+  .timer-num { font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; min-width:26px; text-align:right; }
+
+  /* ── CARD PREGUNTA ── */
+  .q-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:26px 26px 22px;
+    margin-bottom:14px;
+    box-shadow:0 10px 40px rgba(0,0,0,.45);
+    position:relative; overflow:hidden;
+  }
+  .q-card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2),var(--purple));
+  }
+  .q-num { font-size:11px; color:var(--accent2); font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; }
+  .q-text { font-size:17px; font-weight:500; line-height:1.5; }
+
+  /* ── OPCIONES ── */
+  .options { display:flex; flex-direction:column; gap:9px; margin-bottom:16px; }
+  .opt {
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:11px; padding:13px 16px;
+    cursor:pointer; display:flex; align-items:flex-start; gap:12px;
+    font-size:14px; line-height:1.5;
+    transition:border-color .15s, background .15s, transform .1s;
+  }
+  .opt:hover:not(.locked) { border-color:var(--accent); background:rgba(0,201,167,.07); transform:translateX(4px); }
+  .opt.correct { border-color:var(--green); background:rgba(6,214,160,.1); }
+  .opt.wrong   { border-color:var(--red);   background:rgba(239,71,111,.08); }
+  .opt.locked  { cursor:default; }
+  .opt .lt {
+    width:26px; height:26px; border-radius:6px; flex-shrink:0;
+    background:var(--border); display:flex; align-items:center; justify-content:center;
+    font-family:'Unbounded',sans-serif; font-size:11px; font-weight:700;
+    transition:background .2s; margin-top:1px;
+  }
+  .opt.correct .lt { background:var(--green); color:#001a11; }
+  .opt.wrong   .lt { background:var(--red);   color:#fff; }
+  .opt-txt { flex:1; }
+
+  /* ── FEEDBACK ── */
+  .feedback { padding:12px 15px; border-radius:10px; font-size:13px; line-height:1.55; margin-bottom:14px; display:none; }
+  .feedback.show { display:block; }
+  .feedback.ok { background:rgba(6,214,160,.1); border:1px solid rgba(6,214,160,.28); color:#8fffda; }
+  .feedback.no { background:rgba(239,71,111,.09); border:1px solid rgba(239,71,111,.28); color:#ffb3c6; }
+
+  /* ── BTN NEXT ── */
+  .btn-next {
+    width:100%; padding:14px;
+    background:linear-gradient(130deg,var(--accent),var(--accent2));
+    color:#fff; font-family:'Unbounded',sans-serif; font-weight:700; font-size:13px;
+    border:none; border-radius:11px; cursor:pointer;
+    transition:opacity .2s, transform .1s; display:none; letter-spacing:.03em;
+  }
+  .btn-next:hover { opacity:.88; transform:scale(1.01); }
+  .btn-next.show { display:block; }
+
+  /* ── RESULTS ── */
+  .results {
+    text-align:center; padding:44px 28px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:0 16px 60px rgba(0,0,0,.5);
+  }
+  .trophy { font-size:68px; margin-bottom:12px; }
+  .results h2 { font-family:'Unbounded',sans-serif; font-size:24px; font-weight:900; margin-bottom:8px; }
+  .results .pct {
+    font-family:'Unbounded',sans-serif; font-size:58px; font-weight:900;
+    background:linear-gradient(130deg,var(--gold),var(--accent));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .results p { color:var(--muted); font-size:14px; margin-top:8px; margin-bottom:28px; line-height:1.6; }
+  .res-grid { display:flex; gap:10px; margin-bottom:28px; }
+  .res-chip { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center; }
+  .res-chip .rv { font-family:'Unbounded',sans-serif; font-size:22px; font-weight:700; }
+  .res-chip .rl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
+  .btn-restart {
+    padding:13px 40px;
+    background:linear-gradient(130deg,var(--accent),var(--accent2));
+    color:#fff; font-family:'Unbounded',sans-serif; font-weight:700; font-size:13px;
+    border:none; border-radius:11px; cursor:pointer; transition:opacity .2s; letter-spacing:.03em;
+  }
+  .btn-restart:hover { opacity:.87; }
+
+  .footer { text-align:center; color:var(--muted); font-size:11px; margin-top:32px; line-height:1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="inst-badge">CENT N°74 ATSA · Prof. Lic. Francisco Molina</div>
+    <h1>BIOFÍSICA QUÍMICA</h1>
+    <p>1° Año · Enfermero Profesional · Plan 2014<br>76 preguntas · 19 temas · Respuestas cortas y largas</p>
+  </header>
+
+  <div class="score-row">
+    <div class="chip"><div class="v c" id="sc">0</div><div class="l">Correctas</div></div>
+    <div class="chip"><div class="v w" id="sw">0</div><div class="l">Incorrectas</div></div>
+    <div class="chip"><div class="v p" id="sp">0</div><div class="l">Puntos</div></div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-top"><span id="pnum">Pregunta 1 de 76</span><span id="ppct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  </div>
+
+  <div id="game">
+    <div class="tipo-row">
+      <span class="tipo-badge" id="tipobadge">CORTA</span>
+      <span class="tipo-tema" id="tipotema"></span>
+    </div>
+    <div class="timer-row">
+      <span class="timer-lbl">Tiempo</span>
+      <div class="timer-bar"><div class="timer-fill" id="tbar"></div></div>
+      <span class="timer-num" id="tnum">20</span>
+    </div>
+    <div class="q-card">
+      <div class="q-num" id="qnum">PREGUNTA 1</div>
+      <div class="q-text" id="qtext"></div>
+    </div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next" id="btnNext" onclick="next()">Siguiente →</button>
+  </div>
+
+  <div id="results" class="results" style="display:none">
+    <div class="trophy" id="trophy">🏆</div>
+    <h2>Resultado final</h2>
+    <div class="pct" id="rpct"></div>
+    <div class="res-grid">
+      <div class="res-chip"><div class="rv" id="rc" style="color:var(--green)">0</div><div class="rl">Correctas</div></div>
+      <div class="res-chip"><div class="rv" id="rw" style="color:var(--red)">0</div><div class="rl">Incorrectas</div></div>
+      <div class="res-chip"><div class="rv" id="rp" style="color:var(--gold)">0</div><div class="rl">Puntos</div></div>
+    </div>
+    <p id="rmsg"></p>
+    <button class="btn-restart" onclick="restart()">Jugar de nuevo</button>
+  </div>
+
+  <div class="footer">
+    Trivia elaborada por Prof. Lic. Francisco Molina · CENT N°74 ATSA · Tucumán<br>
+    1° Año Carrera Enfermero Profesional · Material didáctico de uso educativo
+  </div>
+</div>
+
+<script>
+// tipo: "C" = corta (20s) | "L" = larga (27s)
+const PREGUNTAS = [
+  // ═══════════════════════════════════════════
+  // TEMA 1 — Metabolismo. Anabolismo. Catabolismo
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 1 · Metabolismo",
+   q:"¿Cómo se llama el conjunto de reacciones químicas que ocurren en el organismo para mantener la vida?",
+   a:"Metabolismo",
+   ops:["Metabolismo","Homeostasis","Catabolismo","Anabolismo"],
+   exp:"El metabolismo es el conjunto de todas las reacciones químicas que ocurren en el organismo para mantener la vida, e incluye anabolismo y catabolismo."},
+  {t:"C", tema:"Tema 1 · Metabolismo",
+   q:"¿Cuál es el proceso metabólico que consiste en construir moléculas complejas a partir de moléculas simples, consumiendo energía?",
+   a:"Anabolismo",
+   ops:["Anabolismo","Catabolismo","Glucólisis","Proteólisis"],
+   exp:"El anabolismo es la fase constructiva del metabolismo: forma moléculas complejas (proteínas, glucógeno) a partir de simples, consumiendo energía (ATP)."},
+  {t:"L", tema:"Tema 1 · Metabolismo",
+   q:"¿Qué diferencia existe entre anabolismo y catabolismo y cómo se relacionan ambos con la energía celular?",
+   a:"El anabolismo construye moléculas complejas consumiendo energía (ATP), mientras que el catabolismo degrada moléculas liberando energía que queda disponible como ATP",
+   ops:[
+     "El anabolismo construye moléculas complejas consumiendo energía (ATP), mientras que el catabolismo degrada moléculas liberando energía que queda disponible como ATP",
+     "El anabolismo y el catabolismo son procesos idénticos que se alternan en el ciclo circadiano y no tienen relación directa con la producción de ATP",
+     "El anabolismo degrada proteínas liberando aminoácidos, mientras que el catabolismo sintetiza glucógeno consumiendo glucosa en el hígado",
+     "El anabolismo ocurre solo en células musculares durante el ejercicio, mientras que el catabolismo ocurre solo en neuronas en reposo"
+   ],
+   exp:"El anabolismo es la fase constructiva (síntesis de proteínas, glucógeno, lípidos) que consume ATP. El catabolismo es la fase destructiva (glucólisis, beta-oxidación, proteólisis) que libera energía almacenada como ATP. Ambos son complementarios y ocurren simultáneamente."},
+  {t:"L", tema:"Tema 1 · Metabolismo",
+   q:"¿Por qué la biología estudia tanto la estructura como la función de los organismos y qué importancia tiene esto para la enfermería?",
+   a:"Porque estructura y función son inseparables: conocer cómo está hecho el cuerpo permite entender cómo funciona y así identificar alteraciones patológicas para aplicar cuidados correctos",
+   ops:[
+     "Porque estructura y función son inseparables: conocer cómo está hecho el cuerpo permite entender cómo funciona y así identificar alteraciones patológicas para aplicar cuidados correctos",
+     "Porque la biología es una ciencia exclusivamente descriptiva que cataloga organismos sin aplicación práctica directa en la atención clínica",
+     "Porque el enfermero solo necesita conocer la función de los órganos, no su estructura microscópica ni su composición química",
+     "Porque la biología estudia únicamente los microorganismos patógenos que causan enfermedades infecciosas tratables con antibióticos"
+   ],
+   exp:"La biología estudia el origen, evolución y propiedades de los seres vivos, incluyendo su estructura y función. Para enfermería es fundamental porque permite comprender la fisiología normal, reconocer desviaciones patológicas y aplicar intervenciones adecuadas."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 2 — Glúcidos
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 2 · Glúcidos",
+   q:"¿Cuál es el monosacárido más importante para el metabolismo energético humano?",
+   a:"Glucosa",
+   ops:["Glucosa","Fructosa","Galactosa","Ribosa"],
+   exp:"La glucosa es el principal combustible del organismo, especialmente del cerebro y eritrocitos, y el azúcar más usado para proporcionar energía rápidamente."},
+  {t:"C", tema:"Tema 2 · Glúcidos",
+   q:"¿Cómo se denomina la vía metabólica que produce glucosa a partir de precursores no glucídicos?",
+   a:"Gluconeogénesis",
+   ops:["Gluconeogénesis","Glucogenólisis","Glucólisis","Glucogenogénesis"],
+   exp:"La gluconeogénesis es la síntesis de glucosa a partir de precursores no glucídicos como aminoácidos, lactato y glicerol, principalmente en el hígado."},
+  {t:"L", tema:"Tema 2 · Glúcidos",
+   q:"¿Qué es la glucemia, cuál es su valor normal en ayunas y qué mecanismos la regulan?",
+   a:"La glucemia es la concentración de glucosa en sangre; el valor normal en ayunas es 70-100 mg/dL; se regula principalmente por insulina (baja la glucemia) y glucagón (la sube)",
+   ops:[
+     "La glucemia es la concentración de glucosa en sangre; el valor normal en ayunas es 70-100 mg/dL; se regula principalmente por insulina (baja la glucemia) y glucagón (la sube)",
+     "La glucemia es la concentración de lípidos en sangre; el valor normal es 200 mg/dL; se regula por la hormona del crecimiento y las hormonas tiroideas exclusivamente",
+     "La glucemia es la presión osmótica del plasma; el valor normal es 280-295 mOsm/L; se regula por la ADH y el sistema renina-angiotensina-aldosterona",
+     "La glucemia es la cantidad total de glúcidos ingeridos en la dieta; el valor normal es 300 g/día; se regula solo por mecanismos digestivos sin participación hormonal"
+   ],
+   exp:"La glucemia es la concentración de glucosa en sangre. Valor normal en ayunas: 70-100 mg/dL. La regulación hormonal principal: la insulina (secretada por células β pancreáticas) reduce la glucemia promoviendo captación celular; el glucagón (células α) aumenta la glucemia estimulando glucogenólisis y gluconeogénesis hepáticas."},
+  {t:"L", tema:"Tema 2 · Glúcidos",
+   q:"¿Qué diferencia hay entre glucogenogénesis y glucogenólisis y en qué situaciones fisiológicas ocurre cada una?",
+   a:"La glucogenogénesis sintetiza glucógeno almacenando glucosa (ocurre en estado postprandial con insulina alta); la glucogenólisis degrada glucógeno liberando glucosa (ocurre en ayuno y ejercicio con glucagón alto)",
+   ops:[
+     "La glucogenogénesis sintetiza glucógeno almacenando glucosa (ocurre en estado postprandial con insulina alta); la glucogenólisis degrada glucógeno liberando glucosa (ocurre en ayuno y ejercicio con glucagón alto)",
+     "La glucogenogénesis y la glucogenólisis son el mismo proceso pero en sentido inverso, ambos ocurren exclusivamente en el músculo durante el ejercicio intenso",
+     "La glucogenogénesis produce glucosa a partir de aminoácidos en el hígado; la glucogenólisis produce ácidos grasos a partir de glicerol en el tejido adiposo",
+     "La glucogenogénesis es la transformación de glucosa en CO₂ y agua; la glucogenólisis es la transformación de lípidos en cuerpos cetónicos"
+   ],
+   exp:"Glucogenogénesis: síntesis de glucógeno a partir de glucosa; ocurre postprandialmente cuando la insulina es alta y la glucosa disponible es abundante. Glucogenólisis: degradación del glucógeno para liberar glucosa; ocurre en ayuno, ejercicio y estrés cuando el glucagón y adrenalina están elevados."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 3 — Lípidos
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 3 · Lípidos",
+   q:"¿Cuál es la principal característica química que distingue a los lípidos del resto de las biomoléculas?",
+   a:"Son hidrofóbicos (insolubles en agua, solubles en disolventes orgánicos)",
+   ops:["Son hidrofóbicos (insolubles en agua, solubles en disolventes orgánicos)","Son hidrofílicos y se disuelven fácilmente en agua fisiológica","Están formados exclusivamente por carbono, hidrógeno y nitrógeno","Son siempre de naturaleza proteica con función estructural exclusiva"],
+   exp:"La característica principal de los lípidos es ser hidrofóbicos o insolubles en agua y solubles en disolventes orgánicos como bencina, alcohol, benceno y cloroformo."},
+  {t:"C", tema:"Tema 3 · Lípidos",
+   q:"¿Cómo se denomina la enfermedad caracterizada por la acumulación de placas de ateroma en las arterias?",
+   a:"Ateroesclerosis",
+   ops:["Ateroesclerosis","Arteriosclerosis","Trombosis","Aneurisma"],
+   exp:"La ateroesclerosis es el depósito de placas de ateroma (colesterol, lípidos, células inflamatorias) en la íntima arterial, reduciendo la luz vascular y aumentando el riesgo cardiovascular."},
+  {t:"L", tema:"Tema 3 · Lípidos",
+   q:"¿Cuáles son las funciones biológicas principales de los lípidos en el organismo humano?",
+   a:"Reserva energética (triglicéridos), componente de membranas (fosfolípidos), síntesis hormonal (colesterol), aislamiento térmico, transporte de vitaminas liposolubles y protección de órganos",
+   ops:[
+     "Reserva energética (triglicéridos), componente de membranas (fosfolípidos), síntesis hormonal (colesterol), aislamiento térmico, transporte de vitaminas liposolubles y protección de órganos",
+     "Exclusivamente energética como el glucógeno muscular, sin participar en la composición de membranas ni en la síntesis de ningún tipo de hormona",
+     "Solo actúan como catalizadores de reacciones enzimáticas y como cofactores en el transporte de oxígeno por la hemoglobina eritrocitaria",
+     "Su única función es la regulación del pH sanguíneo y el mantenimiento del equilibrio ácido-base junto con los sistemas tampón del plasma"
+   ],
+   exp:"Las funciones de los lípidos incluyen: reserva energética (triglicéridos aportan 9 kcal/g); componentes estructurales de membranas (fosfolípidos y colesterol); precursores de hormonas esteroideas y vitamina D (colesterol); aislamiento térmico (tejido adiposo subcutáneo); transporte de vitaminas A, D, E, K; protección mecánica de órganos."},
+  {t:"L", tema:"Tema 3 · Lípidos",
+   q:"¿Cómo se produce la ateroesclerosis y cuáles son sus principales consecuencias clínicas?",
+   a:"Se produce por depósito de LDL oxidado en la íntima arterial, generando placas de ateroma que estenosan la luz vascular; las consecuencias son infarto de miocardio, ACV e isquemia periférica",
+   ops:[
+     "Se produce por depósito de LDL oxidado en la íntima arterial, generando placas de ateroma que estenosan la luz vascular; las consecuencias son infarto de miocardio, ACV e isquemia periférica",
+     "Se produce por exceso de HDL en sangre que deposita colesterol en las venas, provocando insuficiencia venosa crónica sin riesgo de infarto",
+     "Se produce por deficiencia de triglicéridos en la dieta, lo que hace que las arterias pierdan elasticidad y se calcifiquen en personas jóvenes",
+     "Se produce por exceso de proteínas dietarias que forman depósitos en los capilares renales, causando exclusivamente insuficiencia renal crónica"
+   ],
+   exp:"La ateroesclerosis se inicia con daño endotelial que facilita la entrada de LDL oxidado a la íntima arterial. Los macrófagos lo fagocitan formando células espumosas → estría grasa → placa fibroaterómica → estenosis. Consecuencias: angina, infarto agudo de miocardio, ACV isquémico, isquemia arterial periférica."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 4 — Proteínas
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 4 · Proteínas",
+   q:"¿Cuál es la unidad estructural básica de las proteínas?",
+   a:"Aminoácidos",
+   ops:["Aminoácidos","Nucleótidos","Ácidos grasos","Monosacáridos"],
+   exp:"Las proteínas son macromoléculas formadas por cadenas lineales de aminoácidos unidos por enlaces peptídicos. Son la hidrólisis de proteínas la que libera los 20 aminoácidos que las componen."},
+  {t:"C", tema:"Tema 4 · Proteínas",
+   q:"¿Cómo se denomina el enlace químico que une los aminoácidos entre sí en una cadena proteica?",
+   a:"Enlace peptídico",
+   ops:["Enlace peptídico","Enlace glucosídico","Enlace éster","Enlace fosfodiéster"],
+   exp:"El enlace peptídico es la unión covalente que se establece entre el grupo carboxilo (-COOH) de un aminoácido y el grupo amino (-NH₂) del siguiente, con pérdida de agua."},
+  {t:"L", tema:"Tema 4 · Proteínas",
+   q:"¿Cuáles son las principales funciones de las proteínas en el organismo y cuál es el ejemplo de cada una?",
+   a:"Estructural (colágeno), catalítica (enzimas), transporte (hemoglobina), defensa (inmunoglobulinas), hormonal (insulina), contráctil (actina y miosina) y reguladora",
+   ops:[
+     "Estructural (colágeno), catalítica (enzimas), transporte (hemoglobina), defensa (inmunoglobulinas), hormonal (insulina), contráctil (actina y miosina) y reguladora",
+     "Solo energética y de reserva, acumulando aminoácidos en el hígado para liberarlos únicamente en períodos prolongados de ayuno total",
+     "Exclusivamente catalítica como enzimas, sin ningún papel en el transporte de oxígeno ni en la defensa inmunológica del organismo",
+     "Solo estructural formando el citoesqueleto celular, sin participar en señalización, defensa, transporte ni función hormonal alguna"
+   ],
+   exp:"Las proteínas tienen múltiples funciones: estructural (colágeno en tejido conectivo, queratina en piel); catalítica (todas las enzimas son proteínas); transporte (hemoglobina transporta O₂, albúmina transporta fármacos y ácidos grasos); defensa (anticuerpos/inmunoglobulinas); hormonal (insulina, GH); contráctil (actina y miosina en músculo); reguladora (receptores)."},
+  {t:"L", tema:"Tema 4 · Proteínas",
+   q:"¿Qué son las dislipoproteinemias y por qué son importantes en la práctica de enfermería?",
+   a:"Son alteraciones en las concentraciones sanguíneas de lipoproteínas (LDL, HDL, VLDL, triglicéridos); son importantes porque aumentan el riesgo cardiovascular y requieren educación, monitoreo y apoyo al tratamiento",
+   ops:[
+     "Son alteraciones en las concentraciones sanguíneas de lipoproteínas (LDL, HDL, VLDL, triglicéridos); son importantes porque aumentan el riesgo cardiovascular y requieren educación, monitoreo y apoyo al tratamiento",
+     "Son enfermedades hereditarias del metabolismo de los aminoácidos que provocan acumulación de proteínas en riñón y solo se tratan con diálisis",
+     "Son tumores benignos formados por depósitos de proteínas en el tejido adiposo subcutáneo sin ningún riesgo cardiovascular asociado",
+     "Son enfermedades autoinmunes en las que el sistema inmune ataca las lipoproteínas propias, causando anemia hemolítica severa"
+   ],
+   exp:"Las dislipoproteinemias son alteraciones en las concentraciones de lipoproteínas plasmáticas: hipercolesterolemia (LDL elevado), hipertrigliceridemia, HDL bajo. Son factores de riesgo cardiovascular mayor. La enfermería interviene en: toma de muestras, educación nutricional, adherencia farmacológica, monitoreo de signos de complicaciones cardiovasculares."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 5 — Vitaminas
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 5 · Vitaminas",
+   q:"¿Cómo se clasifican las vitaminas según su solubilidad?",
+   a:"Liposolubles (A, D, E, K) e hidrosolubles (complejo B y vitamina C)",
+   ops:["Liposolubles (A, D, E, K) e hidrosolubles (complejo B y vitamina C)","Ácidas y básicas según su pH en solución acuosa fisiológica","Orgánicas e inorgánicas según su contenido de carbono en la cadena","Esenciales y no esenciales según si el organismo puede sintetizarlas o no"],
+   exp:"Las vitaminas se clasifican en: liposolubles (A, D, E, K), que se almacenan en tejido adiposo e hígado, e hidrosolubles (complejo B y vitamina C), que no se almacenan y requieren aporte diario."},
+  {t:"C", tema:"Tema 5 · Vitaminas",
+   q:"¿Qué enfermedad provoca la deficiencia de vitamina C?",
+   a:"Escorbuto",
+   ops:["Escorbuto","Raquitismo","Beriberi","Pelagra"],
+   exp:"La deficiencia de vitamina C (ácido ascórbico) produce escorbuto, caracterizado por hemorragias, encías sangrantes y mala cicatrización por falla en la síntesis de colágeno."},
+  {t:"L", tema:"Tema 5 · Vitaminas",
+   q:"¿Cuál es la diferencia entre vitaminas liposolubles e hidrosolubles en cuanto a almacenamiento, toxicidad y necesidad de ingesta?",
+   a:"Las liposolubles se almacenan en grasa e hígado, pueden acumularse y producir toxicidad por exceso, y no requieren ingesta diaria; las hidrosolubles no se almacenan, se excretan por orina y requieren ingesta regular",
+   ops:[
+     "Las liposolubles se almacenan en grasa e hígado, pueden acumularse y producir toxicidad por exceso, y no requieren ingesta diaria; las hidrosolubles no se almacenan, se excretan por orina y requieren ingesta regular",
+     "Las liposolubles se excretan por orina diariamente y nunca producen toxicidad; las hidrosolubles se acumulan en el hígado y producen hipervitaminosis si se toman en exceso",
+     "Ambos grupos tienen idéntico comportamiento metabólico, la diferencia es solo química pero sin importancia clínica en cuanto a dosificación",
+     "Las liposolubles actúan solo como cofactores enzimáticos, mientras que las hidrosolubles tienen función exclusivamente antioxidante en plasma"
+   ],
+   exp:"Vitaminas liposolubles (A, D, E, K): se absorben con grasas, se almacenan en tejido adiposo e hígado, pueden acumularse produciendo hipervitaminosis (toxicidad), no necesitan ingesta diaria. Vitaminas hidrosolubles (B y C): no se almacenan, el exceso se elimina por orina, rara toxicidad, requieren ingesta frecuente (diaria o casi diaria)."},
+  {t:"L", tema:"Tema 5 · Vitaminas",
+   q:"¿Qué papel cumple la vitamina D en el metabolismo del calcio y cuál es la consecuencia de su deficiencia?",
+   a:"La vitamina D favorece la absorción intestinal de calcio y su reabsorción renal, manteniendo la calcemia; su deficiencia produce raquitismo en niños (huesos blandos) y osteomalacia en adultos",
+   ops:[
+     "La vitamina D favorece la absorción intestinal de calcio y su reabsorción renal, manteniendo la calcemia; su deficiencia produce raquitismo en niños (huesos blandos) y osteomalacia en adultos",
+     "La vitamina D inhibe la absorción intestinal de calcio para evitar hipercalcemia; su deficiencia produce exceso de calcio en sangre y cálculos renales",
+     "La vitamina D actúa exclusivamente en el hígado para sintetizar albúmina transportadora de calcio; su deficiencia produce hipoproteinemia sin efecto óseo",
+     "La vitamina D regula la secreción de insulina en el páncreas y no tiene relación directa con el metabolismo del calcio ni con el tejido óseo"
+   ],
+   exp:"La vitamina D (calcitriol en su forma activa) estimula la absorción intestinal de calcio y fósforo, y su reabsorción renal. Trabaja sinérgicamente con la PTH. Su deficiencia: raquitismo en niños (deformidades óseas por mineralización deficiente) y osteomalacia en adultos (huesos blandos y dolor). La principal fuente es la síntesis cutánea por exposición solar."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 6 — Agua y Minerales / Osmosis
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 6 · Agua y Minerales",
+   q:"¿Cómo se llama la solución cuya osmolaridad es igual a la del plasma sanguíneo (~285 mOsm/L)?",
+   a:"Solución isotónica",
+   ops:["Solución isotónica","Solución hipotónica","Solución hipertónica","Solución coloide"],
+   exp:"Una solución isotónica tiene la misma osmolaridad que el plasma (~285 mOsm/L). Las células no pierden ni ganan agua en ella. Ejemplo clínico: solución fisiológica al 0,9% de NaCl."},
+  {t:"C", tema:"Tema 6 · Agua y Minerales",
+   q:"¿Qué proceso permite el paso de agua a través de una membrana semipermeable desde una solución menos concentrada hacia una más concentrada?",
+   a:"Ósmosis",
+   ops:["Ósmosis","Difusión","Diálisis","Filtración"],
+   exp:"La ósmosis es el movimiento de agua a través de una membrana semipermeable desde la zona de menor concentración de solutos (más agua) hacia la de mayor concentración de solutos (menos agua)."},
+  {t:"L", tema:"Tema 6 · Agua y Minerales",
+   q:"¿Qué ocurre con un glóbulo rojo si se coloca en solución hipotónica, isotónica e hipertónica respectivamente?",
+   a:"En hipotónica entra agua y el glóbulo se hincha hasta hemolizarse; en isotónica no hay cambios; en hipertónica sale agua y el glóbulo se crenula (arruga)",
+   ops:[
+     "En hipotónica entra agua y el glóbulo se hincha hasta hemolizarse; en isotónica no hay cambios; en hipertónica sale agua y el glóbulo se crenula (arruga)",
+     "En hipotónica el glóbulo se crenula perdiendo agua; en isotónica el glóbulo explota; en hipertónica el glóbulo se hincha absorbiendo sales",
+     "En todas las soluciones el glóbulo rojo mantiene su forma porque la hemoglobina le da rigidez estructural independiente del medio osmótico",
+     "En hipotónica el glóbulo pierde hemoglobina pero no se destruye; en hipertónica fabrica más hemoglobina compensando la pérdida de agua"
+   ],
+   exp:"El comportamiento osmótico de eritrocitos: En solución hipotónica (ej: agua destilada): el agua entra por ósmosis → glóbulo se hincha → hemólisis. En solución isotónica (0,9% NaCl): equilibrio osmótico → sin cambio de volumen. En solución hipertónica (ej: 3% NaCl): el agua sale → crenación. Esto justifica el uso de solución fisiológica en infusiones IV."},
+  {t:"L", tema:"Tema 6 · Agua y Minerales",
+   q:"¿Qué es la diálisis y cuál es su aplicación clínica en el tratamiento de la insuficiencia renal?",
+   a:"La diálisis es la separación de partículas de distinto tamaño a través de una membrana semipermeable; en insuficiencia renal elimina toxinas y exceso de agua que el riñón no puede excretar",
+   ops:[
+     "La diálisis es la separación de partículas de distinto tamaño a través de una membrana semipermeable; en insuficiencia renal elimina toxinas y exceso de agua que el riñón no puede excretar",
+     "La diálisis es la infusión intravenosa de soluciones electrolíticas para restablecer el equilibrio ácido-base en acidosis metabólica grave",
+     "La diálisis es la técnica de separación de proteínas plasmáticas que se usa para transfusiones de plasma en pacientes con quemaduras",
+     "La diálisis es la técnica de oxigenación extracorpórea que reemplaza la función pulmonar en pacientes con insuficiencia respiratoria aguda"
+   ],
+   exp:"La diálisis es un proceso físico-químico que separa solutos de distinto tamaño a través de una membrana semipermeable por gradiente de concentración. En insuficiencia renal crónica reemplaza la función renal: la hemodiálisis hace circular la sangre por un dializador artificial; la diálisis peritoneal usa el peritoneo como membrana. Elimina urea, creatinina, potasio y exceso de agua."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 7 — Enzimas
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 7 · Enzimas",
+   q:"¿Cuánto pueden aumentar las enzimas la velocidad de las reacciones bioquímicas?",
+   a:"Hasta 1 millón de veces",
+   ops:["Hasta 1 millón de veces","Hasta 1.000 veces","Hasta 100 veces","Hasta 10 veces"],
+   exp:"Las enzimas son proteínas catalizadoras que aumentan hasta 1 millón de veces la velocidad de las reacciones químicas sin consumirse en el proceso."},
+  {t:"C", tema:"Tema 7 · Enzimas",
+   q:"¿Cuál de estos factores NO modifica la velocidad de una reacción enzimática?",
+   a:"El color del sustrato",
+   ops:["El color del sustrato","El pH del medio","La temperatura","La concentración del sustrato"],
+   exp:"Los factores que modifican la velocidad enzimática son: pH, temperatura, concentración de sustrato y presencia de catalizadores o inhibidores. El color del sustrato no tiene ningún efecto sobre la actividad enzimática."},
+  {t:"L", tema:"Tema 7 · Enzimas",
+   q:"¿Cómo afectan el pH y la temperatura a la actividad enzimática y qué importancia tiene esto en la fisiología humana?",
+   a:"Cada enzima tiene un pH y temperatura óptimos; alejarse de ellos desnaturaliza la enzima. El cuerpo mantiene pH 7.35-7.45 y temperatura 37°C para maximizar la actividad enzimática",
+   ops:[
+     "Cada enzima tiene un pH y temperatura óptimos; alejarse de ellos desnaturaliza la enzima. El cuerpo mantiene pH 7.35-7.45 y temperatura 37°C para maximizar la actividad enzimática",
+     "Las enzimas son indiferentes al pH y temperatura porque su estructura terciaria es absolutamente rígida e indestructible en cualquier condición",
+     "Un pH más ácido siempre aumenta la actividad enzimática, por eso el estómago tiene pH 1-2 para acelerar todas sus reacciones metabólicas",
+     "La temperatura siempre aumenta la actividad enzimática sin límite, por eso la fiebre alta siempre mejora el metabolismo celular"
+   ],
+   exp:"Cada enzima tiene pH y temperatura óptimos: la mayoría opera a pH 7.35 y 37°C (temperatura corporal). Variaciones: pH extremo o temperatura >42°C desnaturalizan la proteína enzimática perdiendo su función. En fiebre alta (>42°C) las enzimas se inactivan, poniendo en riesgo la vida. El cuerpo mantiene homeostasis de pH y temperatura precisamente para preservar la función enzimática."},
+  {t:"L", tema:"Tema 7 · Enzimas",
+   q:"¿Qué es la inhibición enzimática, cuáles son sus tipos y qué importancia tiene en farmacología?",
+   a:"La inhibición enzimática reduce la actividad de una enzima; puede ser competitiva (el inhibidor compite por el sitio activo) o no competitiva (se une en otro sitio); muchos fármacos actúan como inhibidores enzimáticos",
+   ops:[
+     "La inhibición enzimática reduce la actividad de una enzima; puede ser competitiva (el inhibidor compite por el sitio activo) o no competitiva (se une en otro sitio); muchos fármacos actúan como inhibidores enzimáticos",
+     "La inhibición enzimática siempre destruye permanentemente la enzima; no existen tipos reversibles y todos los inhibidores son letales para la célula",
+     "La inhibición enzimática solo ocurre en condiciones de laboratorio artificiales y no tiene ningún papel fisiológico ni farmacológico real",
+     "La inhibición enzimática solo se aplica a enzimas digestivas y no tiene relación con el mecanismo de acción de ningún medicamento conocido"
+   ],
+   exp:"Inhibición enzimática: reducción de la actividad enzimática. Tipos: 1) Competitiva: el inhibidor es similar al sustrato y compite por el sitio activo (ej: metotrexato inhibe dihidrofolato reductasa); reversible aumentando la concentración de sustrato. 2) No competitiva: el inhibidor se une a otro sitio, cambiando la forma del sitio activo. 3) Irreversible: unión covalente permanente (ej: aspirina inhibe COX-1 irreversiblemente). Muchos antibióticos, antivirales y fármacos son inhibidores enzimáticos."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 8 — Hormonas
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 8 · Hormonas",
+   q:"¿Qué glándula se conoce como 'glándula maestra' porque regula otras glándulas endócrinas?",
+   a:"Hipófisis (glándula pituitaria)",
+   ops:["Hipófisis (glándula pituitaria)","Tiroides","Suprarrenales","Páncreas"],
+   exp:"La hipófisis o pituitaria es la 'glándula maestra' porque secreta hormonas que regulan el funcionamiento de otras glándulas endócrinas (tiroides, suprarrenales, gónadas)."},
+  {t:"C", tema:"Tema 8 · Hormonas",
+   q:"¿Qué hormona pancreática disminuye la glucemia promoviendo la captación de glucosa por las células?",
+   a:"Insulina",
+   ops:["Insulina","Glucagón","Adrenalina","Cortisol"],
+   exp:"La insulina, secretada por las células β de los islotes de Langerhans del páncreas, facilita la captación de glucosa por células musculares y adiposas, disminuyendo la glucemia."},
+  {t:"L", tema:"Tema 8 · Hormonas",
+   q:"¿Cuáles son las diferencias entre las hormonas de la hipófisis anterior y posterior y cuáles son sus hormonas principales?",
+   a:"La hipófisis anterior (adenohipófisis) produce GH, TSH, ACTH, FSH, LH y prolactina; la posterior (neurohipófisis) almacena y libera ADH y oxitocina, producidas en el hipotálamo",
+   ops:[
+     "La hipófisis anterior (adenohipófisis) produce GH, TSH, ACTH, FSH, LH y prolactina; la posterior (neurohipófisis) almacena y libera ADH y oxitocina, producidas en el hipotálamo",
+     "Ambas porciones de la hipófisis producen exactamente las mismas hormonas; la diferencia es solo anatómica en cuanto a su vascularización",
+     "La hipófisis anterior libera solo ADH para regular la diuresis; la posterior libera solo GH para regular el crecimiento óseo longitudinal",
+     "La hipófisis anterior sintetiza hormonas esteroideas a partir de colesterol; la posterior sintetiza proteoglicanos para la lubricación articular"
+   ],
+   exp:"Adenohipófisis (anterior) produce: GH (crecimiento), TSH (estimula tiroides), ACTH (estimula suprarrenales), FSH y LH (función gonadal), prolactina (lactancia). Neurohipófisis (posterior): NO produce, sino que almacena y libera ADH (antidiurética, producida en hipotálamo supraóptico) y oxitocina (producida en hipotálamo paraventricular). La regulación es hipotalámica en ambos casos."},
+  {t:"L", tema:"Tema 8 · Hormonas",
+   q:"¿Cómo regulan el calcio y fósforo la hormona paratiroidea (PTH) y la vitamina D, y por qué es relevante en enfermería?",
+   a:"La PTH aumenta la calcemia reabsorbiendo calcio del hueso y riñón, y activa vitamina D; la vitamina D activa aumenta la absorción intestinal de calcio; relevante para monitorear calcemia en pacientes críticos y renales",
+   ops:[
+     "La PTH aumenta la calcemia reabsorbiendo calcio del hueso y riñón, y activa vitamina D; la vitamina D activa aumenta la absorción intestinal de calcio; relevante para monitorear calcemia en pacientes críticos y renales",
+     "La PTH disminuye la calcemia depositando calcio en huesos; la vitamina D inhibe la absorción intestinal de calcio; no tiene relevancia clínica en enfermería",
+     "La PTH y la vitamina D tienen funciones opuestas y se anulan mutuamente; la calcemia es regulada exclusivamente por la hormona tiroidea calcitonina",
+     "La PTH regula solo el potasio sérico y no tiene relación con el calcio; la vitamina D regula solo el sodio en el túbulo contorneado distal"
+   ],
+   exp:"PTH (paratiroidea): secretada cuando la calcemia baja. Acciones: moviliza Ca²⁺ del hueso (osteoclastos), aumenta reabsorción renal de Ca²⁺ y elimina fosfato, activa vitamina D en riñón. Vitamina D activa (calcitriol): aumenta absorción intestinal de Ca²⁺ y P. Calcitonina (tiroides): efecto opuesto a PTH. Relevancia en enfermería: monitorear calcemia (normal 8.5-10.5 mg/dL), vigilar tetania (hipocalcemia) e hipercalcemia en neoplasias e hiperparatiroidismo."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 9 — Digestión y Absorción
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 9 · Digestión y Absorción",
+   q:"¿Dónde se absorben principalmente los monosacáridos producto de la digestión de glúcidos?",
+   a:"En el intestino delgado (yeyuno)",
+   ops:["En el intestino delgado (yeyuno)","En el estómago","En el intestino grueso","En el duodeno exclusivamente"],
+   exp:"Los monosacáridos (glucosa, fructosa, galactosa) resultantes de la digestión de hidratos de carbono se absorben principalmente en el yeyuno del intestino delgado, mediante transportadores específicos."},
+  {t:"C", tema:"Tema 9 · Digestión y Absorción",
+   q:"¿Qué enzima comienza la digestión de proteínas en el estómago?",
+   a:"Pepsina",
+   ops:["Pepsina","Tripsina","Amilasa","Lipasa"],
+   exp:"La pepsina es la enzima proteolítica gástrica que actúa en el estómago a pH ácido (1-2), iniciando la digestión de proteínas al fragmentar cadenas polipeptídicas."},
+  {t:"L", tema:"Tema 9 · Digestión y Absorción",
+   q:"¿Cómo se digieren y absorben los lípidos de la dieta y qué papel cumple la bilis en este proceso?",
+   a:"Las sales biliares emulsifican las grasas formando micelas; la lipasa pancreática las hidroliza en ácidos grasos y monoglicéridos; se absorben en el intestino delgado y se transportan como quilomicrones por la linfa",
+   ops:[
+     "Las sales biliares emulsifican las grasas formando micelas; la lipasa pancreática las hidroliza en ácidos grasos y monoglicéridos; se absorben en el intestino delgado y se transportan como quilomicrones por la linfa",
+     "Las grasas se digieren directamente en el estómago por acción del HCl gástrico y se absorben por vía venosa portal sin necesidad de sales biliares",
+     "Los lípidos no requieren digestión enzimática porque se absorben intactos como triglicéridos directamente a través de la mucosa gástrica",
+     "Las proteínas de la dieta digieren las grasas en el intestino grueso, donde se absorben como colesterol libre hacia la circulación linfática"
+   ],
+   exp:"Digestión de lípidos: 1) Sales biliares (de la vesícula biliar) emulsifican los triglicéridos formando micelas (aumentan superficie). 2) Lipasa pancreática hidroliza triglicéridos → ácidos grasos libres + 2-monoglicéridos. 3) Se absorben en enterocitos del intestino delgado. 4) Se resintetizan en triglicéridos → se empaquetan en quilomicrones. 5) Los quilomicrones entran a la linfa (no a la sangre portal) y llegan al torrente sanguíneo por el conducto torácico."},
+  {t:"L", tema:"Tema 9 · Digestión y Absorción",
+   q:"¿Cuál es la secuencia completa de la digestión de proteínas desde la boca hasta la absorción de aminoácidos?",
+   a:"Comienza en el estómago con la pepsina (pH 1-2), continúa en el duodeno con tripsina y quimotripsina pancreáticas, y las peptidasas intestinales completan la digestión; los aminoácidos se absorben en el intestino delgado",
+   ops:[
+     "Comienza en el estómago con la pepsina (pH 1-2), continúa en el duodeno con tripsina y quimotripsina pancreáticas, y las peptidasas intestinales completan la digestión; los aminoácidos se absorben en el intestino delgado",
+     "La digestión de proteínas comienza en la boca con la ptialina salival, continúa en el colon con bacterias proteolíticas y termina sin ninguna absorción por ser toxinas",
+     "Las proteínas se digieren exclusivamente en el intestino grueso por acción de la microbiota, y los aminoácidos resultantes se excretan en las heces",
+     "Las proteínas se absorben intactas en el estómago sin digestión enzimática previa y son distribuidas directamente a todos los tejidos por la sangre"
+   ],
+   exp:"Digestión proteica: Boca: sin acción proteolítica. Estómago: el HCl desnaturaliza proteínas y activa pepsinógeno → pepsina; pepsina rompe enlaces peptídicos a pH 1-2 produciendo peptonas. Intestino delgado: el pH básico activa enzimas pancreáticas (tripsina, quimotripsina, elastasa, carboxipeptidasas) y peptidasas del borde en cepillo. Productos finales: aminoácidos y dipéptidos que se absorben por transportadores específicos hacia la sangre portal → hígado."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 10 — Secreción Digestiva
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 10 · Secreción Digestiva",
+   q:"¿Cuántos litros de saliva produce aproximadamente el ser humano por día?",
+   a:"Entre 1 y 1,5 litros por día",
+   ops:["Entre 1 y 1,5 litros por día","Entre 3 y 4 litros por día","Entre 200 y 300 ml por día","Entre 5 y 6 litros por día"],
+   exp:"La boca está humedecida por la producción de entre 1 y 1,5 litros de saliva al día. Esta cantidad varía con la edad (disminuye) y el ciclo circadiano (mínima por la noche)."},
+  {t:"C", tema:"Tema 10 · Secreción Digestiva",
+   q:"¿Cuál es la función principal de las sales biliares en la digestión?",
+   a:"Emulsionar las grasas para facilitar la acción de la lipasa pancreática",
+   ops:["Emulsionar las grasas para facilitar la acción de la lipasa pancreática","Digerir proteínas en el duodeno actuando como enzimas proteolíticas","Neutralizar el pH del intestino grueso para la absorción de vitaminas","Segregar moco protector de la mucosa gástrica contra el ácido clorhídrico"],
+   exp:"Las sales biliares tienen función detergente: emulsionan las grasas dividiéndolas en gotitas pequeñas (micelas), aumentando la superficie de contacto para la lipasa pancreática y facilitando la digestión y absorción de lípidos."},
+  {t:"L", tema:"Tema 10 · Secreción Digestiva",
+   q:"¿Cuál es la composición y función del jugo gástrico?",
+   a:"El jugo gástrico contiene HCl (pH 1-2 que desnaturaliza proteínas y activa pepsina), pepsina (proteólisis), factor intrínseco (absorción de vitamina B12) y moco (protección de la mucosa)",
+   ops:[
+     "El jugo gástrico contiene HCl (pH 1-2 que desnaturaliza proteínas y activa pepsina), pepsina (proteólisis), factor intrínseco (absorción de vitamina B12) y moco (protección de la mucosa)",
+     "El jugo gástrico contiene exclusivamente amilasa salival que digiere el almidón a pH neutro y bicarbonato para neutralizar el ácido del bolo alimenticio",
+     "El jugo gástrico contiene solo lipasa lingual que actúa sobre triglicéridos y sales biliares que llegan desde la vesícula biliar sin hormona de estímulo",
+     "El jugo gástrico contiene tripsina activa que digiere proteínas a pH básico y factor extrínseco que absorbe hierro en el duodeno proximal"
+   ],
+   exp:"Composición del jugo gástrico: HCl (secretado por células parietales, pH 1-2): desnaturaliza proteínas, activa pepsinógeno → pepsina, acción bactericida. Pepsina (células principales): endopeptidasa que fragmenta proteínas en peptonas. Factor intrínseco (células parietales): glucoproteína necesaria para absorción de vitamina B12 en íleon. Moco (células mucosas): barrera protectora de la mucosa. Producción: estimulada por gastrina, histamina y ACh; inhibida por pH <3."},
+  {t:"L", tema:"Tema 10 · Secreción Digestiva",
+   q:"¿Qué es la tensión superficial y qué papel cumple el surfactante pulmonar como sustancia tensoactiva?",
+   a:"La tensión superficial es la fuerza que mantiene unidas las moléculas de la superficie de un líquido; el surfactante (fosfolípidos) la reduce en los alvéolos, evitando su colapso al espirar y facilitando la inspiración",
+   ops:[
+     "La tensión superficial es la fuerza que mantiene unidas las moléculas de la superficie de un líquido; el surfactante (fosfolípidos) la reduce en los alvéolos, evitando su colapso al espirar y facilitando la inspiración",
+     "La tensión superficial es la presión que ejerce el aire sobre la membrana alvéolo-capilar; el surfactante la aumenta para favorecer el intercambio gaseoso",
+     "La tensión superficial es sinónimo de presión osmótica; el surfactante regula el balance de sodio en el líquido alveolar como la aldosterona en el túbulo renal",
+     "La tensión superficial no tiene relevancia biológica porque los pulmones son tejidos sólidos sin interfaz líquido-aire que la genere"
+   ],
+   exp:"La tensión superficial es la cohesión entre moléculas en la superficie de un líquido (ej: agua). En los alvéolos pulmonares, la interfaz aire-líquido genera tensión superficial que tiende a colapsar el alvéolo (ley de Laplace). El surfactante pulmonar (fosfolípidos: DPPC, producido por neumocitos tipo II) reduce la tensión superficial, evitando el colapso alveolar al final de la espiración. Su deficiencia causa el síndrome de dificultad respiratoria neonatal (pulmón del prematuro)."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 11 — Sangre y Hemodinámica
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 11 · Sangre y Hemodinámica",
+   q:"¿Cuántos tipos de elementos formes contiene la sangre?",
+   a:"Tres: glóbulos rojos, glóbulos blancos y plaquetas",
+   ops:["Tres: glóbulos rojos, glóbulos blancos y plaquetas","Dos: eritrocitos y leucocitos solamente","Cuatro: eritrocitos, leucocitos, plaquetas y reticulocitos","Cinco: eritrocitos, neutrófilos, linfocitos, plaquetas y fibrinógeno"],
+   exp:"Los elementos formes de la sangre son tres: eritrocitos (glóbulos rojos), leucocitos (glóbulos blancos) y plaquetas (trombocitos). El plasma es la porción líquida."},
+  {t:"C", tema:"Tema 11 · Sangre y Hemodinámica",
+   q:"¿Cuál es la proteína de los eritrocitos responsable del transporte de oxígeno?",
+   a:"Hemoglobina",
+   ops:["Hemoglobina","Albúmina","Fibrinógeno","Mioglobina"],
+   exp:"La hemoglobina es el pigmento proteico de los eritrocitos que transporta oxígeno desde los pulmones hacia los tejidos y CO₂ en sentido inverso."},
+  {t:"L", tema:"Tema 11 · Sangre y Hemodinámica",
+   q:"¿Qué es el flujo laminar y el flujo turbulento en hemodinámica y qué condiciones favorecen cada uno?",
+   a:"El flujo laminar es ordenado en capas paralelas (normal en vasos sanos); el flujo turbulento es caótico y disordened (en estenosis, altas velocidades o baja viscosidad) y genera mayor resistencia y ruidos cardíacos",
+   ops:[
+     "El flujo laminar es ordenado en capas paralelas (normal en vasos sanos); el flujo turbulento es caótico y disordened (en estenosis, altas velocidades o baja viscosidad) y genera mayor resistencia y ruidos cardíacos",
+     "El flujo laminar es el que ocurre únicamente en las arterias coronarias; el flujo turbulento ocurre solo en las venas de las extremidades inferiores",
+     "El flujo laminar siempre produce soplos cardíacos patológicos; el flujo turbulento es completamente silencioso y se detecta solo con ecografía",
+     "Ambos tipos de flujo son idénticos y la diferencia es solo semántica; la viscosidad sanguínea no tiene efecto sobre el tipo de flujo"
+   ],
+   exp:"Flujo laminar: el líquido se mueve en capas concéntricas paralelas sin mezcla; la capa central más rápida y la periférica más lenta (fricción con pared). Es el flujo normal en vasos sanos. Flujo turbulento: movimiento caótico con remolinos; aparece cuando el número de Reynolds es >2000 (alta velocidad, baja viscosidad, gran diámetro). Genera mayor resistencia, mayor trabajo cardíaco y soplos (ruidos). Se detecta en estenosis valvulares, anemia severa (baja viscosidad) y aterosclerosis."},
+  {t:"L", tema:"Tema 11 · Sangre y Hemodinámica",
+   q:"¿Cómo afecta el pH sanguíneo a la hemoglobina y qué ocurre en la acidosis y alcalosis?",
+   a:"El pH normal es 7.35-7.45; la acidosis (pH < 7.35) disminuye la afinidad de la hemoglobina por el O₂ (efecto Bohr) facilitando la liberación de O₂ en tejidos; la alcalosis aumenta la afinidad dificultando esa liberación",
+   ops:[
+     "El pH normal es 7.35-7.45; la acidosis (pH < 7.35) disminuye la afinidad de la hemoglobina por el O₂ (efecto Bohr) facilitando la liberación de O₂ en tejidos; la alcalosis aumenta la afinidad dificultando esa liberación",
+     "El pH no tiene ningún efecto sobre la hemoglobina; la afinidad por el oxígeno es siempre constante independientemente del pH sanguíneo",
+     "La acidosis aumenta la afinidad de la hemoglobina por el O₂ acumulándolo en los eritrocitos; la alcalosis libera todo el O₂ causando hiperoxia tisular",
+     "La alcalosis destruye los eritrocitos por hemólisis, liberando hemoglobina libre al plasma que es tóxica para el riñón y causa insuficiencia renal"
+   ],
+   exp:"El pH normal de la sangre es 7.35-7.45. Efecto Bohr: en tejidos con alto CO₂ y pH bajo (acidosis local), la hemoglobina libera O₂ con mayor facilidad. En pulmones con pH más alto, la hemoglobina capta O₂. Acidosis sistémica (pH < 7.35): desplaza la curva de disociación de HbO₂ a la derecha → menor afinidad → libera O₂ en tejidos. Alcalosis (pH > 7.45): desplaza la curva a la izquierda → mayor afinidad → dificulta la liberación de O₂."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 12 — Orina
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 12 · Orina",
+   q:"¿Cuál es el pH normal de la orina?",
+   a:"6.0 a 7.0 (levemente ácida)",
+   ops:["6.0 a 7.0 (levemente ácida)","7.35 a 7.45 (igual al plasma)","1.0 a 2.0 (muy ácida como el jugo gástrico)","8.0 a 9.0 (alcalina)"],
+   exp:"El pH normal de la orina es 6.0-7.0, levemente ácido. Puede variar según la dieta, actividad metabólica y estado ácido-base. En acidosis metabólica se acidifica más; en alcalosis se alcaliniza."},
+  {t:"C", tema:"Tema 12 · Orina",
+   q:"¿Cuál es la densidad normal de la orina?",
+   a:"1.010 a 1.030",
+   ops:["1.010 a 1.030","1.000 a 1.005","1.050 a 1.060","0.990 a 1.000"],
+   exp:"La densidad normal de la orina es 1.010-1.030. Refleja la capacidad de concentración renal. Valores bajos (<1.010) sugieren diabetes insípida o ingesta excesiva de agua; altos (>1.030) sugieren deshidratación."},
+  {t:"L", tema:"Tema 12 · Orina",
+   q:"¿Cuáles son las propiedades físicas normales de la orina y qué puede indicar la presencia de proteínas o glucosa en ella?",
+   a:"La orina normal es ambarilla, volumen 800-1800 ml/día, densidad 1.010-1.030, pH 6-7, sin proteínas ni glucosa; proteinuria indica daño renal y glucosuria puede indicar diabetes mellitus",
+   ops:[
+     "La orina normal es ambarilla, volumen 800-1800 ml/día, densidad 1.010-1.030, pH 6-7, sin proteínas ni glucosa; proteinuria indica daño renal y glucosuria puede indicar diabetes mellitus",
+     "La orina normal es roja por la hemoglobina, volumen 5-6 litros/día, densidad 1.050, pH 8-9, con proteínas y glucosa que son normales en todos los individuos",
+     "La orina normal no tiene color ni olor y tiene volumen de 50-100 ml/día; la presencia de agua en la orina es el principal componente anormal",
+     "Las propiedades físicas de la orina son irrelevantes para el diagnóstico clínico; solo el análisis de ADN urinario tiene valor diagnóstico real"
+   ],
+   exp:"Propiedades normales de la orina: Color: amarillo ámbar (por urobilinógeno). Volumen: 800-1800 ml/día. Densidad: 1.010-1.030. pH: 6.0-7.0. Sin proteínas (proteinuria: daño glomerular en glomerulonefritis, síndrome nefrótico). Sin glucosa (glucosuria: cuando la glucemia supera el umbral renal ~180 mg/dL, sugestivo de DM o síndrome de Fanconi). Sin hematíes (hematuria: litiasis, infección, tumor). Olor a amoniaco: infección urinaria."},
+  {t:"L", tema:"Tema 12 · Orina",
+   q:"¿Cuáles son los tres procesos renales que dan origen a la orina y cómo se relacionan con su composición final?",
+   a:"Filtración glomerular (filtra el plasma formando orina primaria), reabsorción tubular (recupera agua, glucosa, aminoácidos y electrolitos) y secreción tubular (elimina desechos adicionales hacia el túbulo)",
+   ops:[
+     "Filtración glomerular (filtra el plasma formando orina primaria), reabsorción tubular (recupera agua, glucosa, aminoácidos y electrolitos) y secreción tubular (elimina desechos adicionales hacia el túbulo)",
+     "Síntesis, almacenamiento y excreción: el riñón fabrica todos los componentes de la orina desde cero sin filtrar nada del plasma sanguíneo",
+     "Solo la filtración y la excreción participan; la reabsorción no existe porque toda la orina primaria se excreta sin ninguna modificación tubular",
+     "El riñón usa exclusivamente difusión pasiva para formar la orina, sin ningún proceso activo ni gasto energético de ningún tipo"
+   ],
+   exp:"La orina resulta de tres procesos: 1) Filtración glomerular: ~180 L/día de ultrafiltrado pasan al espacio de Bowman (orina primaria), con agua, electrolitos, glucosa, urea, creatinina, pero sin proteínas grandes ni células. 2) Reabsorción tubular: recupera ~99% del agua, toda la glucosa, aminoácidos, Na⁺, K⁺, HCO₃⁻ según necesidades. 3) Secreción tubular: elimina H⁺, K⁺, fármacos y toxinas al túbulo. Resultado: ~1.5 L de orina/día concentrada con desechos."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 13 — Gases y Respiración
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 13 · Gases y Respiración",
+   q:"¿Qué ley establece que a temperatura constante, el volumen de un gas es inversamente proporcional a su presión?",
+   a:"Ley de Boyle-Mariotte",
+   ops:["Ley de Boyle-Mariotte","Ley de Gay-Lussac","Ley de Dalton","Ley de Henry"],
+   exp:"La Ley de Boyle-Mariotte: a temperatura constante, P × V = constante. Si la presión aumenta, el volumen disminuye proporcionalmente. Ejemplo: al comprimir aire en una jeringa tapada."},
+  {t:"C", tema:"Tema 13 · Gases y Respiración",
+   q:"¿Cómo se transporta la mayor parte del dióxido de carbono (CO₂) en la sangre?",
+   a:"Como bicarbonato (HCO₃⁻) disuelto en plasma",
+   ops:["Como bicarbonato (HCO₃⁻) disuelto en plasma","Unido a la hemoglobina formando oxihemoglobina","Disuelto libremente en el plasma como gas","Unido a la albúmina plasmática como carbamino-albúmina"],
+   exp:"El CO₂ se transporta principalmente (~70%) como bicarbonato (HCO₃⁻): el CO₂ entra a los eritrocitos, la anhidrasa carbónica lo convierte en H₂CO₃, que se disocia en H⁺ + HCO₃⁻. El HCO₃⁻ sale al plasma."},
+  {t:"L", tema:"Tema 13 · Gases y Respiración",
+   q:"¿Qué es la anoxia, cuáles son sus tipos y cuáles son sus manifestaciones y consecuencias?",
+   a:"La anoxia es la falta de oxígeno en los tejidos; puede ser hipóxica (baja PO₂), anémica (poca hemoglobina), circulatoria (flujo insuficiente) o histotóxica (célula no puede usar el O₂); produce daño celular y muerte neuronal",
+   ops:[
+     "La anoxia es la falta de oxígeno en los tejidos; puede ser hipóxica (baja PO₂), anémica (poca hemoglobina), circulatoria (flujo insuficiente) o histotóxica (célula no puede usar el O₂); produce daño celular y muerte neuronal",
+     "La anoxia es el exceso de oxígeno en sangre que causa toxicidad neurológica; solo ocurre en pacientes con oxigenoterapia al 100% por más de 24 horas",
+     "La anoxia es la acumulación de CO₂ en tejidos por falla respiratoria; se trata con broncodilatadores y nunca con suplemento de oxígeno",
+     "La anoxia es un estado metabólico normal en tejidos avasculares como el cartílago articular y el cristalino que viven sin oxígeno permanentemente"
+   ],
+   exp:"Anoxia: privación de O₂ a los tejidos. Tipos: 1) Anóxica/hipóxica: PaO₂ baja (altitud, hipoventilación, neumonía). 2) Anémica: hemoglobina baja o no funcional (anemia, intoxicación por CO). 3) Circulatoria/isquémica: flujo sanguíneo insuficiente (shock, infarto). 4) Histotóxica: tejido no puede usar O₂ (intoxicación por cianuro). Consecuencias: el cerebro tolera solo 4-6 minutos; produce muerte neuronal irreversible, falla multiorgánica."},
+  {t:"L", tema:"Tema 13 · Gases y Respiración",
+   q:"¿Qué establece la Ley de Dalton y cómo se aplica a la composición del aire atmosférico y al intercambio gaseoso pulmonar?",
+   a:"La Ley de Dalton establece que la presión total de una mezcla de gases es la suma de las presiones parciales de cada gas; en el aire: PO₂≈159 mmHg y PCO₂≈0.3 mmHg, lo que determina el gradiente para el intercambio alvéolo-capilar",
+   ops:[
+     "La Ley de Dalton establece que la presión total de una mezcla de gases es la suma de las presiones parciales de cada gas; en el aire: PO₂≈159 mmHg y PCO₂≈0.3 mmHg, lo que determina el gradiente para el intercambio alvéolo-capilar",
+     "La Ley de Dalton establece que la velocidad de difusión de un gas es directamente proporcional a su peso molecular y temperatura absoluta",
+     "La Ley de Dalton dice que todos los gases tienen la misma presión parcial en cualquier mezcla, independientemente de su concentración porcentual",
+     "La Ley de Dalton establece que los gases se disuelven en líquidos en proporción directa a la temperatura del líquido e inversa a su presión"
+   ],
+   exp:"Ley de Dalton: P_total = P₁ + P₂ + P₃ + ... (cada gas contribuye con su presión parcial = fracción × P_total). Aire atmosférico (760 mmHg): PO₂ = 0.21 × 760 = 159 mmHg; PN₂ = 600 mmHg; PCO₂ = 0.3 mmHg. En alvéolos: PO₂ alveolar ≈ 100 mmHg; PCO₂ ≈ 40 mmHg. En sangre venosa: PO₂ = 40 mmHg; PCO₂ = 46 mmHg. Los gradientes de presión parcial determinan la dirección de difusión: O₂ pasa de alvéolo a sangre; CO₂ de sangre a alvéolo."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 14 — Calor y Temperatura
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 14 · Calor y Temperatura",
+   q:"¿Cuál es la temperatura corporal normal del ser humano?",
+   a:"36,5°C a 37,5°C",
+   ops:["36,5°C a 37,5°C","35°C a 36°C","38°C a 39°C","34°C a 35°C"],
+   exp:"La temperatura corporal normal oscila entre 36,5°C y 37,5°C. Se considera fiebre cuando supera los 38°C y hipotermia cuando es menor a 36°C."},
+  {t:"C", tema:"Tema 14 · Calor y Temperatura",
+   q:"¿Cuál es la escala termométrica en la que el agua hierve a 212° y se congela a 32°?",
+   a:"Escala Fahrenheit",
+   ops:["Escala Fahrenheit","Escala Celsius","Escala Kelvin","Escala Rankine"],
+   exp:"En la escala Fahrenheit (usada en EE.UU.): agua congela a 32°F y hierve a 212°F. La conversión a Celsius: °C = (°F - 32) × 5/9."},
+  {t:"L", tema:"Tema 14 · Calor y Temperatura",
+   q:"¿Cuáles son los mecanismos de propagación del calor y cómo se aplican en enfermería?",
+   a:"Conducción (contacto directo, ej: bolsa de agua caliente), convección (fluidos en movimiento, ej: enfriamiento con aire) y radiación (ondas electromagnéticas, ej: fototerapia neonatal)",
+   ops:[
+     "Conducción (contacto directo, ej: bolsa de agua caliente), convección (fluidos en movimiento, ej: enfriamiento con aire) y radiación (ondas electromagnéticas, ej: fototerapia neonatal)",
+     "Solo existe un mecanismo de transferencia de calor: la conducción directa; convección y radiación son mitos sin aplicación clínica real",
+     "El calor se propaga solo por evaporación de sudor; los otros mecanismos no aplican en seres humanos con temperatura regulada hormonalmente",
+     "El calor se transfiere exclusivamente por vía sanguínea; sin circulación no hay transferencia de calor entre tejidos del organismo humano"
+   ],
+   exp:"Mecanismos de propagación del calor: 1) Conducción: transferencia por contacto directo entre sólidos; aplicaciones en enfermería: bolsas calientes/frías, cuna de calor radiante, crioterapia. 2) Convección: transferencia por movimiento de fluidos (líquidos o gases); ejemplo: baños tibios para bajar fiebre, incubadoras. 3) Radiación: transferencia por ondas electromagnéticas sin contacto; ejemplo: fototerapia en ictericia neonatal, calentamiento solar. 4) Evaporación: pérdida de calor por evaporación de sudor."},
+  {t:"L", tema:"Tema 14 · Calor y Temperatura",
+   q:"¿Qué diferencia existe entre calor y temperatura y por qué esta distinción es importante en calorimetría clínica?",
+   a:"El calor es la energía total del movimiento molecular (depende de masa, número y tipo de partículas); la temperatura es la energía molecular promedio; en calorimetría medimos el calor producido por el metabolismo (kcal/día)",
+   ops:[
+     "El calor es la energía total del movimiento molecular (depende de masa, número y tipo de partículas); la temperatura es la energía molecular promedio; en calorimetría medimos el calor producido por el metabolismo (kcal/día)",
+     "Calor y temperatura son exactamente el mismo concepto físico expresado en diferentes unidades; su distinción no tiene aplicación en medicina",
+     "El calor es la temperatura dividida por el tiempo; la temperatura es el calor multiplicado por la masa corporal del paciente en kilogramos",
+     "La temperatura es siempre mayor que el calor porque incluye la energía potencial de los enlaces químicos de las biomoléculas celulares"
+   ],
+   exp:"Calor: energía total del movimiento molecular; depende de la velocidad de partículas, su número, tamaño y tipo. Se mide en Joules o calorías. Temperatura: medida de la energía molecular promedio; no depende de la cantidad de materia. Ejemplo: 1 litro de agua a 37°C tiene más calor que 1 ml de agua a 37°C aunque tengan la misma temperatura. En calorimetría clínica: medimos el calor producido por el metabolismo basal y el gasto energético total para calcular las necesidades calóricas del paciente (kcal/día en nutrición parenteral)."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 15 — Cambios de Estado
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 15 · Cambios de Estado",
+   q:"¿Cómo se llama el cambio de estado de líquido a gas que ocurre en toda la masa del líquido a temperatura fija?",
+   a:"Ebullición",
+   ops:["Ebullición","Evaporación","Sublimación","Condensación"],
+   exp:"La ebullición es el cambio de estado de líquido a gas que ocurre en toda la masa del líquido cuando la presión de vapor del líquido iguala la presión atmosférica. La evaporación, en cambio, ocurre solo en la superficie."},
+  {t:"C", tema:"Tema 15 · Cambios de Estado",
+   q:"¿Cómo se llama el paso directo de estado sólido a gaseoso sin pasar por el estado líquido?",
+   a:"Sublimación",
+   ops:["Sublimación","Fusión","Condensación","Vaporización"],
+   exp:"La sublimación es el cambio de estado directo de sólido a gas sin pasar por el estado líquido. Ejemplo: el hielo seco (CO₂ sólido) a temperatura y presión ambiente."},
+  {t:"L", tema:"Tema 15 · Cambios de Estado",
+   q:"¿Cómo se aplican los conceptos de ebullición y evaporación en la esterilización por calor en enfermería?",
+   a:"La ebullición a 100°C destruye formas vegetativas de bacterias pero no esporas; la esterilización por vapor a presión (autoclave, 121°C) mata esporas porque la presión eleva el punto de ebullición del agua",
+   ops:[
+     "La ebullición a 100°C destruye formas vegetativas de bacterias pero no esporas; la esterilización por vapor a presión (autoclave, 121°C) mata esporas porque la presión eleva el punto de ebullición del agua",
+     "La ebullición a 100°C esteriliza completamente todos los microorganismos incluyendo esporas y priones en solo 5 minutos de exposición",
+     "La evaporación del alcohol a temperatura ambiente destruye todos los virus y bacterias con mayor eficacia que cualquier método de calor",
+     "El autoclave funciona por enfriamiento rápido que cristaliza las membranas bacterianas, no por calor ni presión de vapor de agua"
+   ],
+   exp:"Punto de ebullición del agua: 100°C a 1 atm (nivel del mar). La Ley de Gay-Lussac explica que al aumentar la presión, aumenta el punto de ebullición. El autoclave opera a ~2 atm (121°C, 15-20 min): destruye todas las formas vegetativas y esporas bacterianas, virus y hongos. La ebullición simple a 100°C elimina formas vegetativas pero no esporas de Clostridium ni Bacillus. La evaporación (proceso superficial) es la base de la antisepsia con alcohol etílico y las compresas tibias en el manejo de la fiebre."},
+  {t:"L", tema:"Tema 15 · Cambios de Estado",
+   q:"¿Qué es la tensión de vapor y cómo se relaciona con el punto de ebullición de un líquido?",
+   a:"La tensión de vapor es la presión ejercida por el vapor de un líquido en equilibrio con su fase líquida; el punto de ebullición es la temperatura en que esa tensión iguala la presión atmosférica externa",
+   ops:[
+     "La tensión de vapor es la presión ejercida por el vapor de un líquido en equilibrio con su fase líquida; el punto de ebullición es la temperatura en que esa tensión iguala la presión atmosférica externa",
+     "La tensión de vapor es la fuerza de atracción entre moléculas de un sólido que impide su fusión; el punto de ebullición no tiene relación con la presión",
+     "La tensión de vapor es sinónimo de presión osmótica y se mide en mOsm/L; el punto de ebullición es fijo en 100°C para todos los líquidos",
+     "La tensión de vapor es la cantidad de vapor de agua en el aire ambiente medida en porcentaje de humedad relativa sin relación con temperaturas"
+   ],
+   exp:"Tensión de vapor: presión que ejerce el vapor de un líquido sobre la superficie del mismo cuando el sistema está en equilibrio dinámico (evaporación = condensación). Aumenta con la temperatura. Punto de ebullición: temperatura a la cual la tensión de vapor del líquido iguala la presión atmosférica → toda la masa del líquido pasa a gas. Importancia: en altitudes elevadas la presión atmosférica es menor → el agua hierve a menor temperatura (<100°C) → menor eficacia de desinfección por ebullición."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 16 — Sonido y Ondas
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 16 · Sonido y Ondas",
+   q:"¿Cuál es el rango de frecuencias audibles para el oído humano?",
+   a:"Entre 20 Hz y 20.000 Hz",
+   ops:["Entre 20 Hz y 20.000 Hz","Entre 1 Hz y 1.000 Hz","Entre 100 Hz y 100.000 Hz","Entre 0,1 Hz y 10 Hz"],
+   exp:"El oído humano es sensible a frecuencias entre 20 Hz y 20.000 Hz. Los infra-sonidos (<20 Hz) y ultrasonidos (>20.000 Hz) no son audibles para el ser humano."},
+  {t:"C", tema:"Tema 16 · Sonido y Ondas",
+   q:"¿Qué cualidad del sonido permite distinguir si es grave o agudo?",
+   a:"El tono (determinado por la frecuencia)",
+   ops:["El tono (determinado por la frecuencia)","El timbre (determinado por la complejidad de la onda)","La intensidad (determinada por la amplitud)","La velocidad (determinada por el medio de propagación)"],
+   exp:"El tono es la cualidad del sonido que el oído le asigna un lugar en la escala musical (grave-agudo). Está determinado por la frecuencia: mayor frecuencia = sonido más agudo; menor frecuencia = más grave."},
+  {t:"L", tema:"Tema 16 · Sonido y Ondas",
+   q:"¿Cómo se aplican los ultrasonidos en diagnóstico por imágenes (ecografía) y cuál es su fundamento físico?",
+   a:"Los ultrasonidos (>20.000 Hz) se emiten hacia el cuerpo, rebotan en las interfaces de tejidos (reflexión) y el tiempo de retorno se convierte en imagen; no usan radiación ionizante y son seguros en embarazo",
+   ops:[
+     "Los ultrasonidos (>20.000 Hz) se emiten hacia el cuerpo, rebotan en las interfaces de tejidos (reflexión) y el tiempo de retorno se convierte en imagen; no usan radiación ionizante y son seguros en embarazo",
+     "Los ultrasonidos son rayos X de alta frecuencia que penetran el cuerpo y se detectan en una placa radiográfica por ionización de los tejidos",
+     "Los ultrasonidos funcionan por resonancia magnética nuclear excitando los núcleos de hidrógeno del agua corporal con campos magnéticos intensos",
+     "Los ultrasonidos son ondas de luz infrarroja que se absorben en la piel y producen calor que se detecta con cámaras termográficas"
+   ],
+   exp:"Los ultrasonidos son ondas mecánicas con frecuencia >20.000 Hz (típicamente 2-15 MHz en ecografía médica). Principio físico: el transductor piezoeléctrico emite pulsos ultrasónicos. Al llegar a una interfaz de tejidos con diferente impedancia acústica, parte de la onda se refleja (eco). El tiempo que tarda el eco en regresar determina la profundidad. Ventajas: sin radiación ionizante, en tiempo real, portable, seguro en embarazo. Usos: obstetricia, cardiología (ecocardiografía), abdomen, guía de procedimientos."},
+  {t:"L", tema:"Tema 16 · Sonido y Ondas",
+   q:"¿Qué es el Movimiento Armónico Simple (MAS) y cómo se relaciona con la fisiología del músculo cardíaco?",
+   a:"El MAS es un movimiento oscilatorio periódico alrededor de una posición de equilibrio; el corazón genera ondas de presión periódicas con cada latido, y el ECG registra las oscilaciones eléctricas cardíacas que lo originan",
+   ops:[
+     "El MAS es un movimiento oscilatorio periódico alrededor de una posición de equilibrio; el corazón genera ondas de presión periódicas con cada latido, y el ECG registra las oscilaciones eléctricas cardíacas que lo originan",
+     "El MAS es un movimiento lineal uniforme sin aceleración; el corazón lo realiza cuando bombea sangre de manera constante en reposo absoluto",
+     "El MAS no tiene aplicación biológica porque los organismos vivos realizan movimientos caóticos irregulares sin periodicidad mensurable",
+     "El MAS es sinónimo de movimiento browniano de partículas en suspensión coloidal; el corazón lo realiza en el estado de muerte cerebral"
+   ],
+   exp:"El MAS es el movimiento más simple periódico: oscila alrededor de una posición de equilibrio con fuerza restauradora proporcional al desplazamiento. Frecuencia y período son constantes. Aplicaciones biológicas: latido cardíaco (contracción/relajación periódica del miocardio ~60-100/min en reposo), el ECG registra las ondas eléctricas (P, QRS, T) que son representaciones periódicas de la actividad eléctrica cardíaca, vibración de las cuerdas vocales, vibración timpánica ante el sonido."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 17 — Óptica
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 17 · Óptica",
+   q:"¿Cómo se denomina el defecto visual en que el ojo no puede enfocar objetos lejanos correctamente porque el globo ocular es demasiado largo?",
+   a:"Miopía",
+   ops:["Miopía","Hipermetropía","Astigmatismo","Presbicia"],
+   exp:"La miopía (o miopía axial) ocurre cuando el globo ocular es demasiado largo: la imagen se forma antes de la retina. Se corrige con lentes divergentes (cóncavas, valor negativo)."},
+  {t:"C", tema:"Tema 17 · Óptica",
+   q:"¿Qué tipo de lentes se usan para corregir la hipermetropía?",
+   a:"Lentes convergentes (convexas, valor positivo)",
+   ops:["Lentes convergentes (convexas, valor positivo)","Lentes divergentes (cóncavas, valor negativo)","Lentes cilíndricas para corregir el astigmatismo","Prismas para corregir el estrabismo paralítico"],
+   exp:"La hipermetropía: el globo ocular es corto y la imagen se forma detrás de la retina. Se corrige con lentes convergentes (convexas, positivas) que acercan el punto focal."},
+  {t:"L", tema:"Tema 17 · Óptica",
+   q:"¿Cómo funciona el ojo humano como sistema óptico y en qué consiste el proceso de acomodación?",
+   a:"El ojo actúa como lente convergente: la córnea y el cristalino refractan la luz formando una imagen invertida en la retina; la acomodación es el cambio de curvatura del cristalino para enfocar objetos a distintas distancias",
+   ops:[
+     "El ojo actúa como lente convergente: la córnea y el cristalino refractan la luz formando una imagen invertida en la retina; la acomodación es el cambio de curvatura del cristalino para enfocar objetos a distintas distancias",
+     "El ojo actúa como lente divergente que amplía la imagen antes de proyectarla en la retina sin inversión; la acomodación la realiza la pupila cambiando su diámetro",
+     "La imagen en la retina siempre es del mismo tamaño independientemente de la distancia del objeto; la acomodación no existe fisiológicamente",
+     "El ojo no refracta la luz sino que la absorbe con el pigmento de los bastones y envía señales eléctricas que el cerebro reconstruye como imagen"
+   ],
+   exp:"El ojo es un sistema óptico convergente: la córnea aporta ~2/3 del poder refractivo; el cristalino (ajustable) aporta ~1/3. La luz se refracta formando en la fóvea (retina) una imagen real, invertida y reducida. El cerebro la reinterpreta erguida. Acomodación: el músculo ciliar cambia la curvatura del cristalino. Para objetos cercanos: el músculo ciliar se contrae → cristalino más convexo → mayor poder convergente. Para objetos lejanos: músculo se relaja → cristalino más plano. La presbicia (vista cansada) se debe a la pérdida de elasticidad del cristalino con la edad."},
+  {t:"L", tema:"Tema 17 · Óptica",
+   q:"¿Qué es la reflexión y la refracción de la luz y cómo se aplican en los instrumentos ópticos de uso médico?",
+   a:"La reflexión es el rebote de la luz en una superficie; la refracción es el cambio de dirección al pasar de un medio a otro; los endoscopios usan fibra óptica (reflexión interna total) y los microscopios usan lentes de refracción",
+   ops:[
+     "La reflexión es el rebote de la luz en una superficie; la refracción es el cambio de dirección al pasar de un medio a otro; los endoscopios usan fibra óptica (reflexión interna total) y los microscopios usan lentes de refracción",
+     "La reflexión y la refracción son el mismo fenómeno físico con distintos nombres; ambos ocurren solo en superficies de vidrio pulido",
+     "La reflexión es el aumento de velocidad de la luz al entrar en un medio más denso; la refracción es su disminución al entrar en un medio menos denso",
+     "Los instrumentos médicos no usan reflexión ni refracción porque trabajan con ultrasonidos y campos magnéticos, no con luz visible"
+   ],
+   exp:"Reflexión: la luz rebota en una superficie; ángulo de incidencia = ángulo de reflexión. Uso médico: espejos odontológicos, laringoscopios con espejo, fibra óptica (reflexión interna total: la luz no puede salir del filamento de vidrio → transmisión a distancia). Refracción: cambio de dirección de la luz al pasar de un medio a otro de diferente densidad óptica; índice de refracción. Uso médico: lentes correctoras, microscopios ópticos, lupas, biomicroscopio (lámpara de hendidura), lentes intraoculares (cirugía de cataratas)."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 18 — Rayos X y Rayos Catódicos
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 18 · Rayos X",
+   q:"¿Quién descubrió los rayos X en 1895?",
+   a:"Wilhelm Conrad Röntgen",
+   ops:["Wilhelm Conrad Röntgen","Marie Curie","Henri Becquerel","Ernest Rutherford"],
+   exp:"Wilhelm Conrad Röntgen descubrió los rayos X en 1895 en Würzburg, Alemania. Por este descubrimiento recibió el primer Premio Nobel de Física en 1901."},
+  {t:"C", tema:"Tema 18 · Rayos X",
+   q:"¿Cuál de estos tejidos absorbe más los rayos X y por eso aparece blanco en una radiografía?",
+   a:"El tejido óseo (calcio)",
+   ops:["El tejido óseo (calcio)","El tejido muscular","El tejido adiposo","El aire en los pulmones"],
+   exp:"Los huesos absorben fuertemente los rayos X por su contenido de calcio → aparecen blancos (radioopacos) en la radiografía. El aire en pulmones no los absorbe → aparece negro (radiolúcido)."},
+  {t:"L", tema:"Tema 18 · Rayos X",
+   q:"¿Cómo se producen los rayos X en un tubo de Coolidge y qué propiedades tienen que los hacen útiles en diagnóstico médico?",
+   a:"Se producen por aceleración de electrones (rayos catódicos) que al chocar con el ánodo emiten rayos X; tienen alta capacidad de penetración, ionización y acción fotográfica que permiten obtener imágenes de estructuras internas",
+   ops:[
+     "Se producen por aceleración de electrones (rayos catódicos) que al chocar con el ánodo emiten rayos X; tienen alta capacidad de penetración, ionización y acción fotográfica que permiten obtener imágenes de estructuras internas",
+     "Se producen por calentamiento de un cristal de cuarzo a alta temperatura que emite fotones de luz ultravioleta amplificados en un láser médico",
+     "Se producen por fisión nuclear del uranio en un reactor; tienen propiedades similares a la luz visible y no pueden penetrar tejidos biológicos",
+     "Se producen por vibración de moléculas de agua en un campo magnético intenso; tienen la misma longitud de onda que las microondas del horno"
+   ],
+   exp:"El tubo de Coolidge: el filamento (cátodo) se calienta emitiendo electrones por emisión termoiónica. Los electrones se aceleran por alta tensión (kV) hacia el ánodo de tungsteno. Al frenar bruscamente, la energía cinética se convierte en rayos X (radiación de frenado + rayos X característicos). Propiedades: longitud de onda muy corta, alta energía, penetran tejidos diferencialmente (óseo>muscular>adiposo>aire), ionizantes, acción fotográfica y fluorescente. Usos: radiografía simple, TAC, fluoroscopia."},
+  {t:"L", tema:"Tema 18 · Rayos X",
+   q:"¿Por qué es importante la protección radiológica en enfermería y cuáles son los principios ALARA?",
+   a:"Porque los rayos X son radiación ionizante que puede causar mutaciones, cáncer y daño tisular; ALARA significa 'tan bajo como sea razonablemente posible' y se aplica con distancia, tiempo y blindaje",
+   ops:[
+     "Porque los rayos X son radiación ionizante que puede causar mutaciones, cáncer y daño tisular; ALARA significa 'tan bajo como sea razonablemente posible' y se aplica con distancia, tiempo y blindaje",
+     "Porque los rayos X son ondas sonoras de alta frecuencia que pueden causar sordera; ALARA se refiere solo al control del ruido en salas de rayos",
+     "Los rayos X son completamente inocuos en las dosis diagnósticas; la protección radiológica es solo un protocolo administrativo sin base científica",
+     "ALARA significa 'Always Look At Radiograph Answers' y se refiere a la lectura obligatoria de las radiografías por parte del personal de enfermería"
+   ],
+   exp:"Los rayos X son radiación ionizante que puede dañar el ADN, causando mutaciones y aumentando el riesgo de cáncer (especialmente leucemia). El principio ALARA (As Low As Reasonably Achievable): minimizar la exposición. Se aplica mediante: 1) Distancia: la dosis disminuye con el cuadrado de la distancia (ley del inverso del cuadrado). 2) Tiempo: minimizar el tiempo de exposición. 3) Blindaje: delantales de plomo, biombos, salas plomadas. Grupos de riesgo: personal de radiología, embarazadas, niños (mayor radiosensibilidad)."},
+
+  // ═══════════════════════════════════════════
+  // TEMA 19 — Física Atómica y Radioactividad
+  // ═══════════════════════════════════════════
+  {t:"C", tema:"Tema 19 · Física Atómica y Radioactividad",
+   q:"¿Cómo se denominan los átomos del mismo elemento que tienen diferente número de neutrones?",
+   a:"Isótopos",
+   ops:["Isótopos","Isómeros","Isobaros","Isótonos"],
+   exp:"Los isótopos son átomos del mismo elemento (mismo número atómico Z, mismos protones) pero diferente número de neutrones y por tanto diferente masa atómica."},
+  {t:"C", tema:"Tema 19 · Física Atómica y Radioactividad",
+   q:"¿Qué tipo de radiación tiene mayor poder de penetración?",
+   a:"Rayos gamma (γ)",
+   ops:["Rayos gamma (γ)","Partículas alfa (α)","Partículas beta (β)","Rayos X diagnósticos"],
+   exp:"Las radiaciones según poder de penetración: alfa (α) < beta (β) < gamma (γ). Las partículas α se detienen con papel; las β con plástico/aluminio; los rayos γ requieren plomo o concreto grueso."},
+  {t:"L", tema:"Tema 19 · Física Atómica y Radioactividad",
+   q:"¿Qué es la radioactividad y cuáles son los tipos de radiación alfa, beta y gamma y sus características?",
+   a:"La radioactividad es la emisión espontánea de radiación por núcleos inestables; alfa: núcleos de helio (baja penetración), beta: electrones o positrones (penetración media), gamma: fotones electromagnéticos de alta energía (máxima penetración)",
+   ops:[
+     "La radioactividad es la emisión espontánea de radiación por núcleos inestables; alfa: núcleos de helio (baja penetración), beta: electrones o positrones (penetración media), gamma: fotones electromagnéticos de alta energía (máxima penetración)",
+     "La radioactividad es la absorción de rayos X por materiales; alfa es luz ultravioleta, beta es luz visible y gamma es luz infrarroja del espectro solar",
+     "La radioactividad es la fluorescencia de materiales bajo luz ultravioleta; alfa, beta y gamma son los tres colores de la fluorescencia según temperatura",
+     "La radioactividad es la conducción de electricidad en metales; alfa, beta y gamma son los tres estados de la materia en el núcleo atómico"
+   ],
+   exp:"Radioactividad: emisión espontánea de partículas o radiación electromagnética por núcleos atómicos inestables. Tipos: α (alfa): partícula = núcleo de He (2p+2n), carga +2, masa alta, baja penetración (piel, papel), alta ionización; fuente interna es muy peligrosa. β (beta): electrón (β⁻) o positrón (β⁺), carga ±1, penetra cm de tejido, detiene con plástico/aluminio. γ (gamma): fotón de alta energía (longitud de onda muy corta), sin masa ni carga, alta penetración, requiere plomo o concreto grueso. Aplicaciones: diagnóstico (PET, gammagrafía) y terapia (radioterapia)."},
+  {t:"L", tema:"Tema 19 · Física Atómica y Radioactividad",
+   q:"¿Cuáles son las aplicaciones de los radioisótopos en medicina y qué efectos biológicos tiene la radiación ionizante?",
+   a:"Los radioisótopos se usan en diagnóstico (medicina nuclear: I-131 para tiroides, Tc-99m en gammagrafía) y terapia (radioterapia de tumores); la radiación ioniza el ADN pudiendo causar mutaciones, apoptosis o cáncer",
+   ops:[
+     "Los radioisótopos se usan en diagnóstico (medicina nuclear: I-131 para tiroides, Tc-99m en gammagrafía) y terapia (radioterapia de tumores); la radiación ioniza el ADN pudiendo causar mutaciones, apoptosis o cáncer",
+     "Los radioisótopos solo se usan en laboratorios de física nuclear y no tienen ninguna aplicación médica aprobada por ningún organismo internacional",
+     "Los radioisótopos son exclusivamente peligrosos y su único efecto es matar células de manera uniforme sin ninguna aplicación terapéutica posible",
+     "Los radioisótopos se usan solo en la esterilización de alimentos por irradiación y no tienen aplicación diagnóstica ni terapéutica en seres humanos"
+   ],
+   exp:"Aplicaciones médicas de radioisótopos: Diagnóstico (medicina nuclear): I-131 (captación tiroidea), Tc-99m (gammagrafía ósea, renal, pulmonar), F-18 (PET scan en oncología). Terapia: I-131 (hipertiroidismo, Ca de tiroides), radioterapia externa (Co-60, aceleradores lineales) para tumores malignos. Efectos biológicos: la radiación ionizante rompe enlaces, ioniza moléculas, principalmente el ADN → roturas de doble cadena → mutaciones si no hay reparación → cáncer (efecto estocástico) o muerte celular (efecto determinístico). La radiosensibilidad es mayor en tejidos con alta proliferación (médula ósea, gónadas, intestino, embrión)."}
+];
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let preguntas, idx, correctas, incorrectas, puntos, timerInterval, tiempoRestante, respondida;
+
+function init(){
+  preguntas = shuffle([...PREGUNTAS]);
+  idx=0; correctas=0; incorrectas=0; puntos=0;
+  document.getElementById('results').style.display='none';
+  document.getElementById('game').style.display='block';
+  updateScore(); loadQ();
+}
+
+function loadQ(){
+  respondida=false;
+  const p=preguntas[idx];
+  const total=preguntas.length;
+  const esLarga=(p.t==="L");
+  const tiempoQ=esLarga?27:20;
+
+  // tipo badge
+  const tb=document.getElementById('tipobadge');
+  tb.textContent=esLarga?'LARGA':'CORTA';
+  tb.className='tipo-badge '+(esLarga?'larga':'corta');
+  document.getElementById('tipotema').textContent=p.tema;
+
+  document.getElementById('qnum').textContent=`PREGUNTA ${idx+1}`;
+  document.getElementById('qtext').textContent=p.q;
+  document.getElementById('pnum').textContent=`Pregunta ${idx+1} de ${total}`;
+  const pct=Math.round(idx/total*100);
+  document.getElementById('ppct').textContent=pct+'%';
+  document.getElementById('pfill').style.width=pct+'%';
+
+  const fb=document.getElementById('feedback');
+  fb.className='feedback'; fb.textContent='';
+  document.getElementById('btnNext').className='btn-next';
+
+  const ops=shuffle([...p.ops]);
+  const letters=['A','B','C','D'];
+  const cont=document.getElementById('opts');
+  cont.innerHTML='';
+  ops.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='opt';
+    d.innerHTML=`<span class="lt">${letters[i]}</span><span class="opt-txt">${o}</span>`;
+    d.onclick=()=>answer(d,o,p);
+    cont.appendChild(d);
+  });
+
+  clearInterval(timerInterval);
+  tiempoRestante=tiempoQ;
+  updateTimer(tiempoQ);
+  timerInterval=setInterval(()=>tick(tiempoQ),1000);
+}
+
+function tick(max){
+  tiempoRestante--;
+  updateTimer(max);
+  if(tiempoRestante<=0){ clearInterval(timerInterval); timeUp(); }
+}
+
+function updateTimer(max){
+  const pct=(tiempoRestante/max)*100;
+  const bar=document.getElementById('tbar');
+  bar.style.width=pct+'%';
+  const urgente=tiempoRestante<=5;
+  bar.className='timer-fill'+(urgente?' urgent':'');
+  document.getElementById('tnum').textContent=tiempoRestante;
+}
+
+function timeUp(){
+  if(respondida)return;
+  respondida=true;
+  incorrectas++;
+  updateScore();
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const p=preguntas[idx];
+  document.querySelectorAll('.opt').forEach(o=>{
+    if(o.querySelector('.opt-txt').textContent.trim()===p.a) o.classList.add('correct');
+  });
+  showFeedback(false,p.exp);
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function answer(el,chosen,p){
+  if(respondida)return;
+  respondida=true;
+  clearInterval(timerInterval);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const ok=chosen===p.a;
+  if(ok){
+    el.classList.add('correct');
+    const max=p.t==="L"?27:20;
+    const bonus=Math.round(tiempoRestante/max*50)+50;
+    puntos+=bonus; correctas++;
+  } else {
+    el.classList.add('wrong');
+    incorrectas++;
+    document.querySelectorAll('.opt').forEach(o=>{
+      if(o.querySelector('.opt-txt').textContent.trim()===p.a) o.classList.add('correct');
+    });
+  }
+  updateScore();
+  showFeedback(ok,p.exp);
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function showFeedback(ok,exp){
+  const fb=document.getElementById('feedback');
+  fb.className='feedback show '+(ok?'ok':'no');
+  fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+exp;
+}
+
+function updateScore(){
+  document.getElementById('sc').textContent=correctas;
+  document.getElementById('sw').textContent=incorrectas;
+  document.getElementById('sp').textContent=puntos;
+}
+
+function next(){
+  idx++;
+  if(idx>=preguntas.length){ showResults(); return; }
+  loadQ();
+}
+
+function showResults(){
+  clearInterval(timerInterval);
+  document.getElementById('game').style.display='none';
+  const r=document.getElementById('results');
+  r.style.display='block';
+  const total=preguntas.length;
+  const pct=Math.round(correctas/total*100);
+  document.getElementById('rpct').textContent=pct+'%';
+  document.getElementById('rc').textContent=correctas;
+  document.getElementById('rw').textContent=incorrectas;
+  document.getElementById('rp').textContent=puntos;
+  let trophy='📚', msg='';
+  if(pct>=90){trophy='🏆';msg=`¡Excelente! ${correctas}/${total} correctas. Dominio sobresaliente de los 19 temas de Biofísica Química.`;}
+  else if(pct>=75){trophy='🥇';msg=`¡Muy bien! ${correctas}/${total} correctas. Sólido manejo de los contenidos del módulo.`;}
+  else if(pct>=60){trophy='🥈';msg=`Bien. ${correctas}/${total} correctas. Repasá los temas donde fallaste.`;}
+  else if(pct>=40){trophy='🥉';msg=`Regular. ${correctas}/${total} correctas. Se recomienda repasar el módulo completo.`;}
+  else{trophy='📚';msg=`${correctas}/${total} correctas. El material requiere un repaso profundo antes del examen.`;}
+  document.getElementById('trophy').textContent=trophy;
+  document.getElementById('rmsg').textContent=msg;
+  document.getElementById('pfill').style.width='100%';
+  document.getElementById('ppct').textContent='100%';
+}
+
+function restart(){ init(); }
+
+init();
+</script>
+</body>
+</html>
