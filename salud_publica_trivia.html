@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia · Salud Pública · 2° Año · CENT N°74 ATSA</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05080e;
+    --surface: #0b1018;
+    --card: #101520;
+    --border: #192030;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --gold: #fbbf24;
+    --green: #34d399;
+    --red: #f87171;
+    --teal: #2dd4bf;
+    --text: #e2e8f0;
+    --muted: #4b5a72;
+    --radius: 16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 14px 50px;
+  }
+  body::before {
+    content:''; position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse 65% 40% at 15% 8%, rgba(56,189,248,.08) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 35% at 85% 88%, rgba(129,140,248,.07) 0%, transparent 55%),
+      radial-gradient(ellipse 35% 25% at 50% 45%, rgba(45,212,191,.04) 0%, transparent 55%);
+    pointer-events:none;
+  }
+  .wrap { position:relative; z-index:1; width:100%; max-width:780px; }
+
+  /* ── HEADER ── */
+  header { text-align:center; padding:30px 0 26px; }
+  .inst-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(56,189,248,.1); border:1px solid rgba(56,189,248,.22);
+    color:var(--accent); font-size:11px; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase;
+    padding:5px 16px; border-radius:50px; margin-bottom:16px;
+  }
+  .inst-badge::before { content:'◆'; font-size:7px; }
+  header h1 {
+    font-family:'Unbounded',sans-serif;
+    font-size:clamp(21px,4.2vw,36px); font-weight:900;
+    line-height:1.1; letter-spacing:-.02em;
+    background:linear-gradient(130deg,#fff 20%,var(--accent));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:8px;
+  }
+  header p { color:var(--muted); font-size:13px; line-height:1.6; }
+
+  /* ── STATS ── */
+  .score-row { display:flex; gap:10px; margin-bottom:18px; }
+  .chip { flex:1; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 12px; text-align:center; }
+  .chip .v { font-family:'Unbounded',sans-serif; font-size:20px; font-weight:700; }
+  .chip .l { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+  .v.c { color:var(--green); }
+  .v.w { color:var(--red); }
+  .v.p { color:var(--gold); }
+
+  /* ── PROGRESS ── */
+  .prog-wrap { margin-bottom:16px; }
+  .prog-top { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .prog-bar { height:3px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .prog-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; transition:width .4s ease; }
+
+  /* ── TIPO ── */
+  .tipo-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .tipo-badge { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 12px; border-radius:50px; }
+  .tipo-badge.corta { background:rgba(56,189,248,.12); color:var(--accent); border:1px solid rgba(56,189,248,.28); }
+  .tipo-badge.larga { background:rgba(129,140,248,.12); color:var(--accent2); border:1px solid rgba(129,140,248,.28); }
+  .tipo-tema { font-size:11px; color:var(--muted); }
+
+  /* ── TIMER ── */
+  .timer-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .timer-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+  .timer-bar { flex:1; height:5px; background:var(--border); border-radius:5px; overflow:hidden; }
+  .timer-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--green),var(--gold)); transition:width .1s linear, background .3s; }
+  .timer-fill.urgent { background:linear-gradient(90deg,var(--red),var(--gold)); }
+  .timer-num { font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; min-width:26px; text-align:right; }
+
+  /* ── CARD ── */
+  .q-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:26px 26px 22px;
+    margin-bottom:14px; box-shadow:0 10px 40px rgba(0,0,0,.45);
+    position:relative; overflow:hidden;
+  }
+  .q-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2),var(--teal));
+  }
+  .q-num { font-size:11px; color:var(--accent); font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; }
+  .q-text { font-size:17px; font-weight:500; line-height:1.5; }
+
+  /* ── OPCIONES ── */
+  .options { display:flex; flex-direction:column; gap:9px; margin-bottom:16px; }
+  .opt {
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:11px; padding:13px 16px;
+    cursor:pointer; display:flex; align-items:flex-start; gap:12px;
+    font-size:14px; line-height:1.5;
+    transition:border-color .15s, background .15s, transform .1s;
+  }
+  .opt:hover:not(.locked) { border-color:var(--accent); background:rgba(56,189,248,.07); transform:translateX(4px); }
+  .opt.correct { border-color:var(--green); background:rgba(52,211,153,.1); }
+  .opt.wrong   { border-color:var(--red);   background:rgba(248,113,113,.08); }
+  .opt.locked  { cursor:default; }
+  .opt .lt {
+    width:26px; height:26px; border-radius:6px; flex-shrink:0;
+    background:var(--border); display:flex; align-items:center; justify-content:center;
+    font-family:'Unbounded',sans-serif; font-size:11px; font-weight:700;
+    transition:background .2s; margin-top:1px;
+  }
+  .opt.correct .lt { background:var(--green); color:#001a0e; }
+  .opt.wrong   .lt { background:var(--red);   color:#fff; }
+  .opt-txt { flex:1; }
+
+  /* ── FEEDBACK ── */
+  .feedback { padding:12px 15px; border-radius:10px; font-size:13px; line-height:1.55; margin-bottom:14px; display:none; }
+  .feedback.show { display:block; }
+  .feedback.ok { background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.28); color:#86efcb; }
+  .feedback.no { background:rgba(248,113,113,.09); border:1px solid rgba(248,113,113,.28); color:#fca5a5; }
+
+  /* ── BTN ── */
+  .btn-next {
+    width:100%; padding:14px;
+    background:linear-gradient(130deg,var(--accent),var(--accent2));
+    color:#fff; font-family:'Unbounded',sans-serif; font-weight:700; font-size:13px;
+    border:none; border-radius:11px; cursor:pointer;
+    transition:opacity .2s, transform .1s; display:none; letter-spacing:.03em;
+  }
+  .btn-next:hover { opacity:.88; transform:scale(1.01); }
+  .btn-next.show { display:block; }
+
+  /* ── RESULTS ── */
+  .results {
+    text-align:center; padding:44px 28px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:0 16px 60px rgba(0,0,0,.5);
+  }
+  .trophy { font-size:68px; margin-bottom:12px; }
+  .results h2 { font-family:'Unbounded',sans-serif; font-size:24px; font-weight:900; margin-bottom:8px; }
+  .results .pct {
+    font-family:'Unbounded',sans-serif; font-size:58px; font-weight:900;
+    background:linear-gradient(130deg,var(--gold),var(--accent));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .res-grid { display:flex; gap:10px; margin:16px 0 24px; }
+  .res-chip { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center; }
+  .res-chip .rv { font-family:'Unbounded',sans-serif; font-size:22px; font-weight:700; }
+  .res-chip .rl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
+  .results p { color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:24px; }
+  .btn-restart {
+    padding:13px 40px;
+    background:linear-gradient(130deg,var(--accent),var(--accent2));
+    color:#fff; font-family:'Unbounded',sans-serif; font-weight:700; font-size:13px;
+    border:none; border-radius:11px; cursor:pointer; transition:opacity .2s;
+  }
+  .btn-restart:hover { opacity:.87; }
+
+  .footer { text-align:center; color:var(--muted); font-size:11px; margin-top:32px; line-height:1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="inst-badge">CENT N°74 ATSA · Prof. Lic. Francisco Molina</div>
+    <h1>SALUD PÚBLICA</h1>
+    <p>2° Año · Enfermero Profesional · 2023<br>40 preguntas · 10 temas · Respuestas cortas y largas</p>
+  </header>
+
+  <div class="score-row">
+    <div class="chip"><div class="v c" id="sc">0</div><div class="l">Correctas</div></div>
+    <div class="chip"><div class="v w" id="sw">0</div><div class="l">Incorrectas</div></div>
+    <div class="chip"><div class="v p" id="sp">0</div><div class="l">Puntos</div></div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-top"><span id="pnum">Pregunta 1 de 40</span><span id="ppct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  </div>
+
+  <div id="game">
+    <div class="tipo-row">
+      <span class="tipo-badge corta" id="tipobadge">CORTA</span>
+      <span class="tipo-tema" id="tipotema"></span>
+    </div>
+    <div class="timer-row">
+      <span class="timer-lbl">Tiempo</span>
+      <div class="timer-bar"><div class="timer-fill" id="tbar"></div></div>
+      <span class="timer-num" id="tnum">20</span>
+    </div>
+    <div class="q-card">
+      <div class="q-num" id="qnum">PREGUNTA 1</div>
+      <div class="q-text" id="qtext"></div>
+    </div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next" id="btnNext" onclick="next()">Siguiente →</button>
+  </div>
+
+  <div id="results" class="results" style="display:none">
+    <div class="trophy" id="trophy">🏆</div>
+    <h2>Resultado final</h2>
+    <div class="pct" id="rpct"></div>
+    <div class="res-grid">
+      <div class="res-chip"><div class="rv" id="rc" style="color:var(--green)">0</div><div class="rl">Correctas</div></div>
+      <div class="res-chip"><div class="rv" id="rw" style="color:var(--red)">0</div><div class="rl">Incorrectas</div></div>
+      <div class="res-chip"><div class="rv" id="rp" style="color:var(--gold)">0</div><div class="rl">Puntos</div></div>
+    </div>
+    <p id="rmsg"></p>
+    <button class="btn-restart" onclick="restart()">Jugar de nuevo</button>
+  </div>
+
+  <div class="footer">
+    Trivia elaborada por Prof. Lic. Francisco Molina · CENT N°74 ATSA · Tucumán<br>
+    2° Año Carrera Enfermero Profesional · Salud Pública 2023 · Material didáctico de uso educativo
+  </div>
+</div>
+
+<script>
+// t:"C" = corta 20s | t:"L" = larga 27s
+const PREGUNTAS = [
+
+  // ════════════════════════════════════════
+  // TEMA 1 — Proceso Salud-Enfermedad
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 1 · Proceso Salud-Enfermedad",
+    q:"¿Cómo definió la OMS la salud en 1948?",
+    a:"Estado de completo bienestar físico, mental y social, y no solamente la ausencia de enfermedad",
+    ops:[
+      "Estado de completo bienestar físico, mental y social, y no solamente la ausencia de enfermedad",
+      "Ausencia de toda dolencia orgánica confirmada por exámenes clínicos y de laboratorio",
+      "Capacidad de realizar actividades laborales sin limitaciones físicas ni psíquicas",
+      "Equilibrio entre el individuo y su entorno determinado exclusivamente por factores biológicos"
+    ],
+    exp:"La OMS definió salud en 1948 como un estado de completo bienestar físico, mental y social, y no solamente la ausencia de enfermedad o dolencia. Esta definición supuso un avance al incorporar las dimensiones mental y social." },
+
+  { t:"C", tema:"Tema 1 · Proceso Salud-Enfermedad",
+    q:"¿Cuál fue la concepción del proceso salud-enfermedad en la era paleolítica?",
+    a:"Concepción mágica, atribuida a lo sobrenatural, con brujos y shamanes como actores principales",
+    ops:[
+      "Concepción mágica, atribuida a lo sobrenatural, con brujos y shamanes como actores principales",
+      "Concepción naturalista basada en la observación científica de síntomas y signos físicos",
+      "Concepción social que relacionaba la enfermedad con las condiciones de trabajo y vivienda",
+      "Concepción psicológica que atribuía la enfermedad a conflictos emocionales inconscientes"
+    ],
+    exp:"En la era paleolítica, la concepción del proceso salud-enfermedad fue mágica: todo se atribuía a lo sobrenatural. Los actores principales eran los brujos o shamanes, que actuaban como intermediarios con las fuerzas sobrenaturales." },
+
+  { t:"L", tema:"Tema 1 · Proceso Salud-Enfermedad",
+    q:"¿Qué son los determinantes sociales de la salud y por qué reconocerlos es clave para la enfermería?",
+    a:"Son las condiciones sociales en que las personas viven y trabajan e impactan sobre su salud; reconocerlos permite identificar desigualdades evitables e injustas y orientar intervenciones más allá del acto clínico individual",
+    ops:[
+      "Son las condiciones sociales en que las personas viven y trabajan e impactan sobre su salud; reconocerlos permite identificar desigualdades evitables e injustas y orientar intervenciones más allá del acto clínico individual",
+      "Son los genes y factores hereditarios que determinan completamente la salud de cada persona, sin posibilidad de modificación por intervenciones sociales",
+      "Son exclusivamente los factores biológicos como edad, sexo y raza que la medicina puede medir con indicadores clínicos objetivos y cuantificables",
+      "Son las enfermedades crónicas más prevalentes que generan mayor carga de morbilidad en la población adulta mayor de países en desarrollo"
+    ],
+    exp:"Los determinantes sociales de la salud son las condiciones sociales en que las personas viven y trabajan, que impactan directamente sobre su salud (ingreso, educación, vivienda, empleo, entorno). La OMS señala que las desigualdades en salud son evitables e injustas. Para enfermería, reconocerlos permite abordar la salud integralmente, comprender por qué un paciente no adhiere al tratamiento y diseñar intervenciones comunitarias efectivas." },
+
+  { t:"L", tema:"Tema 1 · Proceso Salud-Enfermedad",
+    q:"¿Cómo evolucionó históricamente el concepto de salud desde la antigüedad hasta la concepción actual y qué implicancias tiene para la práctica de enfermería?",
+    a:"Pasó de la concepción mágica (paleolítico) a la natural (Grecia), luego a la somático-fisiológica (ausencia de enfermedad), la psicológica (siglo XVIII) y finalmente a la sanitaria y social integral de la OMS (1948), lo que implica que enfermería debe considerar al ser humano en forma holística",
+    ops:[
+      "Pasó de la concepción mágica (paleolítico) a la natural (Grecia), luego a la somático-fisiológica (ausencia de enfermedad), la psicológica (siglo XVIII) y finalmente a la sanitaria y social integral de la OMS (1948), lo que implica que enfermería debe considerar al ser humano en forma holística",
+      "El concepto de salud siempre fue el mismo desde la antigüedad: ausencia de enfermedad verificada por examen clínico, sin variaciones históricas significativas",
+      "Evolucionó solo en términos tecnológicos, pasando de remedios herbales a fármacos sintéticos, sin cambios en la concepción filosófica del proceso salud-enfermedad",
+      "El concepto actual de salud retomó la concepción mágica paleolítica, reconociendo que los factores espirituales son los más importantes para el bienestar humano"
+    ],
+    exp:"La evolución histórica del concepto de salud muestra múltiples transiciones: mágica (paleolítico, brujos/shamanes) → natural (Grecia, bases del método clínico) → utópica/ideal (antigüedad clásica) → somático-fisiológica (ausencia de enfermedad, exploración del cuerpo) → psicológica (siglo XVIII, psicoanálisis) → sanitaria (prevención, colectiva) → integral de la OMS (1948: bienestar físico, mental y social). Para enfermería implica un abordaje holístico que supera el modelo biomédico." },
+
+  // ════════════════════════════════════════
+  // TEMA 2 — Atención Primaria de la Salud
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 2 · Atención Primaria de la Salud",
+    q:"¿En qué ciudad y año se realizó la conferencia internacional que definió la Atención Primaria de la Salud?",
+    a:"Alma-Ata, 1978",
+    ops:[
+      "Alma-Ata, 1978",
+      "Ottawa, 1986",
+      "Ginebra, 1948",
+      "Bogotá, 1992"
+    ],
+    exp:"La Declaración de Alma-Ata (1978) es el documento fundacional de la Atención Primaria de la Salud. Fue adoptada en la Conferencia Internacional sobre APS realizada en Alma-Ata (actual Almaty, Kazajistán) y convocada por OMS y UNICEF." },
+
+  { t:"C", tema:"Tema 2 · Atención Primaria de la Salud",
+    q:"¿Cuál es la meta central propuesta por la Declaración de Alma-Ata como objetivo global para el año 2000?",
+    a:"Salud para todos",
+    ops:[
+      "Salud para todos",
+      "Cero mortalidad infantil",
+      "Atención hospitalaria universal",
+      "Erradicación de enfermedades infecciosas"
+    ],
+    exp:"La Declaración de Alma-Ata proclamó 'Salud para Todos en el año 2000' como meta global, reconociendo que la APS es la estrategia clave para alcanzarla, basada en la participación comunitaria, la equidad y la accesibilidad." },
+
+  { t:"L", tema:"Tema 2 · Atención Primaria de la Salud",
+    q:"¿Cuáles son los componentes estratégicos de la Atención Primaria de la Salud y qué los diferencia de los componentes programáticos?",
+    a:"Los componentes programáticos son actividades concretas del primer nivel de atención (vacunación, control de crecimiento, saneamiento); los estratégicos son principios transversales como participación comunitaria, equidad, intersectorialidad y tecnología apropiada",
+    ops:[
+      "Los componentes programáticos son actividades concretas del primer nivel de atención (vacunación, control de crecimiento, saneamiento); los estratégicos son principios transversales como participación comunitaria, equidad, intersectorialidad y tecnología apropiada",
+      "Ambos tipos de componentes son idénticos; la diferencia es solo administrativa y depende del nivel de gestión que los ejecute en cada ministerio",
+      "Los componentes programáticos son exclusivos de hospitales de alta complejidad; los estratégicos son solo para organismos internacionales como OMS y OPS",
+      "Los componentes estratégicos refieren exclusivamente a la compra de medicamentos e insumos; los programáticos a la capacitación del personal de salud"
+    ],
+    exp:"La propuesta de Alma-Ata distingue dos tipos de componentes de APS: Programáticos (deben cumplirse en el primer nivel de atención): educación sanitaria, nutrición, saneamiento básico, salud materno-infantil, vacunaciones, control de enfermedades endémicas, tratamiento de enfermedades comunes y provisión de medicamentos esenciales. Estratégicos (principios transversales): participación comunitaria, tecnología apropiada, accesibilidad, equidad, intersectorialidad y trabajo en red." },
+
+  { t:"L", tema:"Tema 2 · Atención Primaria de la Salud",
+    q:"¿Qué implica el Programa Nacional de Garantía de Calidad de Atención Médica y cuál es el compromiso profesional que establece para enfermería?",
+    a:"Implica asegurar que las prestaciones de salud cumplan estándares de calidad, eficiencia y accesibilidad; para enfermería establece la obligación de brindar cuidados basados en evidencia, respetar derechos del paciente y mantener actualización continua",
+    ops:[
+      "Implica asegurar que las prestaciones de salud cumplan estándares de calidad, eficiencia y accesibilidad; para enfermería establece la obligación de brindar cuidados basados en evidencia, respetar derechos del paciente y mantener actualización continua",
+      "Implica solo controlar la infraestructura edilicia de los hospitales públicos sin ningún componente de evaluación de la práctica profesional de enfermería",
+      "Es un programa exclusivo para médicos especialistas que no incluye al personal de enfermería ni a ningún otro profesional de la salud",
+      "Garantiza que todos los profesionales de salud reciban salarios iguales independientemente de su formación académica y área de desempeño"
+    ],
+    exp:"El Programa Nacional de Garantía de Calidad de Atención Médica (PNGCAM) tiene por objetivo promover y asegurar la calidad de las prestaciones del sistema de salud a través de normatización, acreditación y fiscalización. Para el profesional de enfermería implica: cumplir normas y protocolos de cuidado, trabajar con estándares basados en evidencia, respetar derechos del paciente, participar en procesos de mejora continua y mantener formación permanente." },
+
+  // ════════════════════════════════════════
+  // TEMA 3 — Políticas Nacionales de Salud / OMS / OPS
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 3 · Políticas de Salud y Organismos Internacionales",
+    q:"¿Qué es la OPS y cuál es su ámbito de acción?",
+    a:"Organización Panamericana de la Salud, organismo regional de salud para las Américas",
+    ops:[
+      "Organización Panamericana de la Salud, organismo regional de salud para las Américas",
+      "Organización de Países Sanitarios, organismo económico del Mercosur para financiar hospitales",
+      "Oficina de Provisión de Servicios, dependencia del Ministerio de Salud de Argentina",
+      "Organismo de Prevención Sanitaria, entidad privada que regula obras sociales nacionales"
+    ],
+    exp:"La OPS (Organización Panamericana de la Salud) es el organismo internacional de salud pública de las Américas, actúa como oficina regional de la OMS para el continente. Trabaja con los países para mejorar y proteger la salud de sus poblaciones." },
+
+  { t:"C", tema:"Tema 3 · Políticas de Salud y Organismos Internacionales",
+    q:"¿Cuáles son los tres tipos de intervenciones que componen una política nacional de salud?",
+    a:"Intervenciones sobre determinantes estructurales, sobre comportamientos individuales y de socialización-empoderamiento",
+    ops:[
+      "Intervenciones sobre determinantes estructurales, sobre comportamientos individuales y de socialización-empoderamiento",
+      "Intervenciones hospitalarias, ambulatorias y domiciliarias según el nivel de complejidad requerido",
+      "Intervenciones farmacológicas, quirúrgicas y de rehabilitación para las tres principales causas de mortalidad",
+      "Intervenciones de financiamiento, de recursos humanos y de infraestructura edilicia únicamente"
+    ],
+    exp:"Los tres tipos de intervenciones de una política nacional de salud son: 1) Intervenciones públicas dirigidas a determinantes estructurales (reducir desigualdades). 2) Políticas públicas dirigidas a individuos para cambiar comportamientos y estilos de vida. 3) Socialización y empoderamiento: relación entre responsabilidades colectivas e individuales para asegurar condiciones de buena salud." },
+
+  { t:"L", tema:"Tema 3 · Políticas de Salud y Organismos Internacionales",
+    q:"¿Qué es la regionalización de los efectores de salud y cuáles son sus objetivos en la organización del sistema sanitario?",
+    a:"Es la organización territorial de los servicios de salud en niveles de complejidad creciente (primer, segundo y tercer nivel) para garantizar accesibilidad, continuidad de la atención y uso eficiente de los recursos según la necesidad de la población",
+    ops:[
+      "Es la organización territorial de los servicios de salud en niveles de complejidad creciente (primer, segundo y tercer nivel) para garantizar accesibilidad, continuidad de la atención y uso eficiente de los recursos según la necesidad de la población",
+      "Es la privatización de los hospitales públicos para que cada región administre sus propios recursos sin intervención del Estado nacional",
+      "Es la concentración de todos los servicios de salud en los grandes centros urbanos para aprovechar la tecnología de alta complejidad disponible",
+      "Es la eliminación de los centros de salud periféricos para centralizar la atención en hospitales de referencia provincial exclusivamente"
+    ],
+    exp:"La regionalización de los efectores de salud organiza los servicios en niveles de complejidad creciente articulados en red: Primer nivel (centros de salud, APS, resolución del 80-85% de los problemas); Segundo nivel (hospitales de mediana complejidad, internación general); Tercer nivel (hospitales de alta complejidad, especialidades). Sus objetivos: garantizar accesibilidad geográfica, continuidad de la atención mediante referencia y contrarreferencia, uso racional de recursos y equidad sanitaria." },
+
+  { t:"L", tema:"Tema 3 · Políticas de Salud y Organismos Internacionales",
+    q:"¿Cuáles son los componentes principales de una política nacional de salud y qué actores participan en su implementación?",
+    a:"Los componentes son: determinantes estructurales, cambio de comportamientos y empoderamiento; los actores son partidos políticos, sindicatos, asociaciones vecinales, instituciones estatales y la comunidad organizada",
+    ops:[
+      "Los componentes son: determinantes estructurales, cambio de comportamientos y empoderamiento; los actores son partidos políticos, sindicatos, asociaciones vecinales, instituciones estatales y la comunidad organizada",
+      "Los únicos componentes son los hospitales y clínicas; el único actor es el Estado nacional que financia y gestiona todos los servicios",
+      "Los componentes son exclusivamente farmacológicos; los actores son solo los laboratorios farmacéuticos y las obras sociales nacionales",
+      "Los componentes son infraestructura y tecnología; el único actor es el mercado privado que determina la oferta y demanda de servicios"
+    ],
+    exp:"Una política nacional de salud comprende tres componentes: 1) Intervenciones sobre determinantes estructurales (mejorar condiciones sociales, reducir inequidades). 2) Intervenciones dirigidas a individuos (cambio de comportamientos y estilos de vida). 3) Socialización y empoderamiento (responsabilidades colectivas e individuales). Los agentes de estas intervenciones son colectivos e institucionales: partidos políticos, sindicatos, asociaciones vecinales, organizaciones comunitarias, y el Estado en sus distintos niveles (nacional, provincial, municipal)." },
+
+  // ════════════════════════════════════════
+  // TEMA 4 — Salud Pública. Funciones esenciales. Derechos del niño
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 4 · Salud Pública y Derechos",
+    q:"¿Cuál es la definición de Salud Pública según Winslow (1920)?",
+    a:"Ciencia y arte de evitar enfermedades, alargar la vida y fomentar la salud y eficiencia con los esfuerzos de la comunidad",
+    ops:[
+      "Ciencia y arte de evitar enfermedades, alargar la vida y fomentar la salud y eficiencia con los esfuerzos de la comunidad",
+      "Conjunto de servicios hospitalarios financiados por el Estado para atender a la población sin cobertura de obra social",
+      "Sistema de normas y protocolos que regulan la práctica médica en instituciones públicas y privadas del país",
+      "Organización administrativa de los ministerios de salud para distribuir recursos entre provincias y municipios"
+    ],
+    exp:"Según Winslow (1920), la Salud Pública es la ciencia y arte de evitar enfermedades, alargar la vida y fomentar la salud y eficiencia con los esfuerzos de la comunidad. Esta definición destaca el componente colectivo y comunitario como rasgo central de la salud pública." },
+
+  { t:"C", tema:"Tema 4 · Salud Pública y Derechos",
+    q:"¿Qué categorías de derechos reconoce la Convención sobre los Derechos del Niño relevantes para la salud?",
+    a:"Derechos de supervivencia y desarrollo, de participación y ciudadanía, y de protección jurídica especial",
+    ops:[
+      "Derechos de supervivencia y desarrollo, de participación y ciudadanía, y de protección jurídica especial",
+      "Solo derechos económicos y patrimoniales administrados por los tutores legales hasta la mayoría de edad",
+      "Exclusivamente derechos educativos y al juego, sin ningún reconocimiento explícito del derecho a la salud",
+      "Derechos laborales para niños mayores de 14 años y derechos penales reducidos para menores infractores"
+    ],
+    exp:"La Convención sobre los Derechos del Niño reconoce categorías de derechos aplicables a la salud: 1) Derechos de supervivencia y desarrollo (vida, salud, alimentación, educación). 2) Derechos de participación y ciudadanía (opinión, identidad, información). 3) Derechos de protección jurídica especial (contra explotación, violencia y discriminación). El derecho a la salud es uno de los derechos humanos fundamentales reconocidos." },
+
+  { t:"L", tema:"Tema 4 · Salud Pública y Derechos",
+    q:"¿Qué son las Funciones Esenciales de Salud Pública (FESP) según OPS/OMS y en qué ámbitos se aplican?",
+    a:"Son las condiciones que permiten un mejor desempeño de la práctica de salud pública; se aplican en salud ambiental, salud ocupacional, salud materno-infantil y enfermedades crónicas, entre otros ámbitos",
+    ops:[
+      "Son las condiciones que permiten un mejor desempeño de la práctica de salud pública; se aplican en salud ambiental, salud ocupacional, salud materno-infantil y enfermedades crónicas, entre otros ámbitos",
+      "Son los requisitos mínimos de equipamiento que deben tener los hospitales públicos para ser habilitados por el Ministerio de Salud de cada provincia",
+      "Son las competencias exclusivas del médico especialista en salud pública sin participación de otros profesionales de la salud",
+      "Son los protocolos quirúrgicos de alta complejidad que solo pueden aplicarse en hospitales universitarios de tercer nivel"
+    ],
+    exp:"Las FESP (Funciones Esenciales de Salud Pública) se definen como las condiciones que permiten un mejor desempeño de la práctica de salud pública. Incluyen: monitoreo y análisis de la situación de salud, vigilancia epidemiológica, regulación y fiscalización, desarrollo de políticas, planificación y gestión, promoción de la salud, participación ciudadana, garantía de la calidad, investigación y reducción del impacto de emergencias. Se aplican en múltiples ámbitos: salud ambiental, salud ocupacional, salud materno-infantil, enfermedades crónicas, entre otros." },
+
+  { t:"L", tema:"Tema 4 · Salud Pública y Derechos",
+    q:"¿Por qué el derecho a la salud es considerado un derecho humano fundamental y qué obligaciones genera para el Estado y para los profesionales de enfermería?",
+    a:"Porque sin salud no pueden ejercerse los demás derechos; obliga al Estado a garantizar acceso universal, equitativo y sin discriminación a los servicios de salud; y a enfermería, a brindar atención digna, justa y sin distinción de ningún tipo",
+    ops:[
+      "Porque sin salud no pueden ejercerse los demás derechos; obliga al Estado a garantizar acceso universal, equitativo y sin discriminación a los servicios de salud; y a enfermería, a brindar atención digna, justa y sin distinción de ningún tipo",
+      "El derecho a la salud no es un derecho humano fundamental sino una prestación mercantil que cada persona debe adquirir según su capacidad económica",
+      "Solo es un derecho declarativo sin obligaciones concretas para el Estado ni para los profesionales sanitarios en su práctica cotidiana",
+      "Genera obligaciones únicamente para los médicos y no para enfermería, que solo tiene responsabilidades técnicas sin componente ético-jurídico"
+    ],
+    exp:"El derecho a la salud es un derecho humano reconocido en la Constitución Nacional (art. 75 inc. 22), la Convención sobre los Derechos del Niño, el Pacto Internacional de Derechos Económicos, Sociales y Culturales y otros instrumentos internacionales. Para el Estado implica: accesibilidad, disponibilidad, aceptabilidad y calidad de los servicios de salud, sin discriminación. Para enfermería: brindar atención humanizada, respetar la dignidad de cada paciente, garantizar igualdad de trato y actuar como garante de derechos en el contacto directo con el paciente." },
+
+  // ════════════════════════════════════════
+  // TEMA 5 — Seguridad Social y Sistemas de Salud
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 5 · Seguridad Social y Sistemas de Salud",
+    q:"¿Qué es la seguridad social en el contexto del sistema de salud argentino?",
+    a:"Conjunto de medidas para garantizar bienestar de la población trabajadora mediante redistribución solidaria de aportes y contribuciones",
+    ops:[
+      "Conjunto de medidas para garantizar bienestar de la población trabajadora mediante redistribución solidaria de aportes y contribuciones",
+      "Sistema de atención hospitalaria gratuita financiado por impuestos exclusivamente para personas sin empleo formal",
+      "Programa de subsidios monetarios del Estado para personas en situación de pobreza extrema sin cobertura médica",
+      "Red de clínicas privadas que prestan servicios de salud a precios regulados por el Ministerio de Economía"
+    ],
+    exp:"La seguridad social es el conjunto de medidas destinadas a garantizar el bienestar de la población trabajadora mediante la redistribución solidaria de los aportes y contribuciones que cada uno realiza de acuerdo a sus ingresos, instrumentada bajo la forma de beneficios económicos y servicios sociales que cada uno recibe según sus necesidades." },
+
+  { t:"C", tema:"Tema 5 · Seguridad Social y Sistemas de Salud",
+    q:"¿Cuál es la entidad que controla a las obras sociales nacionales en Argentina y el cumplimiento del PMO?",
+    a:"La Superintendencia de Servicios de Salud (SSS)",
+    ops:[
+      "La Superintendencia de Servicios de Salud (SSS)",
+      "El ANMAT (Administración Nacional de Medicamentos, Alimentos y Tecnología Médica)",
+      "El INDEC (Instituto Nacional de Estadística y Censos)",
+      "La AFIP (Administración Federal de Ingresos Públicos)"
+    ],
+    exp:"La Superintendencia de Servicios de Salud (SSS), creada por Decreto 1615/96, tiene a su cargo controlar las obras sociales, el cumplimiento del Programa Médico Obligatorio (PMO), asegurar calidad y cobertura del sistema, y la recuperación de costos de los hospitales públicos." },
+
+  { t:"L", tema:"Tema 5 · Seguridad Social y Sistemas de Salud",
+    q:"¿Cuáles son los tres subsistemas que componen el sistema de salud argentino y cuáles son sus características principales?",
+    a:"El subsistema público (hospitales estatales, cobertura universal gratuita), el de seguridad social (obras sociales y PAMI para trabajadores) y el privado (clínicas y prepagas, financiado por el usuario); coexisten con escasa coordinación",
+    ops:[
+      "El subsistema público (hospitales estatales, cobertura universal gratuita), el de seguridad social (obras sociales y PAMI para trabajadores) y el privado (clínicas y prepagas, financiado por el usuario); coexisten con escasa coordinación",
+      "Solo existe un subsistema único y universal financiado por el Estado con igualdad de acceso para toda la población sin distinción de cobertura",
+      "Existen cinco subsistemas diferenciados por nivel de complejidad: primario, secundario, terciario, cuaternario y de investigación clínica",
+      "Solo existen subsistemas públicos y privados; las obras sociales no son un subsistema independiente sino parte de la medicina privada"
+    ],
+    exp:"El sistema de salud argentino se compone de tres subsistemas: 1) Público: financiado por el Estado (nacional, provincial, municipal); hospitales y centros de salud; acceso universal y gratuito; atiende a todos incluyendo quienes tienen obra social. 2) Seguridad social: obras sociales nacionales y provinciales (sindicatos) + PAMI (jubilados). Financia ~18 millones de beneficiarios. 3) Privado: clínicas, sanatorios y empresas de medicina prepaga; financiado por cuotas del usuario. La falta de coordinación entre subsistemas genera inequidades y uso ineficiente de recursos." },
+
+  { t:"L", tema:"Tema 5 · Seguridad Social y Sistemas de Salud",
+    q:"¿Qué es el Programa Médico Obligatorio (PMO) y por qué es importante para garantizar el derecho a la salud?",
+    a:"El PMO es el conjunto mínimo de prestaciones que toda obra social y prepaga está obligada a cubrir; garantiza el derecho a la salud al establecer un piso igualitario de cobertura independientemente del monto de la cuota",
+    ops:[
+      "El PMO es el conjunto mínimo de prestaciones que toda obra social y prepaga está obligada a cubrir; garantiza el derecho a la salud al establecer un piso igualitario de cobertura independientemente del monto de la cuota",
+      "El PMO es un plan de vacunación exclusivo para niños menores de 5 años financiado por el Estado nacional con fondos del Banco Mundial",
+      "El PMO es un protocolo quirúrgico de emergencia que los hospitales públicos deben seguir en casos de catástrofes o accidentes masivos",
+      "El PMO es el presupuesto máximo que el Estado puede gastar por paciente en hospitales públicos de alta complejidad por año"
+    ],
+    exp:"El Programa Médico Obligatorio (PMO) establece el conjunto mínimo de prestaciones que todas las obras sociales y empresas de medicina prepaga están obligadas a cubrir a sus afiliados. Incluye: consultas médicas, internaciones, medicamentos básicos, estudios diagnósticos, salud mental, rehabilitación, entre otras. Su importancia: garantiza un piso igualitario de acceso a la atención de salud con independencia de la obra social o plan prepago, constituyendo un instrumento concreto para el ejercicio del derecho a la salud." },
+
+  // ════════════════════════════════════════
+  // TEMA 6 — Epidemiología
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 6 · Epidemiología",
+    q:"¿Cuáles son los tres componentes de la triada epidemiológica?",
+    a:"Persona, tiempo y lugar",
+    ops:[
+      "Persona, tiempo y lugar",
+      "Agente, huésped y ambiente",
+      "Incidencia, prevalencia y mortalidad",
+      "Prevención, tratamiento y rehabilitación"
+    ],
+    exp:"La triada epidemiológica clásica está compuesta por persona (¿quién o quiénes se enfermaron?), tiempo (¿cuándo sucedió?) y lugar (¿dónde sucedió?). Esta conceptualización orienta la investigación epidemiológica y la descripción de brotes y enfermedades." },
+
+  { t:"C", tema:"Tema 6 · Epidemiología",
+    q:"¿Qué es la vigilancia epidemiológica?",
+    a:"Sistema continuo y sistemático de recolección, análisis y difusión de datos de salud para orientar la toma de decisiones en salud pública",
+    ops:[
+      "Sistema continuo y sistemático de recolección, análisis y difusión de datos de salud para orientar la toma de decisiones en salud pública",
+      "Inspección visual de los pacientes internados para detectar casos de enfermedades infecciosas en tiempo real",
+      "Control policial de las fronteras para evitar el ingreso de enfermedades infecciosas provenientes de otros países",
+      "Revisión periódica de los registros contables de los hospitales para detectar irregularidades en el uso de fondos públicos"
+    ],
+    exp:"La vigilancia epidemiológica es el proceso continuo y sistemático de recolección, consolidación, análisis e interpretación de datos sobre eventos de salud, junto con la difusión oportuna de sus resultados, para orientar la planificación, implementación y evaluación de medidas de salud pública." },
+
+  { t:"L", tema:"Tema 6 · Epidemiología",
+    q:"¿Qué es la epidemiología, cuál es su objeto de estudio y cuáles son sus principales usos en salud pública?",
+    a:"Es la ciencia que estudia la distribución y determinantes de las enfermedades y eventos de salud en poblaciones; se usa para describir brotes, identificar factores de riesgo, planificar intervenciones y evaluar programas de salud",
+    ops:[
+      "Es la ciencia que estudia la distribución y determinantes de las enfermedades y eventos de salud en poblaciones; se usa para describir brotes, identificar factores de riesgo, planificar intervenciones y evaluar programas de salud",
+      "Es la ciencia que estudia únicamente las epidemias de enfermedades infecciosas con transmisión respiratoria en países en desarrollo",
+      "Es la rama de la biología que estudia los parásitos causantes de enfermedades sin relación con factores sociales ni ambientales",
+      "Es la disciplina que diseña fármacos para combatir enfermedades crónicas en base a estudios genéticos de poblaciones específicas"
+    ],
+    exp:"La Epidemiología estudia la distribución (quién, cuándo, dónde) y los determinantes (por qué, cómo) de las enfermedades y otros eventos de salud en poblaciones humanas. Sus usos en salud pública: describir el estado de salud de una población, identificar factores de riesgo y grupos vulnerables, investigar brotes epidémicos, planificar y priorizar intervenciones sanitarias, monitorear tendencias y evaluar el impacto de programas de salud." },
+
+  { t:"L", tema:"Tema 6 · Epidemiología",
+    q:"¿Qué es el riesgo epidemiológico y cómo se identifica a los grupos vulnerables en salud pública?",
+    a:"El riesgo es la probabilidad de que un individuo o grupo desarrolle un evento de salud adverso; los grupos vulnerables se identifican analizando variables como edad, sexo, nivel socioeconómico, exposición ambiental y condiciones de vida",
+    ops:[
+      "El riesgo es la probabilidad de que un individuo o grupo desarrolle un evento de salud adverso; los grupos vulnerables se identifican analizando variables como edad, sexo, nivel socioeconómico, exposición ambiental y condiciones de vida",
+      "El riesgo epidemiológico es equivalente al diagnóstico clínico individual; los grupos vulnerables son solo los pacientes hospitalizados con enfermedades crónicas",
+      "El riesgo mide únicamente la exposición a agentes infecciosos; los grupos vulnerables son solo los niños menores de 5 años y los adultos mayores de 80 años",
+      "El riesgo es una categoría filosófica sin medición posible; los grupos vulnerables se determinan por criterios exclusivamente genéticos y hereditarios"
+    ],
+    exp:"El riesgo epidemiológico es la probabilidad de que un evento de salud adverso (enfermedad, lesión, muerte) ocurra en un individuo o grupo dado durante un período determinado. Los grupos vulnerables son aquellos con mayor riesgo de enfermar o morir: se identifican mediante análisis de variables de la triada epidemiológica (persona: edad, sexo, nutrición, nivel educativo/económico; tiempo: estacionalidad; lugar: zona geográfica, entorno social). La vigilancia de estos grupos orienta la priorización de intervenciones preventivas." },
+
+  // ════════════════════════════════════════
+  // TEMA 7 — Prevención. Niveles. Epidemias. Esquema Leavell y Clark
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 7 · Prevención y Epidemias",
+    q:"¿Cuáles son los tres niveles de prevención según el esquema de Leavell y Clark?",
+    a:"Prevención primaria, secundaria y terciaria",
+    ops:[
+      "Prevención primaria, secundaria y terciaria",
+      "Prevención universal, selectiva e indicada",
+      "Prevención individual, grupal y comunitaria",
+      "Prevención biológica, ambiental y conductual"
+    ],
+    exp:"El esquema de Leavell y Clark (historia natural de la enfermedad) establece tres niveles de prevención: Primaria (evitar la aparición de la enfermedad, ej: vacunación, educación sanitaria), Secundaria (detener el progreso de la enfermedad ya instalada, ej: diagnóstico precoz y tratamiento oportuno) y Terciaria (rehabilitación y limitación del daño una vez establecida la enfermedad)." },
+
+  { t:"C", tema:"Tema 7 · Prevención y Epidemias",
+    q:"¿A qué nivel de prevención corresponde la vacunación?",
+    a:"Prevención primaria",
+    ops:[
+      "Prevención primaria",
+      "Prevención secundaria",
+      "Prevención terciaria",
+      "Prevención cuaternaria"
+    ],
+    exp:"La vacunación es una medida de prevención primaria porque actúa antes de que la enfermedad aparezca, evitando su ocurrencia. Otros ejemplos de prevención primaria: educación sanitaria, saneamiento ambiental, uso de preservativos, actividad física." },
+
+  { t:"L", tema:"Tema 7 · Prevención y Epidemias",
+    q:"¿Cuál es la relación entre la historia natural de la enfermedad y los tres niveles de prevención y qué rol cumple enfermería en cada nivel?",
+    a:"La prevención primaria actúa en el período prepatogénico (antes de la enfermedad); la secundaria en el patogénico temprano (diagnóstico precoz); la terciaria en el tardío o secuelar (rehabilitación); enfermería participa activamente en los tres niveles",
+    ops:[
+      "La prevención primaria actúa en el período prepatogénico (antes de la enfermedad); la secundaria en el patogénico temprano (diagnóstico precoz); la terciaria en el tardío o secuelar (rehabilitación); enfermería participa activamente en los tres niveles",
+      "Los tres niveles de prevención actúan solo durante el período de incubación de enfermedades infecciosas y no aplican a enfermedades crónicas",
+      "La historia natural de la enfermedad solo tiene dos fases y corresponde a dos niveles de prevención; el tercero es una creación académica sin aplicación clínica",
+      "Enfermería solo participa en la prevención terciaria (rehabilitación); los otros dos niveles son exclusivos del médico y del epidemiólogo"
+    ],
+    exp:"Leavell y Clark relacionaron la historia natural de la enfermedad con los niveles de prevención: Período prepatogénico → Prevención primaria (fomento de la salud y protección específica: vacunas, nutrición, educación sanitaria). Período patogénico temprano → Prevención secundaria (diagnóstico precoz y tratamiento oportuno: screening, tamizajes). Período patogénico tardío/secuelar → Prevención terciaria (limitación del daño y rehabilitación). Enfermería en cada nivel: primaria (educación, vacunación), secundaria (detección, toma de muestras, adherencia al tratamiento), terciaria (rehabilitación, cuidados domiciliarios, reinserción)." },
+
+  { t:"L", tema:"Tema 7 · Prevención y Epidemias",
+    q:"¿Qué es un perfil epidemiológico y cómo se usan los perfiles nacionales, regionales y locales en la planificación de servicios de salud?",
+    a:"El perfil epidemiológico es la descripción de los patrones de salud-enfermedad de una población (principales causas de morbi-mortalidad); el perfil local permite priorizar problemas, diseñar programas y evaluar intervenciones en un territorio concreto",
+    ops:[
+      "El perfil epidemiológico es la descripción de los patrones de salud-enfermedad de una población (principales causas de morbi-mortalidad); el local permite priorizar problemas, diseñar programas y evaluar intervenciones en un territorio concreto",
+      "El perfil epidemiológico es el currículum académico de los especialistas en salud pública de un país; no tiene relación con la planificación de servicios",
+      "Es el inventario de equipamiento médico disponible en una región; se usa exclusivamente para gestionar compras de insumos hospitalarios",
+      "Es el registro de casos clínicos individuales de un médico a lo largo de su carrera profesional; no tiene utilidad para la gestión sanitaria colectiva"
+    ],
+    exp:"El perfil epidemiológico describe el estado de salud-enfermedad de una población: principales causas de mortalidad, morbilidad prevalente, grupos de riesgo, factores determinantes. Tipos: Nacional (orienta políticas nacionales), Regional (planificación regional/provincial), Local (programación de los servicios de salud locales, centro de salud o municipio). El perfil local es la herramienta fundamental para: priorizar problemas de salud de una comunidad concreta, asignar recursos, diseñar intervenciones pertinentes y evaluar su impacto." },
+
+  // ════════════════════════════════════════
+  // TEMA 8 — Promoción de la Salud
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 8 · Promoción de la Salud",
+    q:"¿En qué ciudad y año se adoptó la Carta que define formalmente la Promoción de la Salud?",
+    a:"Ottawa, 1986",
+    ops:[
+      "Ottawa, 1986",
+      "Alma-Ata, 1978",
+      "Ginebra, 1948",
+      "Bogotá, 1992"
+    ],
+    exp:"La Carta de Ottawa (1986) es el documento fundamental de la Promoción de la Salud. Fue aprobada en la Primera Conferencia Internacional de Promoción de la Salud celebrada en Ottawa, Canadá, y declara que la salud es un recurso para la vida cotidiana, no el objetivo de vivir." },
+
+  { t:"C", tema:"Tema 8 · Promoción de la Salud",
+    q:"¿Cuál es la diferencia fundamental entre promoción de la salud y prevención de enfermedades?",
+    a:"La promoción mejora las condiciones de vida y potencia el bienestar de la población sana; la prevención evita o reduce la enfermedad en personas en riesgo",
+    ops:[
+      "La promoción mejora las condiciones de vida y potencia el bienestar de la población sana; la prevención evita o reduce la enfermedad en personas en riesgo",
+      "Son sinónimos intercambiables que describen exactamente las mismas acciones sanitarias con distinto nombre según el contexto",
+      "La promoción es exclusiva de hospitales; la prevención corresponde solo a centros de salud del primer nivel de atención",
+      "La prevención actúa sobre toda la población sana; la promoción actúa exclusivamente sobre enfermos crónicos en rehabilitación"
+    ],
+    exp:"La distinción clave: La Promoción de la Salud apunta a mejorar el entorno y las condiciones de vida para aumentar el bienestar, actuando sobre los determinantes de la salud en poblaciones sanas (acción intersectorial, empoderamiento). La Prevención de enfermedades se orienta a reducir factores de riesgo y evitar la aparición o progresión de enfermedades en personas o grupos con riesgo identificado (vacunación, screening, educación sanitaria específica)." },
+
+  { t:"L", tema:"Tema 8 · Promoción de la Salud",
+    q:"¿Cuáles son los focos de las intervenciones de promoción de la salud, sus metodologías principales y quiénes son los actores que intervienen?",
+    a:"Los focos son los determinantes de la salud y el entorno; las metodologías incluyen participación social, educación para la salud, intersectorialidad y comunicación; los actores son comunidad, Estado, ONGs, escuelas y equipos de salud",
+    ops:[
+      "Los focos son los determinantes de la salud y el entorno; las metodologías incluyen participación social, educación para la salud, intersectorialidad y comunicación; los actores son comunidad, Estado, ONGs, escuelas y equipos de salud",
+      "El único foco es la consulta médica individual; la metodología es la prescripción farmacológica; el único actor es el médico clínico",
+      "Los focos son exclusivamente las enfermedades infecciosas de declaración obligatoria; los actores son solo los epidemiólogos del Ministerio de Salud",
+      "El único foco es la infraestructura hospitalaria; la metodología es la licitación pública de obras; el actor es el área de administración del Estado"
+    ],
+    exp:"Focos de la promoción de la salud: determinantes sociales, condiciones de vida, entorno físico, social y político. Metodologías: participación social (comunitaria), educación para la salud, comunicación social y mercadotecnia social, intersectorialidad, construcción de alianzas estratégicas, abogacía en salud, fortalecimiento de la acción comunitaria. Actores intervinientes: comunidad organizada, Estado en todos sus niveles, ONGs, organizaciones comunitarias, escuelas, medios de comunicación, equipos interdisciplinarios de salud." },
+
+  { t:"L", tema:"Tema 8 · Promoción de la Salud",
+    q:"¿Qué es el fortalecimiento de la acción comunitaria en el marco de la promoción de la salud y cómo lo implementa enfermería?",
+    a:"Es el proceso por el cual la comunidad define sus problemas de salud, planifica acciones y controla los recursos para resolverlos; enfermería lo implementa facilitando la organización comunitaria, promoviendo el diagnóstico participativo y apoyando redes de apoyo social",
+    ops:[
+      "Es el proceso por el cual la comunidad define sus problemas de salud, planifica acciones y controla los recursos para resolverlos; enfermería lo implementa facilitando la organización comunitaria, promoviendo el diagnóstico participativo y apoyando redes de apoyo social",
+      "Es la construcción de nuevos centros de salud por parte del Estado sin participación de la comunidad en la planificación ni en la gestión",
+      "Es el entrenamiento de médicos voluntarios para atender a comunidades rurales sin acceso a hospitales de segunda y tercera complejidad",
+      "Es la compra comunitaria de medicamentos genéricos para bajar los costos de atención sin ningún componente de organización colectiva"
+    ],
+    exp:"El fortalecimiento de la acción comunitaria es uno de los pilares de la Carta de Ottawa: consiste en apoyar a que las comunidades establezcan prioridades, tomen decisiones, planifiquen estrategias y las implementen para mejorar su salud. Supone control comunitario sobre sus determinantes de salud. Enfermería lo implementa: identificando líderes y recursos comunitarios, facilitando reuniones y diagnósticos participativos, apoyando la formación de redes de apoyo (grupos de autoayuda, promotores comunitarios de salud), articulando con otros sectores." },
+
+  // ════════════════════════════════════════
+  // TEMA 9 — Responsabilidades individuales, estilos de vida saludables
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 9 · Estilos de Vida Saludables",
+    q:"¿Qué se entiende por intersectorialidad en salud pública?",
+    a:"La acción coordinada de diferentes sectores (salud, educación, vivienda, trabajo) para abordar los determinantes de la salud más allá del sector sanitario",
+    ops:[
+      "La acción coordinada de diferentes sectores (salud, educación, vivienda, trabajo) para abordar los determinantes de la salud más allá del sector sanitario",
+      "La administración del presupuesto de salud entre diferentes ministerios sin coordinación de acciones ni objetivos comunes",
+      "La especialización de cada profesional de salud en un único sector de atención sin posibilidad de trabajo interdisciplinario",
+      "La fusión de hospitales públicos y privados en una sola entidad gestionada por el Estado nacional"
+    ],
+    exp:"La intersectorialidad es la acción coordinada entre diferentes sectores de gobierno y de la sociedad (salud, educación, vivienda, medio ambiente, trabajo, desarrollo social) para abordar los determinantes de la salud, reconociendo que la salud no se produce solo desde el sector sanitario sino desde condiciones de vida integrales." },
+
+  { t:"C", tema:"Tema 9 · Estilos de Vida Saludables",
+    q:"¿Cuáles son ejemplos de estilos de vida que influyen directamente en el proceso salud-enfermedad?",
+    a:"Alimentación, consumo de tabaco, actividad física, consumo de alcohol y conducta sexual",
+    ops:[
+      "Alimentación, consumo de tabaco, actividad física, consumo de alcohol y conducta sexual",
+      "Nivel de ingresos, tipo de trabajo, lugar de nacimiento y color de piel como factores fijos",
+      "La geografía del país de residencia, el clima y la altitud sobre el nivel del mar",
+      "Solo la genética y los antecedentes hereditarios familiares sin intervención de conductas cotidianas"
+    ],
+    exp:"Los estilos de vida (EV) son conductas y hábitos de la población que influyen directamente en el proceso salud-enfermedad: alimentación inadecuada, consumo de tabaco, drogas, sedentarismo, conducta sexual de riesgo, consumo de alcohol. Gran parte de las patologías que provocan enfermedad y muerte tienen relación con estos factores modificables." },
+
+  { t:"L", tema:"Tema 9 · Estilos de Vida Saludables",
+    q:"¿Cuál es la responsabilidad individual y cuál es la responsabilidad del Estado en la promoción de estilos de vida saludables, y cómo se equilibran ambas?",
+    a:"El individuo es responsable de sus conductas cotidianas; el Estado debe generar condiciones habilitantes (entornos saludables, acceso a información, políticas de control del tabaco, regulación alimentaria) para que ese ejercicio de responsabilidad individual sea posible y equitativo",
+    ops:[
+      "El individuo es responsable de sus conductas cotidianas; el Estado debe generar condiciones habilitantes (entornos saludables, acceso a información, políticas de control del tabaco, regulación alimentaria) para que ese ejercicio de responsabilidad individual sea posible y equitativo",
+      "La responsabilidad es exclusivamente individual; el Estado no tiene ningún papel en la promoción de hábitos saludables de su población",
+      "El Estado tiene responsabilidad total y el individuo ninguna; la salud depende únicamente de las políticas públicas y no de las conductas personales",
+      "Ambas responsabilidades son contradictorias y no pueden coexistir; cuando interviene el Estado, la responsabilidad individual desaparece automáticamente"
+    ],
+    exp:"El abordaje contemporáneo reconoce una doble responsabilidad complementaria: Individual: cada persona toma decisiones cotidianas sobre alimentación, actividad física, consumo de sustancias, conducta sexual. Del Estado: crear entornos que habiliten las elecciones saludables (legislación antitabaco, impuestos a alimentos ultraprocesados, espacios públicos para actividad física, educación alimentaria, acceso a agua potable, regulación publicitaria). El equilibrio evita 'culpabilizar a la víctima' reconociendo que las condiciones sociales condicionan la autonomía individual." },
+
+  { t:"L", tema:"Tema 9 · Estilos de Vida Saludables",
+    q:"¿Cuáles son los escenarios principales de la educación para la salud y qué herramientas se utilizan en cada uno?",
+    a:"Los escenarios son: medios masivos de comunicación (campañas), instituciones educativas (talleres, materiales didácticos), instituciones comunitarias (grupos de autoayuda) y servicios de salud (consejería, educación al paciente)",
+    ops:[
+      "Los escenarios son: medios masivos de comunicación (campañas), instituciones educativas (talleres, materiales didácticos), instituciones comunitarias (grupos de autoayuda) y servicios de salud (consejería, educación al paciente)",
+      "El único escenario es el consultorio médico individual donde el profesional instruye al paciente sobre cómo cuidar su salud",
+      "Los escenarios son exclusivamente los hospitales de alta complejidad donde se realizan charlas grupales para pacientes internados",
+      "El escenario único es Internet y las redes sociales; no existen otros escenarios válidos de educación para la salud en la actualidad"
+    ],
+    exp:"Los escenarios principales de la educación para la salud son: 1) Medios masivos de comunicación: radio, televisión, redes sociales; herramientas: campañas de comunicación social, spots, infografías. 2) Instituciones educativas: escuelas y universidades; herramientas: talleres, materiales didácticos, educación entre pares. 3) Instituciones comunitarias: centros vecinales, iglesias, ONGs; herramientas: grupos de autoayuda, diagnóstico participativo, actividades comunitarias. 4) Servicios de salud: centros de salud y hospitales; herramientas: consejería individual, educación terapéutica, grupos de pacientes." },
+
+  // ════════════════════════════════════════
+  // TEMA 10 — Programación Local de Salud
+  // ════════════════════════════════════════
+  { t:"C", tema:"Tema 10 · Programación Local de Salud",
+    q:"¿Qué es la programación local de salud según la OPS?",
+    a:"Proceso científico de planificación a nivel de servicios locales para dar solución a las necesidades de salud de una población determinada",
+    ops:[
+      "Proceso científico de planificación a nivel de servicios locales para dar solución a las necesidades de salud de una población determinada",
+      "Listado de compras de medicamentos e insumos para un hospital municipal elaborado por el área de administración",
+      "Protocolo de atención médica de urgencias que se activa solo ante epidemias declaradas por el Ministerio de Salud",
+      "Cronograma de guardias del personal de enfermería elaborado mensualmente por la jefatura de cada servicio hospitalario"
+    ],
+    exp:"Según la OPS, la programación local de salud es un proceso de carácter científico que responde a contenidos de las ciencias sociales y administrativas, mediante el cual un servicio o conjunto de servicios planifica acciones para dar solución a las necesidades de salud de una población determinada sobre la cual tienen responsabilidad." },
+
+  { t:"C", tema:"Tema 10 · Programación Local de Salud",
+    q:"¿Qué significa 'programar' en el contexto de la programación local de salud?",
+    a:"Prepararse para actuar en la mejor forma posible, previendo con anticipación los recursos y pasos necesarios para no tener dudas ni fallas en el momento de la acción",
+    ops:[
+      "Prepararse para actuar en la mejor forma posible, previendo con anticipación los recursos y pasos necesarios para no tener dudas ni fallas en el momento de la acción",
+      "Registrar en un sistema informático todas las consultas médicas realizadas durante el mes en un centro de salud",
+      "Definir los sueldos del personal de salud de acuerdo al presupuesto disponible del municipio para el año en curso",
+      "Elaborar el cronograma de licencias anuales del equipo de salud según los convenios colectivos de trabajo vigentes"
+    ],
+    exp:"Programar es prepararse para hacer algo en la mejor forma posible: prever las cosas con anticipación suficiente para que al momento de la acción no hayan dudas sobre lo que se quiere hacer ni falten los elementos para hacerlo. En salud local implica un proceso complejo que busca cambiar las formas habituales de actuar para resolver necesidades identificadas." },
+
+  { t:"L", tema:"Tema 10 · Programación Local de Salud",
+    q:"¿Cuáles son los pasos fundamentales para elaborar un programa local de salud y qué determinantes se deben considerar?",
+    a:"Los pasos incluyen: diagnóstico de situación (perfil epidemiológico local), priorización de problemas, definición de objetivos, planificación de actividades, asignación de recursos, ejecución y evaluación; los determinantes son sociales, económicos, ambientales y culturales",
+    ops:[
+      "Los pasos incluyen: diagnóstico de situación (perfil epidemiológico local), priorización de problemas, definición de objetivos, planificación de actividades, asignación de recursos, ejecución y evaluación; los determinantes son sociales, económicos, ambientales y culturales",
+      "El único paso es la firma de convenios con el Ministerio de Salud; los determinantes son exclusivamente económicos en función del presupuesto disponible",
+      "Los pasos son: comprar insumos, contratar personal y construir infraestructura; sin análisis previo de ningún determinante de la comunidad",
+      "El único paso es replicar programas nacionales sin adaptación local; los determinantes no se consideran porque son los mismos en todo el país"
+    ],
+    exp:"Los pasos de la programación local de salud: 1) Diagnóstico de situación: conocer la realidad local (perfil epidemiológico, recursos disponibles, características de la población). 2) Priorización de problemas: seleccionar los más urgentes e importantes. 3) Definición de objetivos: generales y específicos, medibles. 4) Planificación de actividades: qué, quién, cuándo, cómo, con qué recursos. 5) Ejecución: implementación del programa. 6) Evaluación: monitoreo del proceso y de los resultados. Determinantes a considerar: sociales, económicos, culturales, ambientales, históricos y demográficos de la comunidad." },
+
+  { t:"L", tema:"Tema 10 · Programación Local de Salud",
+    q:"¿En qué consiste la evaluación estratégica de un programa local de salud y por qué es indispensable en la gestión sanitaria?",
+    a:"La evaluación estratégica analiza si el programa alcanzó sus objetivos, si los recursos se usaron eficientemente y qué ajustes se necesitan; es indispensable para rendir cuentas, mejorar la calidad y tomar decisiones basadas en evidencia",
+    ops:[
+      "La evaluación estratégica analiza si el programa alcanzó sus objetivos, si los recursos se usaron eficientemente y qué ajustes se necesitan; es indispensable para rendir cuentas, mejorar la calidad y tomar decisiones basadas en evidencia",
+      "La evaluación estratégica solo consiste en contar el número de consultas realizadas sin analizar el impacto del programa en la salud de la población",
+      "Es una instancia burocrática sin utilidad práctica que solo sirve para justificar el gasto ante las autoridades sin incidir en ninguna decisión",
+      "Se realiza solo al inicio del programa para verificar que tiene financiamiento y nunca más durante ni al final de su ejecución"
+    ],
+    exp:"La evaluación estratégica es el proceso sistemático de valorar el diseño, la implementación y los resultados de un programa de salud. Dimensiones: eficacia (¿se alcanzaron los objetivos?), eficiencia (¿se usaron bien los recursos?), equidad (¿llegó a quienes más lo necesitaban?), pertinencia (¿respondió a los problemas reales?), sostenibilidad (¿puede mantenerse?). Es indispensable porque: permite la rendición de cuentas, identifica qué funciona y qué no, fundamenta decisiones de política sanitaria, mejora la calidad de futuras intervenciones y es una exigencia ética de la gestión pública en salud." }
+
+];
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let preguntas,idx,correctas,incorrectas,puntos,timerInterval,tiempoRestante,respondida;
+
+function init(){
+  preguntas=shuffle([...PREGUNTAS]);
+  idx=0; correctas=0; incorrectas=0; puntos=0;
+  document.getElementById('results').style.display='none';
+  document.getElementById('game').style.display='block';
+  updateScore(); loadQ();
+}
+
+function loadQ(){
+  respondida=false;
+  const p=preguntas[idx];
+  const total=preguntas.length;
+  const esL=(p.t==="L");
+  const tQ=esL?27:20;
+
+  const tb=document.getElementById('tipobadge');
+  tb.textContent=esL?'LARGA':'CORTA';
+  tb.className='tipo-badge '+(esL?'larga':'corta');
+  document.getElementById('tipotema').textContent=p.tema;
+
+  document.getElementById('qnum').textContent=`PREGUNTA ${idx+1}`;
+  document.getElementById('qtext').textContent=p.q;
+  document.getElementById('pnum').textContent=`Pregunta ${idx+1} de ${total}`;
+  const pct=Math.round(idx/total*100);
+  document.getElementById('ppct').textContent=pct+'%';
+  document.getElementById('pfill').style.width=pct+'%';
+
+  const fb=document.getElementById('feedback');
+  fb.className='feedback'; fb.textContent='';
+  document.getElementById('btnNext').className='btn-next';
+
+  const ops=shuffle([...p.ops]);
+  const letters=['A','B','C','D'];
+  const cont=document.getElementById('opts');
+  cont.innerHTML='';
+  ops.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='opt';
+    d.innerHTML=`<span class="lt">${letters[i]}</span><span class="opt-txt">${o}</span>`;
+    d.onclick=()=>answer(d,o,p);
+    cont.appendChild(d);
+  });
+
+  clearInterval(timerInterval);
+  tiempoRestante=tQ;
+  updateTimer(tQ);
+  timerInterval=setInterval(()=>tick(tQ),1000);
+}
+
+function tick(max){
+  tiempoRestante--;
+  updateTimer(max);
+  if(tiempoRestante<=0){ clearInterval(timerInterval); timeUp(); }
+}
+
+function updateTimer(max){
+  const pct=(tiempoRestante/max)*100;
+  const bar=document.getElementById('tbar');
+  bar.style.width=pct+'%';
+  bar.className='timer-fill'+(tiempoRestante<=5?' urgent':'');
+  document.getElementById('tnum').textContent=tiempoRestante;
+}
+
+function timeUp(){
+  if(respondida)return;
+  respondida=true;
+  incorrectas++;
+  updateScore();
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const p=preguntas[idx];
+  document.querySelectorAll('.opt').forEach(o=>{
+    if(o.querySelector('.opt-txt').textContent.trim()===p.a) o.classList.add('correct');
+  });
+  showFeedback(false,p.exp);
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function answer(el,chosen,p){
+  if(respondida)return;
+  respondida=true;
+  clearInterval(timerInterval);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const ok=chosen===p.a;
+  if(ok){
+    el.classList.add('correct');
+    const max=p.t==="L"?27:20;
+    const bonus=Math.round(tiempoRestante/max*50)+50;
+    puntos+=bonus; correctas++;
+  } else {
+    el.classList.add('wrong');
+    incorrectas++;
+    document.querySelectorAll('.opt').forEach(o=>{
+      if(o.querySelector('.opt-txt').textContent.trim()===p.a) o.classList.add('correct');
+    });
+  }
+  updateScore();
+  showFeedback(ok,p.exp);
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function showFeedback(ok,exp){
+  const fb=document.getElementById('feedback');
+  fb.className='feedback show '+(ok?'ok':'no');
+  fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+exp;
+}
+
+function updateScore(){
+  document.getElementById('sc').textContent=correctas;
+  document.getElementById('sw').textContent=incorrectas;
+  document.getElementById('sp').textContent=puntos;
+}
+
+function next(){
+  idx++;
+  if(idx>=preguntas.length){ showResults(); return; }
+  loadQ();
+}
+
+function showResults(){
+  clearInterval(timerInterval);
+  document.getElementById('game').style.display='none';
+  const r=document.getElementById('results');
+  r.style.display='block';
+  const total=preguntas.length;
+  const pct=Math.round(correctas/total*100);
+  document.getElementById('rpct').textContent=pct+'%';
+  document.getElementById('rc').textContent=correctas;
+  document.getElementById('rw').textContent=incorrectas;
+  document.getElementById('rp').textContent=puntos;
+  let trophy='📚',msg='';
+  if(pct>=90){trophy='🏆';msg=`¡Excelente! ${correctas}/${total} correctas. Dominio sobresaliente de los 10 temas de Salud Pública.`;}
+  else if(pct>=75){trophy='🥇';msg=`¡Muy bien! ${correctas}/${total} correctas. Sólido manejo de los contenidos del módulo.`;}
+  else if(pct>=60){trophy='🥈';msg=`Bien. ${correctas}/${total} correctas. Repasá los temas donde tuviste dificultades.`;}
+  else if(pct>=40){trophy='🥉';msg=`Regular. ${correctas}/${total} correctas. Se recomienda repasar el módulo completo.`;}
+  else{trophy='📚';msg=`${correctas}/${total} correctas. El material requiere un repaso profundo antes del examen.`;}
+  document.getElementById('trophy').textContent=trophy;
+  document.getElementById('rmsg').textContent=msg;
+  document.getElementById('pfill').style.width='100%';
+  document.getElementById('ppct').textContent='100%';
+}
+
+function restart(){ init(); }
+init();
+</script>
+</body>
+</html>
