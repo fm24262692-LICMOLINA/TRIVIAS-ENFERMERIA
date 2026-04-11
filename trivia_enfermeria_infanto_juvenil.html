@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia de Enfermería Infanto Juvenil — Lic. Francisco Molina</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1D9E75;
+    --green-light: #EAF3DE;
+    --green-dark: #0F6E56;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --gray: #f4f6f8;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #e8f5f0 0%, #dbeafe 50%, #ede9fe 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.5rem 1.25rem;
+    margin-bottom: 1.25rem;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(29,158,117,0.10);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #1D9E75, #185FA5, #7c3aed);
+  }
+  .header-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+  .header h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.55rem;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .header .prof {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--green-dark);
+    margin-top: 0.3rem;
+  }
+  .header .inst {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    line-height: 1.6;
+  }
+  .header .badge {
+    display: inline-block;
+    margin-top: 0.75rem;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 99px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* PROGRESS */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .progress-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 700;
+    min-width: 52px;
+    text-align: right;
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .q-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 0.6rem;
+  }
+  .q-text {
+    font-size: 1.05rem;
+    color: var(--text);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  /* TIMER */
+  .timer-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 1rem;
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .timer-circle {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+  .timer-circle svg {
+    transform: rotate(-90deg);
+  }
+  .timer-num {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .timer-info { flex: 1; }
+  .timer-info .t-label { font-size: 0.85rem; color: var(--muted); }
+  .timer-info .t-msg { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  /* OPTIONS */
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .opt-btn {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.4;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--green);
+    background: var(--green-light);
+    transform: translateY(-1px);
+  }
+  .opt-btn.correct {
+    background: var(--green-light);
+    border-color: var(--green);
+    color: var(--green-dark);
+  }
+  .opt-btn.wrong {
+    background: var(--red-light);
+    border-color: var(--red);
+    color: #7f1d1d;
+  }
+  .opt-btn:disabled { cursor: default; transform: none; }
+
+  /* FEEDBACK */
+  .feedback {
+    min-height: 40px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    padding: 0 0.25rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .feedback.ok { color: var(--green-dark); }
+  .feedback.fail { color: #b91c1c; }
+
+  /* BUTTONS */
+  .nav-btn {
+    width: 100%;
+    padding: 13px;
+    font-size: 1rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--green), var(--green-dark));
+    color: #fff;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 14px rgba(29,158,117,0.3);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .nav-btn:hover { opacity: 0.93; transform: translateY(-1px); }
+
+  /* START */
+  .start-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .start-card h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .start-card p {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+  }
+  .start-card strong { color: var(--text); }
+  .info-chips {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.75rem;
+  }
+  .chip {
+    background: var(--gray);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 99px;
+  }
+  .chip.green { background: var(--green-light); color: var(--green-dark); }
+  .chip.blue { background: var(--blue-light); color: var(--blue); }
+
+  /* RESULT */
+  .result-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 2.25rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .result-card h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .score-big {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--green);
+    line-height: 1;
+    margin: 1rem 0 0.25rem;
+  }
+  .score-sub {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .result-msg {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--gray);
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+  }
+  .result-footer {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 420px) {
+    .options { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.25rem; }
+    .score-big { font-size: 3rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <span class="header-icon">🩺</span>
+    <h1>Trivia de Enfermería</h1>
+    <div class="prof">Lic. Francisco Molina</div>
+    <div class="inst">
+      CENT N° 74 — ATSA<br>
+      Carrera de Enfermero Profesional — 3° Año
+    </div>
+    <div class="badge">📚 Repaso · Enfermería Infanto Juvenil</div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+const TIME = 23;
+
+const allQ = [
+  { tema:"Tema 1 — Salud Infanto Juvenil", q:"¿Qué disciplina médica se ocupa de la salud del niño?", opts:["Pediatría","Geriatría","Cardiología","Neurología"], a:0 },
+  { tema:"Tema 1 — Salud Infanto Juvenil", q:"¿Qué factores influyen en la salud infanto juvenil?", opts:["Solo genéticos","Fisiológicos, económicos y culturales","Solo culturales","Solo económicos"], a:1 },
+  { tema:"Tema 2 — Proceso Salud-Enfermedad", q:"¿Cuál es un factor de riesgo en pediatría?", opts:["Vacunación completa","Nutrición adecuada","Pobreza","Ejercicio físico"], a:2 },
+  { tema:"Tema 2 — Proceso Salud-Enfermedad", q:"¿Qué busca la promoción de la salud en pediatría?", opts:["Curar enfermedades","Prevenir y conservar el equilibrio","Hospitalizar al niño","Recetar medicamentos"], a:1 },
+  { tema:"Tema 3 — Epidemiología", q:"¿Qué se aplica para prevenir enfermedades infecciosas en la infancia?", opts:["Antibióticos","Antivirales","Vacunas","Antifúngicos"], a:2 },
+  { tema:"Tema 3 — Epidemiología", q:"¿Cómo se conservan correctamente las vacunas?", opts:["A temperatura ambiente","En cadena de frío","Al sol","Congeladas siempre"], a:1 },
+  { tema:"Tema 4 — Valoración del niño", q:"¿Qué se evalúa en la valoración física pediátrica?", opts:["Rendimiento escolar","Presupuesto familiar","Crecimiento y desarrollo","Historia laboral"], a:2 },
+  { tema:"Tema 5 — Hospitalización", q:"¿Cómo se llama el documento que registra los datos clínicos del paciente?", opts:["Receta médica","Historia clínica","Libro de actas","Informe estadístico"], a:1 },
+  { tema:"Tema 5 — Hospitalización", q:"¿Cuál es la primera acción de enfermería al ingresar un niño?", opts:["Alta médica","Egreso","Ingreso y registro","Derivación"], a:2 },
+  { tema:"Tema 6 — Nutrición", q:"¿Qué trastorno nutricional implica déficit severo de proteínas y calorías?", opts:["Obesidad","Bulimia","Marasmo","Raquitismo"], a:2 },
+  { tema:"Tema 6 — Nutrición", q:"¿Qué trastorno se caracteriza por atracones y purgas en la adolescencia?", opts:["Marasmo","Anorexia","Bulimia","Kwashiorkor"], a:2 },
+  { tema:"Tema 6 — Nutrición", q:"¿El Kwashiorkor es causado principalmente por déficit de qué nutriente?", opts:["Vitamina C","Hierro","Proteínas","Calcio"], a:2 },
+  { tema:"Tema 7 — Aparato Digestivo", q:"¿Cuál es la complicación más grave de la diarrea en el niño?", opts:["Fiebre alta","Dolor abdominal","Deshidratación","Vómitos"], a:2 },
+  { tema:"Tema 7 — Aparato Digestivo", q:"¿Qué patología digestiva inflama el apéndice?", opts:["Hepatitis","Apendicitis","Reflujo","Úlcera péptica"], a:1 },
+  { tema:"Tema 7 — Aparato Digestivo", q:"¿Cómo se llama la inflamación del hígado causada por virus?", opts:["Hepatitis","Gastritis","Colitis","Pancreatitis"], a:0 },
+  { tema:"Tema 8 — Anomalías Congénitas", q:"¿Qué anomalía congénita afecta el labio superior del recién nacido?", opts:["Megacolon","Hernia umbilical","Labio leporino","Estenosis pilórica"], a:2 },
+  { tema:"Tema 8 — Anomalías Congénitas", q:"¿Qué es la estenosis pilórica?", opts:["Inflamación del colon","Obstrucción del píloro","Hernia inguinal","Malformación cardíaca"], a:1 },
+  { tema:"Tema 8 — Anomalías Congénitas", q:"¿Qué es el mielomeningocele?", opts:["Tumor cerebral","Defecto del tubo neural","Infección meníngea","Lesión muscular"], a:1 },
+  { tema:"Tema 9 — Disfunción Respiratoria", q:"¿Qué enfermedad respiratoria se caracteriza por broncoespasmo y sibilancias?", opts:["Neumonía","Rinitis","Faringoamigdalitis","Asma bronquial"], a:3 },
+  { tema:"Tema 9 — Disfunción Respiratoria", q:"¿Qué es la atelectasia?", opts:["Acumulación de líquido","Colapso pulmonar","Inflamación bronquial","Ruptura pleural"], a:1 },
+  { tema:"Tema 10 — Infectocontagiosas", q:"¿Qué enfermedad produce manchas de Koplik y erupción roja generalizada?", opts:["Varicela","Sarampión","Rubeola","Escarlatina"], a:1 },
+  { tema:"Tema 10 — Infectocontagiosas", q:"¿Qué enfermedad causa vesículas en todo el cuerpo y picazón intensa?", opts:["Rubeola","Coqueluche","Sarampión","Varicela"], a:3 },
+  { tema:"Tema 10 — Infectocontagiosas", q:"¿Cómo se aísla al niño con enfermedad infectocontagiosa?", opts:["No se aísla","Con precauciones de aislamiento","Solo con mascarilla","Se lo da de alta"], a:1 },
+  { tema:"Tema 11 — Cardiovascular", q:"¿Cómo se llama la cardiopatía presente desde el nacimiento?", opts:["Endocarditis","Insuficiencia cardiaca","Cardiopatía congénita","Arritmia adquirida"], a:2 },
+  { tema:"Tema 11 — Cardiovascular", q:"¿Qué es la endocarditis infecciosa?", opts:["Infección del corazón","Infarto de miocardio","Trombosis venosa","Hipertensión arterial"], a:0 },
+  { tema:"Tema 12 — Hematología", q:"¿Qué disfunción hematológica se caracteriza por bajo nivel de hemoglobina?", opts:["Leucemia","Hemofilia","Púrpura","Anemia"], a:3 },
+  { tema:"Tema 12 — Hematología", q:"¿Qué enfermedad hematológica implica dificultad para coagular la sangre?", opts:["Anemia","Leucemia","Hemofilia","Púrpura"], a:2 },
+  { tema:"Tema 13 — Genitourinario", q:"¿Qué síndrome renal se caracteriza por proteinuria masiva y edema?", opts:["Enuresis","Glomerulitis","Infección urinaria","Síndrome nefrótico"], a:3 },
+  { tema:"Tema 13 — Genitourinario", q:"¿Cómo se llama la emisión involuntaria de orina en la noche en niños?", opts:["Enuresis","Hematuria","Proteinuria","Oliguria"], a:0 },
+  { tema:"Tema 14 — Sistema Nervioso", q:"¿Cómo se llama la acumulación de líquido cefalorraquídeo en el cerebro?", opts:["Epilepsia","Hidrocefalia","Meningitis","Síndrome de Reye"], a:1 },
+  { tema:"Tema 14 — Sistema Nervioso", q:"¿Qué es la meningitis?", opts:["Inflamación del cerebro","Inflamación de las meninges","Convulsión febril","Acumulación de líquido"], a:1 },
+  { tema:"Tema 14 — Sistema Nervioso", q:"¿Cómo se llaman las convulsiones producidas por fiebre alta en niños?", opts:["Epilepsia","Hidrocefalia","Convulsiones febriles","Encefalitis"], a:2 },
+  { tema:"Tema 15 — Sistema Endocrino", q:"¿Qué enfermedad endocrina implica elevación del azúcar en sangre?", opts:["Hipotiroidismo","Hipocalcemia","Hipertiroidismo","Diabetes"], a:3 },
+  { tema:"Tema 15 — Sistema Endocrino", q:"¿Cómo se llama la glándula que regula el metabolismo mediante tiroxina?", opts:["Páncreas","Tiroides","Hipófisis","Suprarrenal"], a:1 },
+  { tema:"Tema 16 — Musculoesquelético", q:"¿Qué enfermedad afecta articulaciones con inflamación autoinmune en niños?", opts:["Lupus eritematoso","Artritis séptica","Osteoporosis","Artritis reumatoidea"], a:3 },
+  { tema:"Tema 16 — Musculoesquelético", q:"¿Qué es la artritis séptica?", opts:["Inflamación autoinmune","Infección articular bacteriana","Fractura ósea","Luxación"], a:1 },
+  { tema:"Tema 17 — Tegumentos", q:"¿Qué infestación cutánea es causada por el ácaro Sarcoptes scabiei?", opts:["Pediculosis","Acné","Dermatitis","Escabiosis"], a:3 },
+  { tema:"Tema 17 — Tegumentos", q:"¿Qué es la pediculosis?", opts:["Infección por hongos","Infestación por piojos","Reacción alérgica","Quemadura solar"], a:1 },
+  { tema:"Tema 18 — Salud Adolescente", q:"¿Cómo se llama la infección de transmisión sexual causada por el VIH?", opts:["Sífilis","Blenorragia","Hepatitis","SIDA"], a:3 },
+  { tema:"Tema 18 — Salud Adolescente", q:"¿Qué se entiende por maltrato infantil?", opts:["Juego brusco","Todo daño físico o psicológico al niño","Disciplina escolar","Deporte de contacto"], a:1 },
+  { tema:"Tema 19 — Quemaduras", q:"¿Cómo se clasifican las quemaduras según profundidad?", opts:["Leves y graves","Internas y externas","Agudas y crónicas","Primer, segundo y tercer grado"], a:3 },
+  { tema:"Tema 19 — Quemaduras", q:"¿Qué grado de quemadura afecta toda la piel hasta tejido profundo?", opts:["Primer grado","Segundo grado","Tercer grado","Cuarto grado"], a:2 },
+  { tema:"Tema 20 — Primeros Auxilios", q:"¿Cuál es la sigla de la reanimación cardiopulmonar?", opts:["RAC","REA","RPM","RCP"], a:3 },
+  { tema:"Tema 20 — Primeros Auxilios", q:"¿Cómo se clasifican las fracturas?", opts:["Solo en abiertas y cerradas","Leves y graves","Completas e incompletas, abiertas y cerradas","Solo en completas e incompletas"], a:2 },
+];
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function prepareQuestions() {
+  return shuffleArray(allQ).slice(0, 13).map(q => {
+    const correctText = q.opts[q.a];
+    const shuffled = shuffleArray([...q.opts]);
+    return { ...q, shuffledOpts: shuffled, correctText };
+  });
+}
+
+let questions = [], current = 0, score = 0, timer = null, timeLeft = TIME, answered = false;
+
+function renderStart() {
+  document.getElementById('content').innerHTML = `
+    <div class="start-card">
+      <h2>¿Listos para el repaso? 🎯</h2>
+      <p>Respondé <strong>13 preguntas</strong> aleatorias sobre los contenidos de<br><strong>Enfermería Infanto Juvenil</strong>.<br>Cada pregunta tiene <strong>23 segundos</strong> para responder.</p>
+      <div class="info-chips">
+        <span class="chip green">13 preguntas</span>
+        <span class="chip blue">23 seg / pregunta</span>
+        <span class="chip">Respuestas aleatorias</span>
+      </div>
+      <button class="nav-btn" onclick="startTrivia()">Comenzar trivia ▶</button>
+    </div>`;
+}
+
+function startTrivia() {
+  questions = prepareQuestions();
+  current = 0;
+  score = 0;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  timeLeft = TIME;
+  clearInterval(timer);
+
+  const q = questions[current];
+  const pct = Math.round((current / 13) * 100);
+  const circumference = 2 * Math.PI * 24;
+
+  document.getElementById('content').innerHTML = `
+    <div class="progress-row">
+      <div class="progress-wrap"><div class="progress-fill" id="pbar" style="width:${pct}%"></div></div>
+      <div class="progress-label">${current + 1} / 13</div>
+    </div>
+    <div class="question-card">
+      <div class="q-meta">${q.tema}</div>
+      <div class="q-text">${q.q}</div>
+    </div>
+    <div class="timer-row">
+      <div class="timer-circle">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle cx="28" cy="28" r="24" fill="none" stroke="#e5e7eb" stroke-width="5"/>
+          <circle id="timer-arc" cx="28" cy="28" r="24" fill="none" stroke="#1D9E75" stroke-width="5"
+            stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="0" stroke-linecap="round"/>
+        </svg>
+        <div class="timer-num" id="tnum">${TIME}</div>
+      </div>
+      <div class="timer-info">
+        <div class="t-label" id="tl-label">Segundos restantes</div>
+        <div class="t-msg">¡Elegí tu respuesta!</div>
+      </div>
+    </div>
+    <div class="options" id="opts">
+      ${q.shuffledOpts.map((o, i) => `<button class="opt-btn" onclick="choose(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="feedback" id="fb"></div>
+    <button class="nav-btn" id="next-btn" style="display:none" onclick="next()">${current + 1 < 13 ? 'Siguiente pregunta →' : 'Ver resultados'}</button>`;
+
+  const C = circumference;
+  timer = setInterval(() => {
+    timeLeft--;
+    const el = document.getElementById('tnum');
+    const arc = document.getElementById('timer-arc');
+    const lbl = document.getElementById('tl-label');
+    if (el) el.textContent = timeLeft;
+    if (arc) {
+      const ratio = timeLeft / TIME;
+      arc.style.strokeDashoffset = (C * (1 - ratio)).toFixed(1);
+      arc.style.stroke = timeLeft <= 7 ? '#E24B4A' : '#1D9E75';
+    }
+    if (lbl) lbl.style.color = timeLeft <= 7 ? '#b91c1c' : '';
+    if (timeLeft <= 0) { clearInterval(timer); if (!answered) timeUp(); }
+  }, 1000);
+}
+
+function choose(idx) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timer);
+  const q = questions[current];
+  const btns = document.querySelectorAll('.opt-btn');
+  const fb = document.getElementById('fb');
+  const nextBtn = document.getElementById('next-btn');
+  btns.forEach(b => b.disabled = true);
+  btns.forEach((b, i) => { if (q.shuffledOpts[i] === q.correctText) b.classList.add('correct'); });
+  if (q.shuffledOpts[idx] === q.correctText) {
+    score++;
+    btns[idx].classList.add('correct');
+    fb.innerHTML = '✅ ¡Correcto!';
+    fb.className = 'feedback ok';
+  } else {
+    btns[idx].classList.add('wrong');
+    fb.innerHTML = '❌ Incorrecto. La respuesta correcta está en verde.';
+    fb.className = 'feedback fail';
+  }
+  nextBtn.style.display = 'block';
+}
+
+function timeUp() {
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.opt-btn');
+  const fb = document.getElementById('fb');
+  const nextBtn = document.getElementById('next-btn');
+  btns.forEach(b => b.disabled = true);
+  btns.forEach((b, i) => { if (q.shuffledOpts[i] === q.correctText) b.classList.add('correct'); });
+  fb.innerHTML = '⏱️ ¡Tiempo! La respuesta correcta está marcada en verde.';
+  fb.className = 'feedback fail';
+  nextBtn.style.display = 'block';
+}
+
+function next() {
+  current++;
+  if (current >= 13) renderResult();
+  else renderQuestion();
+}
+
+function renderResult() {
+  clearInterval(timer);
+  const pct = Math.round((score / 13) * 100);
+  let msg = '';
+  if (pct >= 85) msg = '🏆 ¡Excelente! Estás muy preparado/a para el examen.';
+  else if (pct >= 60) msg = '👍 Buen repaso. Revisá los temas donde fallaste.';
+  else msg = '📖 Seguí estudiando, ¡podés mejorar mucho!';
+
+  document.getElementById('content').innerHTML = `
+    <div class="result-card">
+      <h2>Trivia finalizada</h2>
+      <div class="score-big">${score}/13</div>
+      <div class="score-sub">${pct}% de respuestas correctas</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-footer">Enfermería Infanto Juvenil · Lic. Francisco Molina<br>CENT N° 74 — ATSA — 3° Año</div>
+      <button class="nav-btn" onclick="renderStart()">Jugar de nuevo 🔄</button>
+    </div>`;
+}
+
+renderStart();
+</script>
+</body>
+</html>
