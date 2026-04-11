@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TriviaEnfer 📋 | Administración en Enfermería</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--azul:#01579b;--dorado:#f57f17;--verde:#1b5e20;--rojo:#b71c1c;--amarillo:#f9a825;--naranja:#e65100;--fondo:#05080f;--card:#0a1020;--card2:#0e1830;--texto:#e3f2fd;--gris:#64b5f6;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:var(--fondo);color:var(--texto);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow-x:hidden;}
+  body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 25% 25%,rgba(1,87,155,.14) 0%,transparent 50%),radial-gradient(ellipse at 75% 75%,rgba(245,127,23,.07) 0%,transparent 50%);pointer-events:none;z-index:0;}
+  .container{width:100%;max-width:760px;padding:20px;position:relative;z-index:1;}
+  #pantalla-inicio{text-align:center;animation:fadeInUp .6s ease;}
+  .logo-emoji{font-size:3rem;display:block;margin-bottom:8px;animation:pulse 2s infinite;}
+  .logo{font-family:'Fredoka One',cursive;font-size:2.6rem;background:linear-gradient(135deg,#01579b,#f57f17);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+  .profesor-badge{display:inline-block;background:linear-gradient(135deg,#01579b,#0277bd);padding:8px 22px;border-radius:30px;font-size:.95rem;font-weight:800;margin-bottom:4px;color:white;}
+  .inst-badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:4px 14px;border-radius:20px;font-size:.78rem;color:var(--gris);margin-bottom:10px;}
+  .subtitulo{font-size:.95rem;color:var(--gris);margin-bottom:14px;}
+  .badge-materia{display:inline-block;background:linear-gradient(135deg,#01579b,#f57f17);padding:6px 18px;border-radius:20px;font-size:.82rem;font-weight:700;margin-bottom:18px;letter-spacing:1px;color:white;}
+  .temas-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:18px;}
+  @media(max-width:520px){.temas-grid{grid-template-columns:repeat(2,1fr);}}
+  .tema-chip{background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:7px 5px;text-align:center;font-size:.66rem;font-weight:700;line-height:1.3;color:#90caf9;}
+  .tema-chip .ic{font-size:.9rem;display:block;margin-bottom:2px;}
+  .stats-inicio{display:flex;justify-content:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .stat-item{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 20px;text-align:center;}
+  .stat-num{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--amarillo);}
+  .stat-label{font-size:.75rem;color:var(--gris);margin-top:2px;}
+  .btn-jugar{background:linear-gradient(135deg,#01579b,#f57f17);color:white;border:none;padding:16px 54px;font-size:1.2rem;font-family:'Fredoka One',cursive;border-radius:50px;cursor:pointer;letter-spacing:1px;box-shadow:0 8px 30px rgba(1,87,155,.5);transition:transform .2s,box-shadow .2s;}
+  .btn-jugar:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 40px rgba(1,87,155,.7);}
+  .firma{margin-top:16px;font-size:.78rem;color:rgba(255,255,255,.2);}
+  #pantalla-juego{display:none;animation:fadeInUp .5s ease;}
+  .header-juego{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .progreso-texto{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--gris);}
+  .progreso-texto span{color:var(--amarillo);font-size:1.3rem;}
+  .puntaje-display{background:var(--card);border:1px solid rgba(249,168,37,.3);border-radius:12px;padding:7px 15px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--amarillo);}
+  .barra-progreso{background:rgba(255,255,255,.08);border-radius:10px;height:7px;margin-bottom:14px;overflow:hidden;}
+  .barra-fill{height:100%;background:linear-gradient(90deg,#01579b,#f57f17);border-radius:10px;transition:width .5s ease;}
+  .timer-container{display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .timer-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1.4rem;border:3px solid #01579b;background:var(--card);transition:border-color .3s,color .3s;}
+  .timer-circle.urgente{border-color:var(--rojo);color:var(--rojo);animation:tiembla .3s infinite;}
+  .categoria-tag{display:inline-block;background:rgba(1,87,155,.2);border:1px solid rgba(1,87,155,.5);color:#90caf9;padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+  .pregunta-card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px;margin-bottom:14px;}
+  .pregunta-texto{font-size:1.05rem;font-weight:700;line-height:1.5;color:#e3f2fd;}
+  .opciones{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px;}
+  @media(max-width:480px){.opciones{grid-template-columns:1fr;}}
+  .opcion-btn{background:var(--card2);border:2px solid rgba(255,255,255,.09);color:var(--texto);padding:13px 14px;border-radius:13px;font-size:.9rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;text-align:left;transition:all .2s;line-height:1.4;}
+  .opcion-btn:hover:not(:disabled){border-color:#01579b;background:rgba(1,87,155,.18);transform:translateY(-2px);}
+  .opcion-btn.correcta{background:rgba(27,94,32,.2);border-color:var(--verde);color:#a5d6a7;animation:correctaAnim .4s ease;}
+  .opcion-btn.incorrecta{background:rgba(183,28,28,.15);border-color:var(--rojo);color:#ef9a9a;}
+  .opcion-btn.resaltar{background:rgba(27,94,32,.15);border-color:var(--verde);}
+  .opcion-btn:disabled{cursor:default;}
+  .letra-opcion{display:inline-block;width:24px;height:24px;border-radius:7px;background:rgba(255,255,255,.1);text-align:center;line-height:24px;margin-right:7px;font-size:.8rem;}
+  .feedback{text-align:center;padding:11px 16px;border-radius:13px;font-weight:800;font-size:.9rem;margin-bottom:12px;display:none;animation:fadeInUp .3s ease;}
+  .feedback.correcto{background:rgba(27,94,32,.15);border:1px solid rgba(27,94,32,.4);color:#a5d6a7;}
+  .feedback.incorrecto{background:rgba(183,28,28,.12);border:1px solid rgba(183,28,28,.3);color:#ef9a9a;}
+  .btn-siguiente{width:100%;background:linear-gradient(135deg,#01579b,#014f8c);color:white;border:none;padding:13px;border-radius:13px;font-size:1rem;font-family:'Fredoka One',cursive;cursor:pointer;display:none;transition:opacity .2s,transform .2s;}
+  .btn-siguiente:hover{opacity:.9;transform:translateY(-2px);}
+  .prof-mini{text-align:center;font-size:.7rem;color:rgba(255,255,255,.16);margin-top:10px;}
+  #pantalla-resultado{display:none;text-align:center;animation:fadeInUp .6s ease;}
+  .trofeo{font-size:5rem;margin-bottom:12px;animation:bounce 1s ease;}
+  .resultado-titulo{font-family:'Fredoka One',cursive;font-size:2.2rem;margin-bottom:8px;}
+  .resultado-sub{color:var(--gris);font-size:.95rem;margin-bottom:20px;}
+  .puntaje-final{font-family:'Fredoka One',cursive;font-size:4rem;background:linear-gradient(135deg,var(--amarillo),var(--naranja));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:6px;}
+  .puntaje-de{color:var(--gris);font-size:.9rem;margin-bottom:20px;}
+  .stats-res{display:flex;justify-content:center;gap:13px;margin-bottom:20px;flex-wrap:wrap;}
+  .stat-r{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:13px 18px;min-width:100px;}
+  .stat-r-num{font-family:'Fredoka One',cursive;font-size:1.8rem;}
+  .stat-r-num.v{color:var(--verde);}.stat-r-num.r{color:var(--rojo);}.stat-r-num.a{color:var(--amarillo);}
+  .stat-r-label{font-size:.75rem;color:var(--gris);margin-top:3px;}
+  .barra-res{background:rgba(255,255,255,.08);border-radius:10px;height:12px;margin-bottom:20px;overflow:hidden;}
+  .barra-res-fill{height:100%;border-radius:10px;transition:width 1s ease .3s;background:linear-gradient(90deg,var(--rojo),var(--amarillo),var(--verde));}
+  .btn-reiniciar{background:linear-gradient(135deg,#01579b,#f57f17);color:white;border:none;padding:14px 46px;font-size:1.1rem;font-family:'Fredoka One',cursive;border-radius:50px;cursor:pointer;box-shadow:0 8px 28px rgba(1,87,155,.4);transition:transform .2s;}
+  .btn-reiniciar:hover{transform:translateY(-3px) scale(1.03);}
+  .firma-res{margin-top:16px;font-size:.76rem;color:rgba(255,255,255,.18);}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+  @keyframes bounce{0%,100%{transform:translateY(0);}30%{transform:translateY(-20px);}60%{transform:translateY(-10px);}}
+  @keyframes correctaAnim{0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
+  @keyframes tiembla{0%,100%{transform:rotate(0);}25%{transform:rotate(-3deg);}75%{transform:rotate(3deg);}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- PANTALLA INICIO -->
+  <div id="pantalla-inicio">
+    <span class="logo-emoji">📋</span>
+    <div class="logo">TriviaEnfer</div>
+    <div class="profesor-badge">👨‍🏫 Lic. Francisco Molina</div><br>
+    <div class="inst-badge">CENT N°74 · ATSA · Enfermero Profesional · 3° Año</div>
+    <p class="subtitulo">Repaso para exámenes y finales · Administración en Enfermería</p>
+    <div class="badge-materia">📋 INTRODUCCIÓN A LA ADMINISTRACIÓN EN ENFERMERÍA</div>
+    <div class="temas-grid">
+      <div class="tema-chip"><span class="ic">⚙️</span>T1: Administración</div>
+      <div class="tema-chip"><span class="ic">🏥</span>T2: Sistema Hospitalario</div>
+      <div class="tema-chip"><span class="ic">🛏️</span>T3: Unidad de Enfermería</div>
+      <div class="tema-chip"><span class="ic">🗂️</span>T4: Organización de la Unidad</div>
+      <div class="tema-chip"><span class="ic">▶️</span>T5: Ejecución y Jefatura</div>
+      <div class="tema-chip"><span class="ic">🔍</span>T6: Control y Normas</div>
+      <div class="tema-chip"><span class="ic">🏢</span>T7: Departamento de Enfermería</div>
+      <div class="tema-chip"><span class="ic">👁️</span>T8: Supervisión y Evaluación</div>
+      <div class="tema-chip"><span class="ic">🤝</span>T9: Liderazgo y RR.HH.</div>
+      <div class="tema-chip"><span class="ic">📢</span>T10: Comunicación</div>
+      <div class="tema-chip"><span class="ic">🆕</span>T11: Orientación al Personal</div>
+      <div class="tema-chip"><span class="ic">📈</span>T12: Asistencia Progresiva</div>
+    </div>
+    <div class="stats-inicio">
+      <div class="stat-item"><div class="stat-num">60</div><div class="stat-label">Preguntas</div></div>
+      <div class="stat-item"><div class="stat-num">12</div><div class="stat-label">Temas</div></div>
+      <div class="stat-item"><div class="stat-num">25s</div><div class="stat-label">Por pregunta</div></div>
+    </div>
+    <button class="btn-jugar" onclick="iniciarJuego()">¡EMPEZAR REPASO! 🚀</button>
+    <p class="firma">© Lic. Francisco Molina · CENT N°74 ATSA · Administración en Enfermería 3° Año</p>
+  </div>
+
+  <!-- PANTALLA JUEGO -->
+  <div id="pantalla-juego">
+    <div class="header-juego">
+      <div class="progreso-texto">Pregunta <span id="num-pregunta">1</span> de 60</div>
+      <div class="puntaje-display">⭐ <span id="puntaje-actual">0</span></div>
+    </div>
+    <div class="barra-progreso"><div class="barra-fill" id="barra" style="width:0%"></div></div>
+    <div class="timer-container"><div class="timer-circle" id="timer">25</div></div>
+    <div style="text-align:center;margin-bottom:10px;"><span class="categoria-tag" id="categoria-tag">Tema</span></div>
+    <div class="pregunta-card"><p class="pregunta-texto" id="pregunta-texto">Cargando...</p></div>
+    <div class="opciones" id="opciones-container"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-siguiente" id="btn-siguiente" onclick="siguientePregunta()">Siguiente →</button>
+    <p class="prof-mini">Lic. Francisco Molina · CENT N°74 ATSA · Administración en Enfermería</p>
+  </div>
+
+  <!-- PANTALLA RESULTADO -->
+  <div id="pantalla-resultado">
+    <div class="trofeo" id="trofeo">🏆</div>
+    <div class="resultado-titulo" id="res-titulo">¡Excelente!</div>
+    <div class="resultado-sub" id="res-sub">Completaste el repaso</div>
+    <div class="puntaje-final" id="puntaje-final">0</div>
+    <div class="puntaje-de">puntos obtenidos</div>
+    <div class="stats-res">
+      <div class="stat-r"><div class="stat-r-num v" id="res-c">0</div><div class="stat-r-label">✅ Correctas</div></div>
+      <div class="stat-r"><div class="stat-r-num r" id="res-i">0</div><div class="stat-r-label">❌ Incorrectas</div></div>
+      <div class="stat-r"><div class="stat-r-num a" id="res-p">0%</div><div class="stat-r-label">📊 Precisión</div></div>
+    </div>
+    <div class="barra-res"><div class="barra-res-fill" id="barra-res" style="width:0%"></div></div>
+    <button class="btn-reiniciar" onclick="reiniciar()">🔄 Jugar de nuevo</button>
+    <p class="firma-res">Lic. Francisco Molina · CENT N°74 ATSA · Administración en Enfermería</p>
+  </div>
+
+</div>
+<script>
+const TIEMPO=25, TOTAL=60;
+const preguntas=[
+
+// T1: ADMINISTRACIÓN
+{cat:"T1: Administración",texto:"¿Cómo define George Terry a la administración?",opciones:["Lograr un objetivo predeterminado mediante el esfuerzo ajeno","Planear y organizar los recursos de una empresa","Controlar el trabajo del personal a cargo","Tomar decisiones en situaciones de emergencia"],correcta:0},
+{cat:"T1: Administración",texto:"¿Cuál es la primera función del proceso administrativo?",opciones:["Planeación","Organización","Control","Integración"],correcta:0},
+{cat:"T1: Administración",texto:"¿Qué postula el principio de 'Unidad de Mando' de Fayol?",opciones:["Cada empleado no debe recibir órdenes de más de un superior","Todo el personal debe reunirse con frecuencia para coordinar","Las decisiones se toman siempre desde el nivel más alto","El jefe debe supervisar a todos los empleados directamente"],correcta:0},
+{cat:"T1: Administración",texto:"¿Cuántos principios enumeró Fayol basados en su experiencia?",opciones:["14 principios","10 principios","7 principios","20 principios"],correcta:0},
+{cat:"T1: Administración",texto:"¿Qué función cumple la Coordinación en el proceso administrativo?",opciones:["Está presente en todas las etapas y establece armonía entre todos los actos","Solo actúa durante la etapa de control final","Se aplica únicamente en la fase de planeación","Es exclusiva de la etapa de integración del personal"],correcta:0},
+
+// T2: SISTEMA HOSPITALARIO
+{cat:"T2: Sistema Hospitalario",texto:"¿Qué son las Actividades Finales de un hospital?",opciones:["Servicios destinados a proporcionar prestaciones directas al paciente","Servicios que apoyan tanto a internación como a consultorios externos","Servicios independientes de la hospitalización y del ambulatorio","Servicios de mantenimiento, ropería y comunicaciones del hospital"],correcta:0},
+{cat:"T2: Sistema Hospitalario",texto:"¿Qué representa la 'Entrada' en un sistema abierto hospitalario?",opciones:["Recursos humanos, materiales, financieros e infraestructura","Las prestaciones de enfermería que ofrece el hospital","La evaluación continua del producto final del sistema","Los procesos que interactúan para cumplir los propósitos"],correcta:0},
+{cat:"T2: Sistema Hospitalario",texto:"¿Cuál es la función del Organigrama en una institución?",opciones:["Representa gráficamente la estructura interna y sus relaciones","Lista las normas y procedimientos de cada servicio","Registra el historial laboral de cada empleado","Define el presupuesto asignado a cada departamento"],correcta:0},
+{cat:"T2: Sistema Hospitalario",texto:"¿En qué nivel de complejidad hospitalaria se encuentran las 4 clínicas básicas con internación y cirugía regular?",opciones:["Nivel IV","Nivel II","Nivel VI","Nivel VII"],correcta:0},
+{cat:"T2: Sistema Hospitalario",texto:"¿Qué son los Efectores de Consulta Ambulatoria?",opciones:["Atienden al paciente que puede trasladarse por sus propios medios","Atienden al paciente imposibilitado de trasladarse a la institución","Exigen internación del paciente para concentrar los servicios","Solo atienden urgencias y emergencias médicas las 24 horas"],correcta:0},
+
+// T3: UNIDAD DE ENFERMERÍA
+{cat:"T3: Unidad de Enfermería",texto:"¿Cuántos pacientes como máximo se recomienda asignar por enfermero en el sistema por paciente?",opciones:["6 pacientes por enfermero por turno","10 pacientes por enfermero por turno","4 pacientes por enfermero por turno","12 pacientes por enfermero por turno"],correcta:0},
+{cat:"T3: Unidad de Enfermería",texto:"¿Cuál es la ventaja principal del sistema de trabajo por paciente?",opciones:["Permite atención integral e individual y favorece la relación enfermero-paciente","Es económico en tiempo porque se reparten tareas rutinarias","No requiere muchos recursos humanos para funcionar bien","Permite enseñar un procedimiento específico con mayor rapidez"],correcta:0},
+{cat:"T3: Unidad de Enfermería",texto:"¿En qué consiste el sistema de trabajo por funciones?",opciones:["Asignar actividades rutinarias en forma equitativa entre los enfermeros del servicio","Distribuir un número determinado de pacientes a cada enfermero del turno","Formar equipos que se encarguen de pacientes desde el ingreso al egreso","Combinar asignación por pacientes y por funciones según la gravedad"],correcta:0},
+{cat:"T3: Unidad de Enfermería",texto:"¿Dónde debe ubicarse idealmente la Estación de Enfermería dentro de la unidad?",opciones:["En la parte central con paredes vidriadas para visualizar pacientes y corredor","En el extremo del pasillo para evitar el ruido de las habitaciones","Junto a los vestuarios del personal para facilitar el acceso rápido","Cerca de la sala de utilidades para optimizar el tiempo de preparación"],correcta:0},
+{cat:"T3: Unidad de Enfermería",texto:"¿Qué ventaja tiene el sistema de trabajo por equipos?",opciones:["Desarrolla espíritu de grupo y permite cuidado continuo desde el ingreso al egreso","Es el más económico en recursos humanos de todos los sistemas","Resulta más eficaz cuando el personal es escaso e insuficiente","Permite realizar con rapidez las actividades urgentes del turno"],correcta:0},
+
+// T4: ORGANIZACIÓN DE LA UNIDAD
+{cat:"T4: Organización de la Unidad",texto:"¿Qué es la Centralización en administración?",opciones:["Concentra la autoridad a nivel central para la toma de decisiones","Difunde la toma de decisiones por toda la organización","Asigna autoridad a los niveles más bajos del organigrama","Distribuye las funciones entre varios departamentos iguales"],correcta:0},
+{cat:"T4: Organización de la Unidad",texto:"¿Qué es la Delegación según el módulo?",opciones:["Asignar tareas a una persona según su capacidad y cargo, dándole autoridad para decidir","Transferir la responsabilidad total a un subordinado de forma permanente","Distribuir el trabajo en partes iguales entre todos los miembros del equipo","Designar a un reemplazante para que asuma todas las funciones del jefe"],correcta:0},
+{cat:"T4: Organización de la Unidad",texto:"¿Qué establece la Norma 8 del Programa Nacional de Garantía de Calidad?",opciones:["La estructura del servicio de enfermería debe graficarse e incluirse en la estructura general del establecimiento","Cada punto de la organización debe tener definidas sus funciones y perfil requerido","La organización se relaciona con los criterios del establecimiento en su conjunto","El organigrama debe ser claro, comprensible y realizarse por niveles jerárquicos"],correcta:0},
+{cat:"T4: Organización de la Unidad",texto:"¿Cuáles son las cinco áreas funcionales de la Unidad de Enfermería?",opciones:["Cuidados del paciente, enseñanza, administración, supervisión e investigación","Planeación, organización, integración, dirección y control del servicio","Internación, consultorios, emergencias, quirófano y cuidados intensivos","Personal, materiales, presupuesto, docencia y control de calidad"],correcta:0},
+{cat:"T4: Organización de la Unidad",texto:"¿Qué muestra la Cadena de Mando en una organización?",opciones:["La línea de toma de decisiones: quién tiene autoridad sobre quién","El orden en que se deben ejecutar los procedimientos de enfermería","Los niveles de formación académica del personal de cada servicio","El recorrido que siguen las notas y comunicaciones escritas"],correcta:0},
+
+// T5: EJECUCIÓN Y JEFATURA
+{cat:"T5: Ejecución y Jefatura",texto:"¿Cómo define George Terry la Ejecución?",opciones:["Hacer que todos los miembros del grupo logren los objetivos según los planes realizados por el jefe","Redactar los planes de trabajo para que el personal los lleve a cabo","Supervisar las tareas del personal para verificar que se cumplan","Impartir órdenes escritas a cada integrante del equipo de trabajo"],correcta:0},
+{cat:"T5: Ejecución y Jefatura",texto:"¿Cómo actúa el dirigente del tipo 'Laissez Faire'?",opciones:["No guía ni orienta y deja que el personal haga lo que desee","Imparte órdenes claras y precisas sin dar participación al grupo","Permite la participación del grupo e inspira confianza en todos","Satisface en todo al personal poniendo sus deseos por encima del servicio"],correcta:0},
+{cat:"T5: Ejecución y Jefatura",texto:"¿En qué circunstancias se recomienda impartir órdenes escritas?",opciones:["Cuando la materia es compleja o se necesita dejar constancia permanente","Cuando el personal está cerca y la situación es una emergencia urgente","Cuando la orden es sencilla y el funcionario puede cumplirla de inmediato","Cuando no hay tiempo suficiente para redactar la orden correctamente"],correcta:0},
+{cat:"T5: Ejecución y Jefatura",texto:"¿Cuál es la diferencia entre una 'orden' y una 'instrucción'?",opciones:["La orden dice qué debe hacerse; la instrucción dice cómo debe hacerse","La orden es verbal y la instrucción es siempre escrita en un manual","La orden viene del director y la instrucción viene del jefe de unidad","La orden es para el personal y la instrucción es para el paciente"],correcta:0},
+{cat:"T5: Ejecución y Jefatura",texto:"¿Qué es la Autoridad según el módulo?",opciones:["Facultad o derecho de actuar, mandar y exigir acción a otros para alcanzar el objetivo","Capacidad personal de influir en los demás sin necesidad de un cargo formal","Conjunto de conocimientos técnicos que le dan respeto al jefe de unidad","Responsabilidad de rendir cuentas ante otros por las tareas encomendadas"],correcta:0},
+
+// T6: CONTROL Y NORMAS
+{cat:"T6: Control y Normas",texto:"¿Cuál es el propósito principal del Control en administración?",opciones:["Evaluar el logro de objetivos y adoptar medidas correctivas si es necesario","Distribuir el trabajo entre el personal de manera equitativa y eficiente","Redactar los planes de trabajo para la siguiente jornada laboral","Capacitar al personal de nuevo ingreso en los procedimientos del servicio"],correcta:0},
+{cat:"T6: Control y Normas",texto:"¿Qué es una Norma según el módulo?",opciones:["Guía general de acción aceptada por la autoridad competente","Secuencia lógica de pasos para realizar una actividad determinada","Documento que registra ordenadamente las instrucciones del hospital","Plan detallado de las actividades a cumplir durante las 24 horas"],correcta:0},
+{cat:"T6: Control y Normas",texto:"¿Qué es un Procedimiento?",opciones:["Secuencia lógica de los pasos específicos para realizar una actividad","Guía general de acción que requiere criterio personal para aplicarse","Lista de normas que regulan el comportamiento del personal de salud","Documento que registra los hechos importantes de cada turno de guardia"],correcta:0},
+{cat:"T6: Control y Normas",texto:"¿Cuál es el Control Simultáneo?",opciones:["Supervisa la marcha real de las operaciones para asegurar el cumplimiento de los objetivos","Se concentra en los resultados finales para determinar acciones futuras","Impide que surjan desviaciones en los recursos usados en la institución","Mide y corrige el desempeño comparándolo con los planes establecidos"],correcta:0},
+{cat:"T6: Control y Normas",texto:"¿Qué es la Coordinación según el módulo?",opciones:["Establecer armonía entre todos los actos de una unidad para facilitar su funcionamiento","Distribuir las tareas entre el personal según su nivel de capacitación","Verificar que los resultados obtenidos coincidan con los objetivos planeados","Supervisar al personal para orientarlo y corregir los errores cometidos"],correcta:0},
+
+// T7: DEPARTAMENTO DE ENFERMERÍA
+{cat:"T7: Departamento de Enfermería",texto:"¿Qué porcentaje del personal total del hospital constituye el personal de enfermería?",opciones:["Del 50% al 60% del total del personal del hospital","Del 20% al 30% del total del personal del hospital","Del 30% al 40% del total del personal del hospital","Del 70% al 80% del total del personal del hospital"],correcta:0},
+{cat:"T7: Departamento de Enfermería",texto:"¿Cuál es una característica distintiva del Departamento de Enfermería?",opciones:["Brinda servicio ininterrumpido las 24 horas los 365 días del año","Concentra solo el 20% del presupuesto total del hospital","Trabaja exclusivamente dentro del hospital sin proyección a la comunidad","Sus funciones se limitan a la atención técnica directa del paciente"],correcta:0},
+{cat:"T7: Departamento de Enfermería",texto:"¿Cuál es el porcentaje del presupuesto hospitalario que se invierte en personal de enfermería?",opciones:["Del 35% al 45% del presupuesto del hospital","Del 10% al 20% del presupuesto del hospital","Del 50% al 60% del presupuesto del hospital","Del 20% al 30% del presupuesto del hospital"],correcta:0},
+{cat:"T7: Departamento de Enfermería",texto:"¿Qué establece la política del Departamento de Enfermería respecto al paciente?",opciones:["El paciente tiene derecho a recibir atención de personal calificado y a ser respetado en su entorno biopsicosocial","El paciente debe adaptarse a las normas del hospital sin importar sus condiciones particulares","El paciente solo puede recibir visitas durante los horarios establecidos por el director","El paciente tiene obligación de cumplir todas las indicaciones sin hacer preguntas"],correcta:0},
+{cat:"T7: Departamento de Enfermería",texto:"¿Qué función de planeación cumple el Departamento de Enfermería hacia el personal?",opciones:["Investigación de recursos, diagnóstico situacional, determinación del plan de trabajo y cálculo del personal","Solo distribuir los turnos y los días de descanso del personal de enfermería","Únicamente elaborar el presupuesto anual y gestionar las compras de insumos","Solo realizar las entrevistas de selección del personal de nuevo ingreso"],correcta:0},
+
+// T8: SUPERVISIÓN Y EVALUACIÓN
+{cat:"T8: Supervisión y Evaluación",texto:"¿Cuál es la finalidad principal de la supervisión en enfermería?",opciones:["Mejorar la calidad de la atención, impulsar el desarrollo del personal y optimizar los recursos","Detectar errores del personal para aplicar las medidas disciplinarias correspondientes","Controlar el ausentismo del personal y verificar la asistencia diaria a los turnos","Reemplazar al personal que no cumple y redistribuir las tareas del turno"],correcta:0},
+{cat:"T8: Supervisión y Evaluación",texto:"¿Qué es la Supervisión Indirecta?",opciones:["Se realiza a través de registros, estadísticas, expedientes, informes y planes de atención","Se realiza mediante observación directa, recorrido, entrevista y enseñanza en el servicio","Se aplica solo cuando el supervisor no puede estar presente en el turno","Se lleva a cabo únicamente a través de encuestas aplicadas al personal"],correcta:0},
+{cat:"T8: Supervisión y Evaluación",texto:"¿Qué porcentaje del tiempo de supervisión se recomienda dedicar al personal?",opciones:["El 45% del tiempo total de supervisión","El 20% del tiempo total de supervisión","El 10% del tiempo total de supervisión","El 30% del tiempo total de supervisión"],correcta:0},
+{cat:"T8: Supervisión y Evaluación",texto:"¿Qué es el Supervisor de Enfermería dentro de la estructura jerárquica?",opciones:["El eslabón entre la dirección y el personal aplicativo del servicio","El responsable directo de cada paciente internado en la unidad","El encargado exclusivo de la evaluación del personal de nuevo ingreso","El director que toma las decisiones finales en el departamento"],correcta:0},
+{cat:"T8: Supervisión y Evaluación",texto:"¿Cuánto tiempo se recomienda dedicar a los Servicios durante la supervisión?",opciones:["El 20% del tiempo total de supervisión","El 45% del tiempo total de supervisión","El 10% del tiempo total de supervisión","El 5% del tiempo total de supervisión"],correcta:0},
+
+// T9: LIDERAZGO Y RELACIONES HUMANAS
+{cat:"T9: Liderazgo y Relaciones Humanas",texto:"¿Cómo actúa el líder Democrático?",opciones:["Define la situación, plantea el problema y anima a todos a expresar ideas para tomar la decisión más consensuada","Adopta decisiones y luego las comunica al grupo sin posibilidad de cambios","Presenta alternativas preparadas de antemano y pide opinión sobre ellas","Permite la libre acción del grupo sin ninguna interferencia ni orientación"],correcta:0},
+{cat:"T9: Liderazgo y Relaciones Humanas",texto:"¿Qué define a un líder según el módulo?",opciones:["Persona que demuestra capacidad para influir en los demás para que trabajen lo mejor posible","Persona que ocupa el cargo más alto dentro del organigrama institucional","Persona que posee el mayor nivel académico dentro del equipo de trabajo","Persona que tiene más años de experiencia en el servicio de enfermería"],correcta:0},
+{cat:"T9: Liderazgo y Relaciones Humanas",texto:"¿Qué caracteriza al estilo de liderazgo Autocrático?",opciones:["Adopta decisiones y luego las comunica al grupo sin dar participación","Define la situación y anima al grupo a expresar sus ideas libremente","Presenta varias alternativas y pide la opinión del grupo antes de decidir","Deja que cada miembro del grupo fije sus propios objetivos de trabajo"],correcta:0},
+{cat:"T9: Liderazgo y Relaciones Humanas",texto:"¿Qué es el Poder de la Pericia como fuente de poder?",opciones:["Se obtiene al mostrar conocimientos, habilidades e información ante los demás","Se da cuando el grupo admira al jefe y quiere parecerse a él en todo","Proviene del miedo del personal al castigo o a las consecuencias negativas","Surge de la posición oficial dentro de la jerarquía organizativa formal"],correcta:0},
+{cat:"T9: Liderazgo y Relaciones Humanas",texto:"¿Qué postula la Teoría del Carisma sobre el liderazgo?",opciones:["El líder inspira compromiso emocional, despertando lealtad y entusiasmo en los demás","El líder ideal es eficiente en cualquier situación independientemente del grupo","El estilo de liderazgo depende del nivel de madurez de los seguidores","El líder debe adaptarse a cada situación siendo a veces líder y a veces seguidor"],correcta:0},
+
+// T10: COMUNICACIÓN
+{cat:"T10: Comunicación",texto:"¿Qué es la Entrega de Guardia?",opciones:["Procedimiento por el cual el personal de cada turno informa al siguiente todas las novedades de pacientes y unidad","Documento escrito donde se registran los medicamentos administrados durante el turno","Reunión diaria del equipo de enfermería para coordinar las actividades del día","Informe mensual que la jefa de unidad presenta al departamento de enfermería"],correcta:0},
+{cat:"T10: Comunicación",texto:"¿Qué es el Cuaderno de Novedades?",opciones:["Documento donde se registran ordenadamente las novedades de cada paciente y la unidad en cada turno","Lista de medicamentos pendientes de administrar al finalizar cada turno de guardia","Registro de las actividades de enseñanza realizadas por el personal durante el mes","Planilla donde se anota la asistencia y puntualidad del personal de cada turno"],correcta:0},
+{cat:"T10: Comunicación",texto:"¿Qué es el Flujo de Información Ascendente?",opciones:["La información fluye desde los niveles bajos hacia los superiores: datos, sugerencias y quejas","Las órdenes e instrucciones fluyen desde los jefes hacia el personal de menor nivel","Es el intercambio de información entre personas del mismo nivel jerárquico","La comunicación entre personal de diferentes departamentos y niveles distintos"],correcta:0},
+{cat:"T10: Comunicación",texto:"¿Cuál es una barrera de la comunicación mencionada en el módulo?",opciones:["Los ruidos, la deficiente redacción del mensaje y no saber escuchar","El uso de comunicación escrita para transmitir órdenes complejas","El empleo de reuniones frecuentes para informar al personal","La comunicación diagonal entre departamentos distintos del hospital"],correcta:0},
+{cat:"T10: Comunicación",texto:"¿Qué son los Registros de Enfermería?",opciones:["Elementos científicos y legales que documentan la atención brindada al paciente","Planillas donde se registra la asistencia y puntualidad del personal","Informes estadísticos mensuales que se envían a la dirección del hospital","Notas internas que el jefe de unidad envía al departamento de enfermería"],correcta:0},
+
+// T11: ORIENTACIÓN AL PERSONAL
+{cat:"T11: Orientación al Personal",texto:"¿Cuánto tiempo mínimo debe abarcar un programa de orientación para personal nuevo?",opciones:["No inferior a tres meses bajo supervisión directa de persona entrenada","No inferior a una semana con presentación al personal del servicio","No inferior a seis meses con rotación por todos los servicios del hospital","No inferior a quince días con evaluación al finalizar el período"],correcta:0},
+{cat:"T11: Orientación al Personal",texto:"¿Qué es la Capacitación?",opciones:["Conjunto de medios organizados para que un individuo adquiera destrezas, valores o conocimientos para desempeñarse con mayor eficacia","Puesta al día de conocimientos y habilidades que se consideren obsoletos en la práctica","Proceso para desarrollar habilidades y destrezas requeridas para un puesto específico","Programa continuo para reforzar la confianza del trabajador y apoyar la creatividad"],correcta:0},
+{cat:"T11: Orientación al Personal",texto:"¿Cuál es el objetivo principal del Programa de Orientación?",opciones:["Que la persona nueva conozca la institución, su puesto, funciones y relaciones con los demás","Evaluar las habilidades técnicas del personal antes de asignarle tareas complejas","Aplicar medidas disciplinarias al personal que no cumple con las normas establecidas","Determinar qué personal necesita adiestramiento adicional en procedimientos específicos"],correcta:0},
+{cat:"T11: Orientación al Personal",texto:"¿Qué es el Adiestramiento?",opciones:["Proceso continuo y organizado para desarrollar conocimientos y destrezas para desempeñar el puesto de trabajo","Proceso de actualización de conocimientos que han quedado obsoletos con el tiempo","Conjunto de medios para adquirir valores, destrezas y conocimientos con mayor eficacia","Programa general de educación para reforzar la confianza del trabajador y la creatividad"],correcta:0},
+{cat:"T11: Orientación al Personal",texto:"¿Cuál es la mejor forma de evaluar un programa de orientación?",opciones:["Observar al personal de enfermería realizando sus funciones en el servicio","Aplicar un examen escrito al finalizar el período de orientación del personal","Revisar los registros de asistencia y puntualidad durante el período de inducción","Pedir al personal nuevo que elabore un informe de sus actividades diarias"],correcta:0},
+
+// T12: ASISTENCIA PROGRESIVA
+{cat:"T12: Asistencia Progresiva del Paciente",texto:"¿Qué son los Cuidados Intensivos en el sistema de asistencia progresiva?",opciones:["Atención para pacientes críticos o graves que requieren cuidados permanentes de enfermería","Atención para pacientes que requieren un cuidado moderado y supervisión periódica","Atención para pacientes que son físicamente autosuficientes pero requieren tratamiento","Atención para pacientes que pueden recibir tratamiento en su propio domicilio"],correcta:0},
+{cat:"T12: Asistencia Progresiva del Paciente",texto:"¿Cuál es la 1ª etapa del Proceso de Atención de Enfermería?",opciones:["Recolección y selección de datos del paciente en forma directa o indirecta","Diagnóstico de enfermería emitiendo un juicio después de la valoración","Planeamiento de los cuidados según las necesidades del paciente","Ejecución o implementación del plan de cuidados establecido"],correcta:0},
+{cat:"T12: Asistencia Progresiva del Paciente",texto:"¿Qué es el Alta Médica?",opciones:["Acto que determina la finalización de la modalidad asistencial por cura, mejoría o inalteración del estado","Traslado del paciente a otro establecimiento de salud al momento del egreso","Retiro voluntario del paciente que suspende la internación por propia voluntad","Egreso por defunción cuando desaparece todo signo de vida del paciente"],correcta:0},
+{cat:"T12: Asistencia Progresiva del Paciente",texto:"¿Cuál es la 5ª y última etapa del PAE?",opciones:["Evaluación del plan: mide el logro de las metas y permite reconocer errores","Ejecución o implementación del plan establecido para el paciente","Diagnóstico de enfermería que establece una conclusión después de la valoración","Planeamiento del cuidado tomando en cuenta las necesidades del paciente"],correcta:0},
+{cat:"T12: Asistencia Progresiva del Paciente",texto:"¿Para qué sirve el Plan de Alta de Enfermería?",opciones:["Proporciona información individualizada al paciente y al cuidador primario sobre sus cuidados fuera del hospital","Registra todos los procedimientos realizados durante la internación del paciente","Informa al equipo médico sobre el estado del paciente al momento del egreso","Documenta las indicaciones del médico para el siguiente control ambulatorio"],correcta:0},
+
+];
+
+let indice=0,puntaje=0,correctas=0,incorrectas=0;
+let timerInterval=null,tiempoRestante=TIEMPO,respondida=false;
+let opcionesMezcladas=[],indiceCorrecto=0,preguntasMezcladas=[];
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function iniciarJuego(){
+  document.getElementById('pantalla-inicio').style.display='none';
+  document.getElementById('pantalla-juego').style.display='block';
+  indice=0;puntaje=0;correctas=0;incorrectas=0;
+  preguntasMezcladas=shuffle(preguntas);
+  mostrarPregunta();
+}
+
+function mostrarPregunta(){
+  respondida=false;
+  const p=preguntasMezcladas[indice];
+  const rc=p.opciones[p.correcta];
+  const idx=shuffle([0,1,2,3]);
+  opcionesMezcladas=idx.map(i=>p.opciones[i]);
+  indiceCorrecto=opcionesMezcladas.indexOf(rc);
+  document.getElementById('num-pregunta').textContent=indice+1;
+  document.getElementById('puntaje-actual').textContent=puntaje;
+  document.getElementById('barra').style.width=((indice/TOTAL)*100)+'%';
+  document.getElementById('categoria-tag').textContent=p.cat;
+  document.getElementById('pregunta-texto').textContent=p.texto;
+  const letras=['A','B','C','D'];
+  const c=document.getElementById('opciones-container');
+  c.innerHTML='';
+  opcionesMezcladas.forEach((op,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opcion-btn';
+    btn.innerHTML=`<span class="letra-opcion">${letras[i]}</span>${op}`;
+    btn.onclick=()=>seleccionar(i,btn);
+    c.appendChild(btn);
+  });
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('btn-siguiente').style.display='none';
+  iniciarTimer();
+}
+
+function iniciarTimer(){
+  clearInterval(timerInterval);
+  tiempoRestante=TIEMPO;
+  const el=document.getElementById('timer');
+  el.textContent=tiempoRestante;
+  el.classList.remove('urgente');
+  timerInterval=setInterval(()=>{
+    tiempoRestante--;
+    el.textContent=tiempoRestante;
+    if(tiempoRestante<=6)el.classList.add('urgente');
+    if(tiempoRestante<=0){clearInterval(timerInterval);if(!respondida)tiempoAgotado();}
+  },1000);
+}
+
+function tiempoAgotado(){
+  respondida=true;incorrectas++;
+  const btns=document.querySelectorAll('.opcion-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[indiceCorrecto].classList.add('resaltar');
+  mostrarFeedback(false,'⏰ ¡Tiempo agotado! La respuesta correcta está resaltada.');
+  document.getElementById('btn-siguiente').style.display='block';
+}
+
+function seleccionar(i,btn){
+  if(respondida)return;
+  respondida=true;
+  clearInterval(timerInterval);
+  const btns=document.querySelectorAll('.opcion-btn');
+  btns.forEach(b=>b.disabled=true);
+  if(i===indiceCorrecto){
+    btn.classList.add('correcta');
+    const pts=Math.max(50,tiempoRestante*5);
+    puntaje+=pts;correctas++;
+    mostrarFeedback(true,`✅ ¡Correcto! +${pts} puntos`);
+  }else{
+    btn.classList.add('incorrecta');
+    btns[indiceCorrecto].classList.add('resaltar');
+    incorrectas++;
+    mostrarFeedback(false,'❌ Incorrecto. La respuesta correcta está resaltada en verde.');
+  }
+  document.getElementById('puntaje-actual').textContent=puntaje;
+  document.getElementById('btn-siguiente').style.display='block';
+}
+
+function mostrarFeedback(ok,msg){
+  const fb=document.getElementById('feedback');
+  fb.textContent=msg;
+  fb.className='feedback '+(ok?'correcto':'incorrecto');
+  fb.style.display='block';
+}
+
+function siguientePregunta(){
+  indice++;
+  if(indice>=TOTAL)mostrarResultado();
+  else mostrarPregunta();
+}
+
+function mostrarResultado(){
+  clearInterval(timerInterval);
+  document.getElementById('pantalla-juego').style.display='none';
+  document.getElementById('pantalla-resultado').style.display='block';
+  const pct=Math.round((correctas/TOTAL)*100);
+  document.getElementById('puntaje-final').textContent=puntaje;
+  document.getElementById('res-c').textContent=correctas;
+  document.getElementById('res-i').textContent=incorrectas;
+  document.getElementById('res-p').textContent=pct+'%';
+  let t,ti,su;
+  if(pct>=90){t='🏆';ti='¡Sobresaliente!';su='Dominio excelente de Administración en Enfermería.';}
+  else if(pct>=70){t='🥇';ti='¡Muy bien!';su='Repasá los temas donde tuviste errores.';}
+  else if(pct>=50){t='🥈';ti='¡Buen intento!';su='Revisá el módulo y volvé a intentarlo.';}
+  else{t='📚';ti='¡A estudiar más!';su='Revisá el módulo tema por tema. ¡Podés lograrlo!';}
+  document.getElementById('trofeo').textContent=t;
+  document.getElementById('res-titulo').textContent=ti;
+  document.getElementById('res-sub').textContent=su;
+  setTimeout(()=>{document.getElementById('barra-res').style.width=pct+'%';},100);
+}
+
+function reiniciar(){
+  document.getElementById('pantalla-resultado').style.display='none';
+  document.getElementById('pantalla-inicio').style.display='block';
+}
+</script>
+</body>
+</html>
