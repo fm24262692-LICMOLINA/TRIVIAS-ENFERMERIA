@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TriviaEnfer 🧬 | Anatomofisiología 1° Año</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--rosa:#c2185b;--verde:#1b5e20;--azul:#01579b;--rojo:#b71c1c;--amarillo:#f9a825;--naranja:#e65100;--fondo:#0a0512;--card:#130820;--card2:#1a0d2e;--texto:#f3e5f5;--gris:#9575cd;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:var(--fondo);color:var(--texto);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow-x:hidden;}
+  body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 20% 20%,rgba(194,24,91,0.1) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(1,87,155,0.08) 0%,transparent 50%);pointer-events:none;z-index:0;}
+  .container{width:100%;max-width:780px;padding:20px;position:relative;z-index:1;}
+  #pantalla-inicio{text-align:center;animation:fadeInUp 0.6s ease;}
+  .logo-emoji{font-size:3rem;display:block;margin-bottom:8px;animation:pulse 2s infinite;}
+  .logo{font-family:'Fredoka One',cursive;font-size:2.6rem;background:linear-gradient(135deg,#c2185b,#01579b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+  .profesor-badge{display:inline-block;background:linear-gradient(135deg,#880e4f,#c2185b);padding:8px 22px;border-radius:30px;font-size:.95rem;font-weight:800;margin-bottom:4px;color:white;}
+  .inst-badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:4px 14px;border-radius:20px;font-size:.78rem;color:var(--gris);margin-bottom:10px;}
+  .subtitulo{font-size:.95rem;color:var(--gris);margin-bottom:14px;}
+  .badge-materia{display:inline-block;background:linear-gradient(135deg,#880e4f,#01579b);padding:6px 18px;border-radius:20px;font-size:.82rem;font-weight:700;margin-bottom:18px;letter-spacing:1px;color:white;}
+  .temas-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:18px;}
+  @media(max-width:520px){.temas-grid{grid-template-columns:repeat(3,1fr);}}
+  .tema-chip{background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:7px 4px;text-align:center;font-size:.65rem;font-weight:700;line-height:1.3;color:#f48fb1;}
+  .tema-chip .ic{font-size:.95rem;display:block;margin-bottom:2px;}
+  .stats-inicio{display:flex;justify-content:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .stat-item{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 20px;text-align:center;}
+  .stat-num{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--amarillo);}
+  .stat-label{font-size:.75rem;color:var(--gris);margin-top:2px;}
+  .btn-jugar{background:linear-gradient(135deg,#c2185b,#01579b);color:white;border:none;padding:16px 54px;font-size:1.2rem;font-family:'Fredoka One',cursive;border-radius:50px;cursor:pointer;letter-spacing:1px;box-shadow:0 8px 30px rgba(194,24,91,0.45);transition:transform .2s,box-shadow .2s;}
+  .btn-jugar:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 40px rgba(194,24,91,0.65);}
+  .firma{margin-top:16px;font-size:.78rem;color:rgba(255,255,255,.2);}
+  #pantalla-juego{display:none;animation:fadeInUp .5s ease;}
+  .header-juego{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .progreso-texto{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--gris);}
+  .progreso-texto span{color:var(--amarillo);font-size:1.3rem;}
+  .puntaje-display{background:var(--card);border:1px solid rgba(249,168,37,.3);border-radius:12px;padding:7px 15px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--amarillo);}
+  .barra-progreso{background:rgba(255,255,255,.08);border-radius:10px;height:7px;margin-bottom:14px;overflow:hidden;}
+  .barra-fill{height:100%;background:linear-gradient(90deg,#c2185b,#01579b);border-radius:10px;transition:width .5s ease;}
+  .timer-container{display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .timer-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1.4rem;border:3px solid #c2185b;background:var(--card);transition:border-color .3s,color .3s;}
+  .timer-circle.urgente{border-color:var(--rojo);color:var(--rojo);animation:tiembla .3s infinite;}
+  .categoria-tag{display:inline-block;background:rgba(194,24,91,0.18);border:1px solid rgba(194,24,91,0.4);color:#f48fb1;padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+  .pregunta-card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px;margin-bottom:14px;}
+  .pregunta-texto{font-size:1.05rem;font-weight:700;line-height:1.55;color:#f3e5f5;}
+  .opciones{display:grid;grid-template-columns:1fr;gap:9px;margin-bottom:14px;}
+  .opcion-btn{background:var(--card2);border:2px solid rgba(255,255,255,.09);color:var(--texto);padding:13px 16px;border-radius:13px;font-size:.9rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;text-align:left;transition:all .2s;line-height:1.45;}
+  .opcion-btn:hover:not(:disabled){border-color:#c2185b;background:rgba(194,24,91,0.15);transform:translateY(-2px);}
+  .opcion-btn.correcta{background:rgba(27,94,32,.2);border-color:var(--verde);color:#a5d6a7;animation:correctaAnim .4s ease;}
+  .opcion-btn.incorrecta{background:rgba(183,28,28,.15);border-color:var(--rojo);color:#ef9a9a;}
+  .opcion-btn.resaltar{background:rgba(27,94,32,.15);border-color:var(--verde);}
+  .opcion-btn:disabled{cursor:default;}
+  .letra-opcion{display:inline-block;width:24px;height:24px;border-radius:7px;background:rgba(255,255,255,.1);text-align:center;line-height:24px;margin-right:8px;font-size:.8rem;}
+  .feedback{text-align:center;padding:11px 16px;border-radius:13px;font-weight:800;font-size:.9rem;margin-bottom:12px;display:none;animation:fadeInUp .3s ease;}
+  .feedback.correcto{background:rgba(27,94,32,.15);border:1px solid rgba(27,94,32,.4);color:#a5d6a7;}
+  .feedback.incorrecto{background:rgba(183,28,28,.12);border:1px solid rgba(183,28,28,.3);color:#ef9a9a;}
+  .btn-siguiente{width:100%;background:linear-gradient(135deg,#c2185b,#880e4f);color:white;border:none;padding:13px;border-radius:13px;font-size:1rem;font-family:'Fredoka One',cursive;cursor:pointer;display:none;transition:opacity .2s,transform .2s;}
+  .btn-siguiente:hover{opacity:.9;transform:translateY(-2px);}
+  .prof-mini{text-align:center;font-size:.7rem;color:rgba(255,255,255,.16);margin-top:10px;}
+  #pantalla-resultado{display:none;text-align:center;animation:fadeInUp .6s ease;}
+  .trofeo{font-size:5rem;margin-bottom:12px;animation:bounce 1s ease;}
+  .resultado-titulo{font-family:'Fredoka One',cursive;font-size:2.2rem;margin-bottom:8px;}
+  .resultado-sub{color:var(--gris);font-size:.95rem;margin-bottom:20px;}
+  .puntaje-final{font-family:'Fredoka One',cursive;font-size:4rem;background:linear-gradient(135deg,var(--amarillo),var(--naranja));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:6px;}
+  .puntaje-de{color:var(--gris);font-size:.9rem;margin-bottom:20px;}
+  .stats-res{display:flex;justify-content:center;gap:13px;margin-bottom:20px;flex-wrap:wrap;}
+  .stat-r{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:13px 18px;min-width:100px;}
+  .stat-r-num{font-family:'Fredoka One',cursive;font-size:1.8rem;}
+  .stat-r-num.v{color:var(--verde);}.stat-r-num.r{color:var(--rojo);}.stat-r-num.a{color:var(--amarillo);}
+  .stat-r-label{font-size:.75rem;color:var(--gris);margin-top:3px;}
+  .barra-res{background:rgba(255,255,255,.08);border-radius:10px;height:12px;margin-bottom:20px;overflow:hidden;}
+  .barra-res-fill{height:100%;border-radius:10px;transition:width 1s ease .3s;background:linear-gradient(90deg,var(--rojo),var(--amarillo),var(--verde));}
+  .btn-reiniciar{background:linear-gradient(135deg,#c2185b,#01579b);color:white;border:none;padding:14px 46px;font-size:1.1rem;font-family:'Fredoka One',cursive;border-radius:50px;cursor:pointer;box-shadow:0 8px 28px rgba(194,24,91,.4);transition:transform .2s;}
+  .btn-reiniciar:hover{transform:translateY(-3px) scale(1.03);}
+  .firma-res{margin-top:16px;font-size:.76rem;color:rgba(255,255,255,.18);}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+  @keyframes bounce{0%,100%{transform:translateY(0);}30%{transform:translateY(-20px);}60%{transform:translateY(-10px);}}
+  @keyframes correctaAnim{0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
+  @keyframes tiembla{0%,100%{transform:rotate(0);}25%{transform:rotate(-3deg);}75%{transform:rotate(3deg);}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="pantalla-inicio">
+    <span class="logo-emoji">🧬</span>
+    <div class="logo">TriviaEnfer</div>
+    <div class="profesor-badge">👨‍🏫 Lic. Francisco Molina</div><br>
+    <div class="inst-badge">CENT N°74 · ATSA · Enfermero Profesional · 1° Año</div>
+    <p class="subtitulo">Repaso para exámenes y finales de Anatomofisiología</p>
+    <div class="badge-materia">🧬 ANATOMOFISIOLOGÍA · 1° AÑO</div>
+    <div class="temas-grid">
+      <div class="tema-chip"><span class="ic">🔬</span>B1: La Célula</div>
+      <div class="tema-chip"><span class="ic">🦴</span>B2: Anatomía y Hueso</div>
+      <div class="tema-chip"><span class="ic">🩸</span>B3: Angiología</div>
+      <div class="tema-chip"><span class="ic">💓</span>B4: TA e Inmunidad</div>
+      <div class="tema-chip"><span class="ic">💀</span>B5: Cabeza y Cuello</div>
+      <div class="tema-chip"><span class="ic">🫁</span>B6: Tórax y Respiración</div>
+      <div class="tema-chip"><span class="ic">❤️</span>B7: Cardiovascular</div>
+      <div class="tema-chip"><span class="ic">🍽️</span>B8: Abdomen y Digestivo</div>
+      <div class="tema-chip"><span class="ic">🫘</span>B9: Aparato Excretor</div>
+      <div class="tema-chip"><span class="ic">⚖️</span>B10: Homeostasis</div>
+      <div class="tema-chip"><span class="ic">🔬</span>B11: Sistema Endocrino</div>
+      <div class="tema-chip"><span class="ic">♂️</span>B12: Ap. Genital Masc.</div>
+      <div class="tema-chip"><span class="ic">♀️</span>B13: Ap. Genital Fem.</div>
+      <div class="tema-chip"><span class="ic">👁️</span>B14: Órganos Sentidos</div>
+      <div class="tema-chip"><span class="ic">🧠</span>B15: Sistema Nervioso</div>
+      <div class="tema-chip"><span class="ic">⚡</span>B16: Segmentos SN</div>
+      <div class="tema-chip"><span class="ic">🦾</span>B17: Miembros</div>
+    </div>
+    <div class="stats-inicio">
+      <div class="stat-item"><div class="stat-num">102</div><div class="stat-label">Preguntas</div></div>
+      <div class="stat-item"><div class="stat-num">17</div><div class="stat-label">Bolillas</div></div>
+      <div class="stat-item"><div class="stat-num">25s</div><div class="stat-label">Por pregunta</div></div>
+    </div>
+    <button class="btn-jugar" onclick="iniciarJuego()">¡EMPEZAR REPASO! 🚀</button>
+    <p class="firma">© Lic. Francisco Molina · CENT N°74 ATSA · Anatomofisiología 1° Año</p>
+  </div>
+
+  <div id="pantalla-juego">
+    <div class="header-juego">
+      <div class="progreso-texto">Pregunta <span id="num-pregunta">1</span> de 102</div>
+      <div class="puntaje-display">⭐ <span id="puntaje-actual">0</span></div>
+    </div>
+    <div class="barra-progreso"><div class="barra-fill" id="barra" style="width:0%"></div></div>
+    <div class="timer-container"><div class="timer-circle" id="timer">25</div></div>
+    <div style="text-align:center;margin-bottom:10px;"><span class="categoria-tag" id="categoria-tag">Bolilla</span></div>
+    <div class="pregunta-card"><p class="pregunta-texto" id="pregunta-texto">Cargando...</p></div>
+    <div class="opciones" id="opciones-container"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-siguiente" id="btn-siguiente" onclick="siguientePregunta()">Siguiente →</button>
+    <p class="prof-mini">Lic. Francisco Molina · CENT N°74 ATSA · Anatomofisiología 1° Año</p>
+  </div>
+
+  <div id="pantalla-resultado">
+    <div class="trofeo" id="trofeo">🏆</div>
+    <div class="resultado-titulo" id="res-titulo">¡Excelente!</div>
+    <div class="resultado-sub" id="res-sub">Completaste el repaso de Anatomofisiología</div>
+    <div class="puntaje-final" id="puntaje-final">0</div>
+    <div class="puntaje-de">puntos obtenidos</div>
+    <div class="stats-res">
+      <div class="stat-r"><div class="stat-r-num v" id="res-c">0</div><div class="stat-r-label">✅ Correctas</div></div>
+      <div class="stat-r"><div class="stat-r-num r" id="res-i">0</div><div class="stat-r-label">❌ Incorrectas</div></div>
+      <div class="stat-r"><div class="stat-r-num a" id="res-p">0%</div><div class="stat-r-label">📊 Precisión</div></div>
+    </div>
+    <div class="barra-res"><div class="barra-res-fill" id="barra-res" style="width:0%"></div></div>
+    <button class="btn-reiniciar" onclick="reiniciar()">🔄 Jugar de nuevo</button>
+    <p class="firma-res">Lic. Francisco Molina · CENT N°74 ATSA · Anatomofisiología 1° Año</p>
+  </div>
+</div>
+
+<script>
+const TIEMPO = 25;
+const preguntas = [
+
+// BOLILLA 1: LA CÉLULA
+{cat:"B1: La Célula",texto:"¿Quién acuñó el término 'célula' y en qué año?",opciones:["Robert Hooke en 1665, al observar tejidos vegetales con un microscopio","Rudolf Virchow en 1858, al postular que todas las células provienen de células","Robert Brown en 1831, al describir el núcleo celular en tejidos vegetales","Theodor Schwann en 1830, al estudiar la célula animal junto a Schleiden"],correcta:0},
+{cat:"B1: La Célula",texto:"¿Qué postula el principio 'Omnis cellula ex cellula' de Virchow?",opciones:["Toda célula deriva de una célula precedente y no puede generarse de forma espontánea","Toda célula contiene la información hereditaria necesaria para reproducirse","Las funciones vitales ocurren dentro de las células o en su entorno inmediato","La célula es la unidad morfológica de todo ser vivo, ya que todo organismo está formado por ellas"],correcta:0},
+{cat:"B1: La Célula",texto:"¿Cuál es la diferencia entre Mitosis y Meiosis?",opciones:["La mitosis ocurre en células somáticas y produce dos células diploides; la meiosis ocurre en células sexuales y produce cuatro células haploides","La mitosis produce cuatro células con la mitad de la carga genética; la meiosis produce dos células con la carga genética completa","La mitosis es exclusiva de los organismos unicelulares; la meiosis ocurre en organismos multicelulares para crecer y reparar tejidos","La mitosis sirve para la reproducción sexual; la meiosis sirve para crecer, renovar y reparar tejidos del cuerpo"],correcta:0},
+{cat:"B1: La Célula",texto:"¿Qué es la membrana plasmática y cuál es su función principal?",opciones:["Es una estructura lipoproteica semipermeable que delimita la célula y determina los compartimentos intracelular y extracelular","Es una estructura de carbohidratos que rodea al núcleo y controla el ingreso de proteínas al material genético","Es una membrana exclusivamente proteica que recubre el citoplasma y regula la temperatura interna de la célula","Es una bicapa de colesterol que protege la célula de agentes externos y permite la síntesis de energía celular"],correcta:0},
+{cat:"B1: La Célula",texto:"¿Qué mecanismo de transporte utiliza gradiente de concentración sin gasto de energía?",opciones:["La difusión simple, donde el soluto pasa desde donde hay mayor cantidad hacia donde hay menor cantidad","La difusión facilitada, que requiere una proteína transportadora para movilizar moléculas grandes","La bomba de sodio y potasio, que intercambia iones en contra del gradiente usando energía celular","La endocitosis, que engloba el soluto en vesículas formadas por la membrana plasmática"],correcta:0},
+{cat:"B1: La Célula",texto:"¿Cuál es el ion predominante en el espacio extracelular?",opciones:["El sodio, que es el ion extracelular principal que determina la composición del líquido intersticial","El potasio, que se concentra en el exterior de la célula y participa en la polarización de la membrana","El calcio, que domina el espacio extracelular y regula la contracción muscular de todos los tejidos","El cloro, que es el anión más abundante fuera de la célula y equilibra la carga del sodio extracelular"],correcta:0},
+
+// BOLILLA 2: ANATOMÍA Y HUESO
+{cat:"B2: Anatomía y Hueso",texto:"¿Cómo se define la Anatomía según el módulo?",opciones:["Es la ciencia que estudia el cuerpo humano en corte; etimológicamente 'ana' significa nuevo y 'tomía' cortes","Es la ciencia que estudia las funciones de los seres multicelulares y sus relaciones con el medio externo","Es la rama de la biología que estudia los órganos a nivel microscópico mediante técnicas histológicas","Es el estudio de las modificaciones que sufre el organismo por acción de enfermedades a nivel celular"],correcta:0},
+{cat:"B2: Anatomía y Hueso",texto:"¿Qué determina el Corte Sagital?",opciones:["Se traza de atrás hacia adelante en línea vertical y determina dos planos: uno derecho y otro izquierdo","Se traza de derecha a izquierda en línea vertical y determina un plano anterior y otro posterior","Separa el cuerpo en dos mitades: una superior y otra inferior, llamadas planos corporales","Se traza con inclinación oblicua sobre el tórax y se utiliza principalmente para practicar autopsias"],correcta:0},
+{cat:"B2: Anatomía y Hueso",texto:"¿Cuáles son las tres células que constituyen el tejido óseo?",opciones:["El osteocito como célula madura, el osteoblasto como célula de crecimiento y el osteoclasto como célula de remodelación","El osteocito como célula de remodelación, el osteoclasto como célula madura y el osteoblasto como célula de defensa","El condrocito como célula del tejido compacto, el osteoblasto como célula de crecimiento y el osteoclasto de remodelación","El osteoblasto como célula madura, el osteocito como célula inmadura y el condrocito como célula de crecimiento óseo"],correcta:0},
+{cat:"B2: Anatomía y Hueso",texto:"¿Cuántos huesos tiene el esqueleto adulto humano?",opciones:["208 huesos, cifra que varía con la edad porque algunos huesos se fusionan durante el desarrollo","212 huesos en total, número que se mantiene constante desde el nacimiento hasta la vejez adulta","206 huesos que incluyen todos los huesos del cuerpo desde el fetal hasta la etapa adulta tardía","200 huesos aproximadamente, número que disminuye a medida que el esqueleto cartilaginoso se osifica"],correcta:0},
+{cat:"B2: Anatomía y Hueso",texto:"¿Qué contiene el tejido esponjoso del hueso largo?",opciones:["La médula ósea, también llamada tejido hematopoyético, que participa en la formación de células sanguíneas","El periostio, que es una membrana fibroelástica con vascularización e inervación para el crecimiento óseo","El tejido compacto, que forma una capa continua de gran dureza de color blanco en la superficie del hueso","El cartílago articular, que cubre las epífisis del hueso y permite el movimiento articular sin fricción"],correcta:0},
+{cat:"B2: Anatomía y Hueso",texto:"¿Cuál es la posición anatómica según el módulo?",opciones:["De pie, de frente al observador, erguido, vista al frente, miembros superiores colgados, palmas hacia el frente y pies paralelos","Acostado boca arriba, con los brazos extendidos a los costados y las palmas apoyadas sobre la superficie de apoyo","De pie, de espaldas al observador, erguido, miembros superiores elevados y palmas mirando hacia afuera","Sentado, de frente al observador, con los miembros inferiores extendidos y los miembros superiores cruzados"],correcta:0},
+
+// BOLILLA 3: ANGIOLOGÍA
+{cat:"B3: Angiología y Sangre",texto:"¿Qué estudia la Angiología?",opciones:["Los vasos, distinguiendo vasos sanguíneos que transportan sangre y vasos linfáticos que transportan linfa","El corazón y su función de bomba, incluyendo sus cavidades y el ciclo cardíaco sistólico y diastólico","La sangre y sus componentes celulares como glóbulos rojos, glóbulos blancos y plaquetas circulantes","Los ganglios linfáticos y el sistema inmune que protege al organismo de los agentes infecciosos externos"],correcta:0},
+{cat:"B3: Angiología y Sangre",texto:"¿Cuál es la diferencia entre la circulación arterial y la venosa?",opciones:["La red arterial es centrífuga, va del corazón a la periferia; la red venosa es centrípeta, va de la periferia al corazón","La red arterial transporta sangre venosa hacia el pulmón; la red venosa transporta sangre oxigenada a los tejidos","La red arterial circula de la periferia al corazón; la red venosa circula del corazón hacia todos los tejidos corporales","La red arterial y la venosa circulan en el mismo sentido, pero una conduce sangre roja y otra sangre azulada"],correcta:0},
+{cat:"B3: Angiología y Sangre",texto:"¿Cuál es la función principal del capilar sanguíneo?",opciones:["Es un vaso de intercambio que permite el pasaje de oxígeno, nutrientes y desechos entre la sangre y los tejidos","Es el vaso de mayor calibre que conduce sangre oxigenada desde el corazón hacia todos los territorios corporales","Es el vaso que recoge la sangre venosa de los tejidos y la conduce de regreso hacia las cavidades cardíacas derechas","Es el vaso que conecta directamente las arteriolas con las venas sin pasar por los tejidos en la microcirculación"],correcta:0},
+{cat:"B3: Angiología y Sangre",texto:"¿Qué transportan los vasos linfáticos?",opciones:["Moléculas de gran peso molecular que no circulan por sangre, como células envejecidas, ácidos grasos y células blancas","Sangre oxigenada desde los pulmones hacia el corazón izquierdo para ser distribuida a los tejidos del cuerpo","Hormonas producidas por las glándulas endocrinas hacia los órganos blanco donde ejercen su acción biológica","Plasma sanguíneo filtrado desde los capilares hacia el espacio intersticial durante el proceso de la hematosis"],correcta:0},
+{cat:"B3: Angiología y Sangre",texto:"¿Cuáles son las tres capas de la pared arterial desde la luz hacia afuera?",opciones:["Túnica interna de endotelio, túnica media de tejido muscular liso y túnica externa de tejido conjuntivo elástico","Endocardio de tejido epitelial, miocardio de músculo estriado y pericardio de tejido fibroso como doble hoja","Túnica externa de endotelio, túnica media de tejido conjuntivo y túnica interna de músculo liso vascular","Capa adventicia de músculo liso, capa media de tejido elástico y capa íntima de tejido conjuntivo denso"],correcta:0},
+{cat:"B3: Angiología y Sangre",texto:"¿Qué función cumple el Aparato Circulatorio según el módulo?",opciones:["Transporta sustancias absorbidas en el aparato digestivo y oxígeno a los tejidos, y dióxido de carbono y desechos metabólicos hacia los órganos de eliminación","Produce las células sanguíneas en la médula ósea y las distribuye por todos los tejidos a través de las arterias","Regula exclusivamente la temperatura corporal mediante la vasodilatación y vasoconstricción de los vasos periféricos","Filtra la sangre de toxinas y desechos metabólicos a través de la red capilar del hígado y del bazo"],correcta:0},
+
+// BOLILLA 4: TENSIÓN ARTERIAL E INMUNIDAD
+{cat:"B4: Tensión Arterial e Inmunidad",texto:"¿Cómo se define la Tensión Arterial?",opciones:["Es la fuerza o presión que lleva la sangre a todas las partes del cuerpo; su resultado se da en dos cifras: sistólica y diastólica","Es la medida de la resistencia que oponen las arteriolas al paso de la sangre durante la fase de relajación cardíaca","Es la presión que ejerce la sangre venosa sobre las paredes de las venas durante el retorno venoso al corazón","Es el gradiente de presión que existe entre el ventrículo izquierdo y la aurícula derecha durante el ciclo cardíaco"],correcta:0},
+{cat:"B4: Tensión Arterial e Inmunidad",texto:"¿Qué son los Glóbulos Blancos o Leucocitos?",opciones:["Células sanguíneas encargadas de la defensa del organismo contra agentes infecciosos, sustancias extrañas y células anómalas","Células sanguíneas anucleadas que transportan el oxígeno ligado a la hemoglobina desde los pulmones a los tejidos","Fragmentos celulares sin núcleo que participan en la coagulación sanguínea para detener el sangrado ante una lesión","Células grandes del tejido óseo que participan en la renovación permanente de la estructura del esqueleto adulto"],correcta:0},
+{cat:"B4: Tensión Arterial e Inmunidad",texto:"¿Qué es la Hemostasia?",opciones:["El conjunto de mecanismos que detienen el sangrado ante una lesión vascular mediante la formación del trombo plaquetario y la coagulación","El proceso de producción de células sanguíneas en la médula ósea a partir de células progenitoras pluripotenciales","La circulación de la sangre a través de los vasos sanguíneos impulsada por la acción de bombeo del corazón","El equilibrio entre la concentración de oxígeno y dióxido de carbono en la sangre circulante durante la respiración"],correcta:0},
+{cat:"B4: Tensión Arterial e Inmunidad",texto:"¿Cuál es la función de las arteriolas en la regulación de la Tensión Arterial?",opciones:["Son el sitio principal de resistencia al flujo sanguíneo y tienen una influencia muy importante en la construcción de la tensión arterial","Son los vasos que producen el impulso sistólico inicial al recibir la sangre expulsada directamente desde el ventrículo izquierdo","Son vasos que almacenan sangre durante la diástole y la liberan paulatinamente durante la sístole cardíaca siguiente","Son vasos que capilarizan en los tejidos y permiten el intercambio de gases y nutrientes con las células del organismo"],correcta:0},
+{cat:"B4: Tensión Arterial e Inmunidad",texto:"¿Cuál es la clasificación general de los Glóbulos Blancos?",opciones:["Se clasifican en granulocitos que incluyen neutrófilos, eosinófilos y basófilos, y agranulocitos que incluyen linfocitos y monocitos","Se clasifican únicamente en linfocitos T y linfocitos B, según su origen en el timo o en la médula ósea respectivamente","Se clasifican en eritrocitos, leucocitos y trombocitos según su función en la defensa inmune del organismo","Se clasifican en macrófagos y neutrófilos como células de la inmunidad innata exclusivamente sin otras subdivisiones"],correcta:0},
+{cat:"B4: Tensión Arterial e Inmunidad",texto:"¿Qué determina la elasticidad de la pared arterial en relación con la Tensión Arterial?",opciones:["La elasticidad de las arteriolas funciona como efecto multiplicador del empuje determinado por la sístole ventricular del corazón","La elasticidad arterial reduce la tensión arterial al amortiguar el impacto del flujo sanguíneo durante la fase sistólica","La elasticidad de la pared arterial no tiene influencia directa sobre la tensión arterial, que depende solo del gasto cardíaco","La elasticidad vascular determina la resistencia periférica total, que es el único factor que regula la tensión arterial"],correcta:0},
+
+// BOLILLA 5: CABEZA Y CUELLO
+{cat:"B5: Cabeza y Cuello",texto:"¿Cuántos huesos forman el cráneo y cómo se clasifican?",opciones:["Ocho huesos; cuatro impares en la línea media: frontal, etmoides, esfenoides y occipital; y cuatro pares: parietales y temporales","Doce huesos; seis pares y seis impares que se disponen formando la bóveda craneana protectora del encéfalo","Seis huesos, todos impares, que se fusionan durante el desarrollo fetal para formar la caja craneana en el adulto","Diez huesos; cinco pares que se articulan mediante suturas fibrosas inmóviles en la línea media del cráneo"],correcta:0},
+{cat:"B5: Cabeza y Cuello",texto:"¿Cuál es la función del Hueso Occipital?",opciones:["Contiene el agujero occipital por el que desciende el sistema nervioso central desde la cavidad craneana hacia el raquis","Forma la frente y las fosas orbitarias donde se ubican los globos oculares y los nervios ópticos en ambos lados","Contiene en su interior todos los segmentos del órgano de la audición: oído externo, medio e interno","Forma la base del cráneo junto al esfenoides y contribuye a las cavidades nasales y orbitarias bilaterales"],correcta:0},
+{cat:"B5: Cabeza y Cuello",texto:"¿Cuáles son los segmentos corporales del cuerpo humano?",opciones:["La cabeza, el cuello, el tronco y las extremidades; el tronco se compone de tórax y abdomen; las extremidades de miembro superior e inferior","La cabeza, el cuello, el pecho, el abdomen, la pelvis y los miembros; cada uno con sus respectivas subdivisiones anatómicas","La cabeza, el raquis, el tórax, el abdomen, los miembros superiores y los miembros inferiores como segmentos independientes","La cabeza, el cuello y el tronco; los miembros no se consideran segmentos sino apéndices del segmento axial principal"],correcta:0},
+{cat:"B5: Cabeza y Cuello",texto:"¿Cuál es el único hueso de la cabeza que es móvil?",opciones:["El maxilar inferior o mandíbula, unido por una articulación móvil a la base del cráneo para realizar la masticación","El hueso temporal, que realiza pequeños movimientos durante la masticación al articularse con la mandíbula","El hueso vómer, que es el único hueso impar de la cara y puede desviarse lateralmente en algunos individuos","El hueso hioides, que es el único hueso del cuello sin articulación directa con ningún otro hueso del esqueleto"],correcta:0},
+{cat:"B5: Cabeza y Cuello",texto:"¿Qué se aloja en el interior de la caja craneana?",opciones:["El encéfalo, que es la parte del sistema nervioso central ubicada en la cavidad craneana, protegida por la bóveda ósea","El cerebelo, que se localiza exclusivamente en las fosas cerebelosas del occipital sin relación con el cerebro","Los órganos de los sentidos, que ocupan la mayor parte del espacio interno de la cavidad craneana del adulto","La glándula pituitaria o hipófisis, que es el único órgano alojado en el interior de la caja craneana adulta"],correcta:0},
+{cat:"B5: Cabeza y Cuello",texto:"¿De cuántas partes se compone la mandíbula superior?",opciones:["De trece huesos agrupados en torno al maxilar superior como elemento principal, de los cuales uno es impar y los demás son pares","De ocho huesos, todos pares y simétricos, que conforman el paladar duro y las paredes de las cavidades nasales","De seis huesos, tres pares, que constituyen el macizo facial superior y permiten la inserción de los dientes superiores","De cuatro huesos principales: el maxilar superior, el palatino, el cigomático y el unguis, todos dispuestos en pares"],correcta:0},
+
+// BOLILLA 6: TÓRAX Y RESPIRACIÓN
+{cat:"B6: Tórax y Respiración",texto:"¿Cómo se clasifican las costillas según su articulación con el esternón?",opciones:["Las seis primeras son verdaderas porque se articulan individualmente; las costillas 7 a 10 son falsas porque comparten cartílago; las dos últimas son flotantes porque no se articulan","Las costillas 1 a 7 son verdaderas; las costillas 8 a 10 son flotantes; las costillas 11 y 12 son falsas que se articulan con cartílago común","Todas las costillas son verdaderas porque todas se articulan con el esternón directamente a través de cartílagos individuales","Las seis primeras son flotantes, las costillas 7 a 9 son falsas y las tres últimas son verdaderas que contactan el esternón"],correcta:0},
+{cat:"B6: Tórax y Respiración",texto:"¿Cuáles son las tres partes del esternón?",opciones:["El manubrio esternal en la porción superior, el cuerpo en la porción media y el apéndice xifoides en la porción inferior","El cuerpo en la porción superior, el manubrio en la porción media y el proceso xifoides en la porción lateral izquierda","El proceso xifoides en la porción superior, el cuerpo en la porción media y el manubrio esternal en la inferior","El ángulo de Louis en la porción superior, el cuerpo en la porción media y el manubrio en la porción inferior"],correcta:0},
+{cat:"B6: Tórax y Respiración",texto:"¿Qué es la Hematosis?",opciones:["El intercambio de gases a nivel alveolo-capilar que da como resultado la oxigenación de la sangre y la liberación de dióxido de carbono","El proceso de transporte de oxígeno por la hemoglobina desde los pulmones hacia los tejidos periféricos del organismo","La función de producción de células sanguíneas que realiza la médula ósea del esternón durante toda la vida adulta","El proceso de filtración del plasma sanguíneo a nivel renal que da origen a la formación inicial de la orina primaria"],correcta:0},
+{cat:"B6: Tórax y Respiración",texto:"¿Cuál es la forma general del tórax?",opciones:["Cilindro-cónica con un vértice superior y una base inferior, con seis caras: anterior, posterior, dos laterales, superior e inferior","Esférica con una superficie continua formada por las costillas, el esternón y las vértebras dorsales articuladas","Prismática con cuatro caras planas formadas por el esternón, las costillas y la columna vertebral torácica","Trapezoidal con base superior más ancha que la base inferior, determinada por el diafragma como base inferior"],correcta:0},
+{cat:"B6: Tórax y Respiración",texto:"¿Por qué el esternón tiene importancia médica práctica?",opciones:["Su situación superficial lo hace accesible para realizar punciones diagnósticas y extraer médula ósea, y para esternotomías que acceden a los órganos torácicos","Su gran tamaño lo convierte en el hueso más fácil de palpar del tórax y en el principal indicador de las fracturas costales","Su composición cartilaginosa determina la edad cronológica del individuo ya que se osifica completamente en la adultez","Su relación con el corazón permite escuchar los ruidos cardíacos con el estetoscopio aplicado directamente sobre él"],correcta:0},
+{cat:"B6: Tórax y Respiración",texto:"¿Cuál es la importancia de los cartílagos costales desde el punto de vista médico-legal?",opciones:["Su osificación a partir de los veinticinco años permite determinar la edad cronológica de los individuos en medicina legal","Su calcificación es indicador de enfermedades cardiovasculares como arteriosclerosis y valvulopatías en adultos mayores","Su presencia o ausencia permite distinguir a nivel forense si la muerte ocurrió antes o después de los cuarenta años","Su densidad radiológica varía con la edad, lo que permite estimar el tiempo transcurrido desde el momento de la muerte"],correcta:0},
+
+// BOLILLA 7: CARDIOVASCULAR
+{cat:"B7: Aparato Cardiovascular",texto:"¿Cuáles son las tres capas concéntricas del corazón desde afuera hacia adentro?",opciones:["El pericardio que protege y aísla, el miocardio que es el músculo funcionante y el endocardio que tapiza las cavidades internas","El endocardio que recubre externamente el corazón, el miocardio en la capa media y el pericardio tapizando las cavidades","El miocardio como capa externa de músculo estriado, el pericardio en la capa media y el endocardio en la capa interna","El epicardio como capa serosa externa, el endocardio como capa media fibrosa y el miocardio como capa interna muscular"],correcta:0},
+{cat:"B7: Aparato Cardiovascular",texto:"¿Qué es el miocardio y cuál es su principal característica patológica?",opciones:["Es tejido muscular estriado especializado con alto consumo basal de oxígeno; cuando hay carencia de oxígeno sufre isquemia que es el sustrato del infarto agudo de miocardio","Es tejido epitelial estratificado que tapiza las cavidades cardíacas y garantiza el flujo laminar de la sangre sin coagulación","Es tejido fibroso dispuesto en dos hojas concéntricas que protege al corazón y lo aísla de las demás vísceras torácicas","Es tejido muscular liso involuntario que forma las paredes de las cuatro cavidades cardíacas y de las válvulas cardíacas"],correcta:0},
+{cat:"B7: Aparato Cardiovascular",texto:"¿Cuál es la diferencia entre la circulación mayor y la circulación menor?",opciones:["La circulación mayor conduce sangre oxigenada a los tejidos y recoge el dióxido de carbono; la circulación menor va del corazón al pulmón para oxigenar la sangre","La circulación mayor va del corazón derecho al pulmón y vuelve al corazón izquierdo; la circulación menor irriga todos los tejidos corporales","La circulación mayor es la que irriga el corazón a través de las arterias coronarias; la circulación menor irriga solo la cabeza y los miembros","La circulación mayor tiene su origen en el ventrículo derecho; la circulación menor parte del ventrículo izquierdo hacia la aorta"],correcta:0},
+{cat:"B7: Aparato Cardiovascular",texto:"¿Dónde se ubica el corazón y cuál es su peso en el adulto?",opciones:["Se ubica en el mediastino anterior del tórax, pesa aproximadamente 250 gramos en el adulto y está sostenido por los vasos que entran y salen de él","Se ubica en el mediastino posterior del tórax, pesa aproximadamente 500 gramos y está protegido por el esternón directamente","Se ubica en la cavidad abdominal superior izquierda, pesa alrededor de 300 gramos y descansa sobre el músculo diafragma","Se ubica en la cavidad pleural izquierda, pesa 150 gramos en el adulto y está rodeado por el tejido pulmonar en todos sus lados"],correcta:0},
+{cat:"B7: Aparato Cardiovascular",texto:"¿Cuál es la función del endocardio en relación con la sangre?",opciones:["Su superficie suave y uniforme garantiza el flujo laminar de la sangre a pesar de la presión cardíaca, evitando la lisis y la coagulación","Su tejido muscular especializado permite la contracción coordinada del corazón durante la sístole ventricular activa","Su doble hoja serosa aísla al corazón de las demás vísceras y permite sus movimientos de contracción y relajación","Su gran vascularización garantiza el aporte constante de oxígeno al corazón durante la diástole coronaria"],correcta:0},
+{cat:"B7: Aparato Cardiovascular",texto:"¿Qué es la diástole y qué función cumple?",opciones:["Es la fase de relajación del corazón durante la cual atrae la sangre venosa que corre por las venas hacia las cavidades","Es la fase de contracción del corazón durante la cual expulsa la sangre hacia las arterias aorta y pulmonar","Es el período de descanso eléctrico del corazón que ocurre entre dos contracciones sucesivas del miocardio","Es la fase en que se cierran las válvulas semilunares y el corazón recibe sangre exclusivamente de las coronarias"],correcta:0},
+
+// BOLILLA 8: ABDOMEN Y DIGESTIVO
+{cat:"B8: Abdomen y Digestivo",texto:"¿Qué separa el tórax del abdomen?",opciones:["El músculo diafragma, que se interpone como un tabique horizontal con convexidad superior entre ambos segmentos","El esternón inferior, cuyo apéndice xifoides marca la separación entre la cavidad torácica y la cavidad abdominal","Las últimas costillas flotantes, que al no articularse con el esternón delimitan el límite inferior del tórax","La pleura, que forma un saco seroso que cierra inferiormente el tórax separándolo del contenido abdominal"],correcta:0},
+{cat:"B8: Abdomen y Digestivo",texto:"¿Cuáles son las seis paredes del abdomen?",opciones:["Pared superior formada por el diafragma, pared inferior por el periné, pared anterior muscular, pared posterior centrada en la columna lumbar y dos paredes laterales","Pared superior por el esternón, pared inferior por el pubis, pared anterior por los rectos del abdomen y pared posterior por las vértebras lumbares","Cuatro paredes: anterior, posterior, derecha e izquierda; más la pared superior e inferior formadas por estructuras óseas","Tres paredes: anterior muscular, posterior ósea y lateral membranosa; la cavidad abdominal no tiene pared superior ni inferior"],correcta:0},
+{cat:"B8: Abdomen y Digestivo",texto:"¿Qué es el peritoneo?",opciones:["Una serosa de tejido conectivo muy particular que recubre las vísceras ubicadas en la cavidad abdominal","Un músculo aponeurótico que forma la pared anterior del abdomen y da inserción a los músculos rectos del abdomen","Un tendón extenso que une los músculos rectos del abdomen en la línea media y está perforado por el ombligo","Una membrana ósea que recubre internamente las paredes del abdomen y participa en la producción de células sanguíneas"],correcta:0},
+{cat:"B8: Abdomen y Digestivo",texto:"¿Cuántos cuadrantes se demarcan en la topografía superficial del abdomen?",opciones:["Nueve cuadrantes, trazados con líneas imaginarias tomando como referencia el ombligo, el reborde costal y las crestas ilíacas","Cuatro cuadrantes trazados a partir de dos líneas que se cruzan en el ombligo: superior derecho, superior izquierdo, inferior derecho e inferior izquierdo","Seis cuadrantes, tres superiores y tres inferiores, delimitados por el ombligo y las espinas ilíacas antero-superiores","Tres cuadrantes superiores y tres inferiores divididos por las crestas ilíacas y la sínfisis pubiana como referencias"],correcta:0},
+{cat:"B8: Abdomen y Digestivo",texto:"¿Cuál es la función de la línea blanca del abdomen?",opciones:["Es una lámina fibrosa que une los bordes internos de los dos músculos rectos del abdomen en la línea media, desde el xifoides hasta la sínfisis pubiana","Es el músculo más profundo de la pared abdominal que se inserta en las últimas costillas y las apófisis transversas lumbares","Es el tendón de inserción inferior del músculo oblicuo mayor que delimita el conducto inguinal en su porción lateral","Es el borde de separación entre los músculos superficiales y los músculos profundos de la pared anterior del abdomen"],correcta:0},
+{cat:"B8: Abdomen y Digestivo",texto:"¿Cuál es el orden correcto del tubo digestivo desde la boca hasta el ano?",opciones:["Boca, faringe, esófago, estómago, intestino delgado con duodeno, yeyuno e íleon, intestino grueso y recto hasta el ano","Boca, esófago, estómago, faringe, intestino delgado, duodeno, colon, intestino grueso, recto hasta el ano","Boca, laringe, esófago, estómago, intestino grueso, intestino delgado con sus porciones y recto hasta el ano","Boca, faringe, esófago, duodeno directamente, yeyuno, íleon, intestino grueso y apéndice cecal hasta el ano"],correcta:0},
+
+// BOLILLA 9: APARATO EXCRETOR
+{cat:"B9: Aparato Excretor",texto:"¿Cuáles son los órganos del aparato urinario?",opciones:["Los riñones, las pelvis renales, los uréteres, la vejiga y la uretra; los riñones y uréteres son pares, la vejiga y uretra son impares","Los riñones, los uréteres, la vejiga y el periné; la uretra no forma parte del aparato urinario sino del aparato genital","Los riñones, las suprarrenales, los uréteres y la vejiga; la uretra corresponde al aparato reproductor en ambos sexos","Los dos riñones, dos uréteres y la vejiga únicamente; la uretra se estudia junto al aparato genital en ambos sexos"],correcta:0},
+{cat:"B9: Aparato Excretor",texto:"¿Cuál es la descripción externa del riñón?",opciones:["Tiene forma de haba con un hilio orientado hacia dentro, coloración rojo violáceo, consistencia firme, dos caras, dos bordes y dos polos","Tiene forma esférica con una superficie lisa y brillante de coloración amarillenta, ubicado en la fosa ilíaca de cada lado","Tiene forma piramidal con una base orientada hacia la columna y un vértice que apunta hacia la vejiga urinaria","Tiene forma triangular de coloración blanca, con dos superficies planas y un borde superior cóncavo con el hilio vascular"],correcta:0},
+{cat:"B9: Aparato Excretor",texto:"¿Qué es la nefrona y cuáles son sus partes?",opciones:["Es la unidad funcional del riñón que realiza la formación de la orina; sus partes son el glomérulo renal, el túbulo contorneado proximal, el asa de Henle, el túbulo contorneado distal y el túbulo colector","Es la cápsula fibrosa que recubre externamente el riñón y lo protege de las estructuras adyacentes del retroperitoneo","Es el conjunto de cálices menores y mayores que recogen la orina formada y la conducen hacia la pelvis renal y el uréter","Es la arteriola aferente que ingresa sangre al glomérulo renal para iniciar el proceso de filtración del plasma sanguíneo"],correcta:0},
+{cat:"B9: Aparato Excretor",texto:"¿Cuáles son las dos zonas del parénquima renal?",opciones:["La corteza externa que contiene las nefronas con los glomérulos renales y la médula interna que contiene los túbulos excretores y los cálices","La médula externa que contiene los glomérulos y la corteza interna que contiene los túbulos de filtración y reabsorción","La cápsula de Bowman en la zona periférica y la pelvis renal en la zona central que recibe la orina producida","La corteza que contiene los túbulos colectores y la médula que contiene los glomérulos y las arterias renales"],correcta:0},
+{cat:"B9: Aparato Excretor",texto:"¿Cuánto mide y cuánto pesa aproximadamente cada riñón?",opciones:["Mide 12 cm de alto, 5 a 8 cm de ancho y 3 a 5 cm de espesor, y pesa alrededor de 170 gramos en el adulto","Mide 8 cm de alto, 4 cm de ancho y 2 cm de espesor, y pesa alrededor de 80 gramos en el adulto sano","Mide 15 cm de alto, 10 cm de ancho y 6 cm de espesor, y pesa alrededor de 250 gramos en el adulto","Mide 10 cm de alto, 6 cm de ancho y 4 cm de espesor, y pesa alrededor de 120 gramos en el adulto"],correcta:0},
+{cat:"B9: Aparato Excretor",texto:"¿Cuál es la función principal del aparato urinario?",opciones:["La formación y posterior eliminación de la orina, lo que depura al organismo de desechos tóxicos y regula la composición y el volumen del líquido extracelular","La producción y almacenamiento de hormonas sexuales que regulan el desarrollo de los caracteres sexuales secundarios","La regulación de la presión arterial mediante la producción de renina y de eritropoyetina para estimular la médula ósea","La absorción de nutrientes a nivel de la mucosa intestinal y su posterior distribución hacia los tejidos del organismo"],correcta:0},
+
+// BOLILLA 10: HOMEOSTASIS
+{cat:"B10: Homeostasis y pH",texto:"¿Cómo se define la Homeostasis según el módulo?",opciones:["Las diferentes disposiciones fisiológicas que ponen en práctica los organismos superiores para restaurar el estado normal de equilibrio una vez que se ha trastocado","La capacidad del organismo de producir energía a partir de los nutrientes absorbidos en el aparato digestivo durante la digestión","El conjunto de hormonas producidas por las glándulas endocrinas que regulan el metabolismo y el crecimiento del organismo","El proceso de adaptación del organismo a los cambios del medio externo mediante la modificación de sus funciones vitales"],correcta:0},
+{cat:"B10: Homeostasis y pH",texto:"¿Cuáles son los mecanismos productores de homeostasis según el módulo?",opciones:["El apetito, la sed, la bomba de sodio y potasio, los ciclos metabólicos, la acción hormonal sobre el crecimiento y la temperatura constante mantenida por el sistema nervioso central","La diuresis, la respiración, la circulación sanguínea y la digestión como únicos cuatro mecanismos productores de equilibrio","Solo la regulación hormonal a través del sistema endocrino y la regulación nerviosa a través del sistema nervioso central","La absorción de nutrientes, la síntesis de proteínas, la reproducción celular y la eliminación de desechos por vías excretoras"],correcta:0},
+{cat:"B10: Homeostasis y pH",texto:"¿Cuál es el pH neutro del agua y qué significa?",opciones:["El pH del agua es 7, lo que significa que los iones de hidrógeno y los iones oxidrilo se encuentran en cantidades iguales","El pH del agua es 7, lo que significa que la solución es ácida porque hay mayor cantidad de iones hidrógeno libres","El pH del agua es 0, que representa el punto de neutralidad entre ácidos y bases en una escala de 0 a 14","El pH del agua es 14, que es el valor neutro a partir del cual se mide la acidez o alcalinidad de las soluciones"],correcta:0},
+{cat:"B10: Homeostasis y pH",texto:"¿Sobre qué principio operan los mecanismos reguladores de la homeostasis?",opciones:["Sobre el principio de retroalimentación negativa, donde las desviaciones de un punto normal activan un censor que desencadena cambios compensadores hasta restablecer el equilibrio","Sobre el principio de retroalimentación positiva, donde un estímulo produce respuestas cada vez más intensas hasta el agotamiento total","Sobre el principio de todo o nada, donde el organismo responde de forma máxima a cualquier desviación del equilibrio interno","Sobre el principio de acción-reacción, donde cada cambio en el organismo produce una respuesta de igual magnitud en dirección opuesta"],correcta:0},
+{cat:"B10: Homeostasis y pH",texto:"¿Qué define el módulo como Salud en relación con la Homeostasis?",opciones:["La salud es el equilibrio físico, psíquico y social; la homeostasis es un estado de plena salud orgánica donde las células están vitalizadas y el organismo cumple sus funciones","La salud es la ausencia total de enfermedades diagnosticables mediante exámenes clínicos y de laboratorio en el organismo","La salud es el estado de máxima eficiencia de todos los órganos y aparatos del cuerpo humano durante toda la vida adulta","La salud es el equilibrio entre el consumo y la producción de energía celular a través de los ciclos metabólicos del organismo"],correcta:0},
+{cat:"B10: Homeostasis y pH",texto:"¿Qué regula el pH sanguíneo según el módulo?",opciones:["El aparato respiratorio y el riñón ejercen ajustes a través del control de la acidez o alcalinidad de la sangre","Solo el riñón tiene la capacidad de regular el pH sanguíneo mediante la excreción selectiva de iones de hidrógeno","Solo el aparato respiratorio regula el pH al controlar la concentración de dióxido de carbono en la sangre arterial","El hígado es el único órgano capaz de regular el pH sanguíneo mediante la producción de proteínas amortiguadoras"],correcta:0},
+
+// BOLILLA 11: SISTEMA ENDOCRINO
+{cat:"B11: Sistema Endocrino",texto:"¿Cómo se define una glándula endocrina?",opciones:["Es aquella que forma hormonas en su parénquima, las vierte a la sangre circulante y tiene el sitio de acción distante del sitio de producción","Es aquella que forma diversas sustancias como saliva o lágrimas y posee un túbulo preformado que conduce las secreciones al sitio de acción","Es aquella que produce hormonas exclusivamente para regular el crecimiento y el desarrollo en la etapa puberal del individuo","Es aquella que forma sustancias biológicas activas y las vierte directamente sobre el epitelio del órgano efector más próximo"],correcta:0},
+{cat:"B11: Sistema Endocrino",texto:"¿Dónde se inicia el eje endocrino según el módulo?",opciones:["En el Hipotálamo, que es un núcleo gris del cerebro desde donde se coordinan las órdenes que regulan las glándulas endocrinas","En la hipófisis, que es la glándula maestra ubicada en la base del cerebro que controla todas las demás glándulas","En la glándula tiroides, que produce las primeras hormonas que coordinan el funcionamiento del sistema endocrino","En la corteza suprarrenal, que produce cortisol e inicia la cascada hormonal que regula las demás glándulas del eje"],correcta:0},
+{cat:"B11: Sistema Endocrino",texto:"¿Cuál es la función del Sistema Endocrino?",opciones:["Regular las actividades de diversos sistemas y adecuarlos a las condiciones exigentes del medio interno y externo mediante hormonas","Producir células de defensa inmune para proteger al organismo de agentes infecciosos externos y células tumorales","Controlar los movimientos voluntarios e involuntarios del organismo a través de la sinapsis nerviosa con los músculos","Coordinar la absorción de nutrientes desde el aparato digestivo hacia la circulación sanguínea para distribuirlos a los tejidos"],correcta:0},
+{cat:"B11: Sistema Endocrino",texto:"¿Qué característica diferencia al sistema endocrino del sistema nervioso según el módulo?",opciones:["El sistema nervioso controla actividades rápidas mediante sinapsis; el sistema endocrino regula funciones metabólicas de manera mediata usando hormonas","El sistema endocrino regula funciones rápidas mediante impulsos eléctricos; el sistema nervioso actúa lentamente con mensajeros químicos","Ambos sistemas actúan mediante mensajeros químicos sin diferencias en la velocidad de respuesta ni en el tipo de función que regulan","El sistema nervioso regula funciones metabólicas crónicas; el sistema endocrino regula funciones rápidas como la contracción muscular"],correcta:0},
+{cat:"B11: Sistema Endocrino",texto:"¿Cuáles son las cuatro clasificaciones generales de glándulas?",opciones:["Glándulas exocrinas de secreción externa, glándulas endocrinas de secreción interna, glándulas paracrinas y glándulas mixtas","Solo glándulas exocrinas con ducto de secreción y glándulas endocrinas sin ducto que vierten sus productos a la sangre","Glándulas mucosas, serosas, mixtas y linfáticas, según el tipo de secreción que producen y el tejido que los forma","Glándulas de secreción hormonal, de secreción enzimática, de secreción salival y de secreción láctea exclusivamente"],correcta:0},
+{cat:"B11: Sistema Endocrino",texto:"¿Cuál es el testículo funcionalmente y qué produce como glándula mixta?",opciones:["Como glándula endocrina produce testosterona que vierte a la sangre; como glándula exocrina elabora el espermatozoide que se transporta por la vía espermática","Como glándula exocrina produce testosterona que actúa localmente; como glándula endocrina produce espermatozoides para la reproducción","Como glándula endocrina produce tanto el espermatozoide como la testosterona, ambos vertidos directamente a la sangre","Como glándula mixta produce únicamente la hormona luteinizante que regula la espermatogénesis y los caracteres masculinos"],correcta:0},
+
+// BOLILLA 12: APARATO GENITAL MASCULINO
+{cat:"B12: Ap. Genital Masculino",texto:"¿Cuáles son los órganos del aparato reproductor masculino?",opciones:["El testículo, el epidídimo, los conductos deferentes, las vesículas seminales, los conductos eyaculadores, la uretra, el pene y las glándulas anexas como la próstata","Solo el testículo y el pene como órganos principales; los demás son glándulas accesorias sin función esencial en la reproducción","El testículo, la próstata y el pene; los demás conductos son simples prolongaciones sin función anatómica específica","El testículo, el epidídimo y la uretra únicamente; el conducto deferente y las vesículas seminales son parte del aparato urinario"],correcta:0},
+{cat:"B12: Ap. Genital Masculino",texto:"¿Cómo se describe externamente el testículo?",opciones:["Es un órgano ovoide, aplanado transversalmente, de color blanco azulado, brillante y liso, con dos caras, dos bordes y dos polos, con sensibilidad muy viva y característica","Es un órgano esférico, de color rojo oscuro, de consistencia blanda, ubicado libremente en la cavidad abdominal sin estructura de soporte","Es un órgano piramidal, de color amarillento, con una superficie rugosa, que se localiza en la pelvis menor junto a la vejiga","Es un órgano cilíndrico, de color rosado, ubicado en el retroperitoneo, similar en aspecto externo al del riñón en posición"],correcta:0},
+{cat:"B12: Ap. Genital Masculino",texto:"¿Cuál es la función de la testosterona?",opciones:["Determina a partir de la pubertad los caracteres sexuales secundarios que condicionan el aspecto corporal propio del varón","Estimula la producción de espermatozoides en los túbulos seminíferos durante toda la vida fértil del varón adulto","Regula la maduración de los espermatozoides durante su paso por el epidídimo antes de ser eyaculados","Controla el ascenso y el descenso del testículo dentro de las bolsas escrotales según la temperatura ambiente"],correcta:0},
+{cat:"B12: Ap. Genital Masculino",texto:"¿Cuál es la función del músculo Cremaster?",opciones:["Determina el ascenso o el descenso del testículo según estímulos como la temperatura ambiente, protegiendo la espermatogénesis","Forma la piel del escroto y contribuye a la pigmentación y a las glándulas sebáceas características de la bolsa testicular","Recubre el testículo formando la capa más interna de las bolsas escrotales y protege al órgano de los traumatismos","Produce la secreción alcalina que neutraliza la acidez de la uretra y facilita el transporte de los espermatozoides"],correcta:0},
+{cat:"B12: Ap. Genital Masculino",texto:"¿Qué son los túbulos seminíferos?",opciones:["Son los conductos del parénquima testicular donde se forma el espermatozoide en el proceso de espermatogénesis","Son los conductos que transportan los espermatozoides desde el testículo hacia la vesícula seminal para su almacenamiento","Son las estructuras glandulares que producen el líquido seminal que nutre y transporta los espermatozoides eyaculados","Son los vasos sanguíneos que irrigan el parénquima testicular desde el hilio del testículo hacia la corteza gonadal"],correcta:0},
+{cat:"B12: Ap. Genital Masculino",texto:"¿Cuáles son las capas de las bolsas escrotales desde afuera hacia adentro?",opciones:["La piel o escroto, el dartos, la túnica celulosa, la túnica muscular con el músculo cremaster, la túnica fibrosa y la túnica vaginal","El dartos externo, la piel media, el tejido subcutáneo, la fascia espermática y finalmente la túnica albugínea más interna","La túnica vaginal externa, la túnica muscular, el tejido celular subcutáneo, el dartos y la piel como capa más interna","La túnica albugínea más externa, la túnica celulosa media, el dartos y la piel como capas de las bolsas escrotales"],correcta:0},
+
+// BOLILLA 13: APARATO GENITAL FEMENINO
+{cat:"B13: Ap. Genital Femenino",texto:"¿Cuáles son los órganos internos y externos del aparato reproductor femenino?",opciones:["Internos: ovarios, trompas de Falopio, útero y vagina; externo: vulva; glándulas anexas: glándulas mamarias","Internos: ovarios, útero y vagina; externos: trompas de Falopio y vulva; los ovarios son también glándulas exocrinas","Internos: trompas de Falopio, útero y vagina; externos: ovarios y vulva; las mamas forman el aparato genital interno","Internos: ovarios y trompas solamente; externos: útero, vagina y vulva; las mamas son parte del aparato digestivo"],correcta:0},
+{cat:"B13: Ap. Genital Femenino",texto:"¿Dónde se ubican los ovarios y cuál es su forma?",opciones:["Son glándulas mixtas situadas en la pelvis menor, de forma ovoide, con dos caras, dos bordes y dos extremos, ubicadas detrás de los ligamentos anchos","Se ubican en el retroperitoneo a nivel lumbar, tienen forma alargada y están íntimamente relacionados con los riñones","Se ubican en la pelvis mayor adheridos a las paredes laterales de la vejiga, con forma esférica y superficie rugosa","Se ubican en la cavidad abdominal media, tienen forma piramidal con la base orientada hacia la trompa de Falopio"],correcta:0},
+{cat:"B13: Ap. Genital Femenino",texto:"¿Cuáles son los caracteres sexuales primarios según el módulo?",opciones:["El par sexual cromosómico XX en la mujer y XY en el varón, y las gónadas, es decir ovarios en la mujer y testículos en el varón","Los caracteres anatómicos externos que distinguen visualmente a la mujer del varón desde el nacimiento en adelante","Las hormonas sexuales femeninas y masculinas que se producen en las gónadas a partir de la pubertad","Los órganos genitales externos que diferencian al sexo masculino del femenino desde el período fetal en adelante"],correcta:0},
+{cat:"B13: Ap. Genital Femenino",texto:"¿Qué contiene la sustancia cortical del ovario?",opciones:["Los folículos ováricos que poseen óvulos en su interior; es la zona periférica muy delgada del parénquima ovárico","Los vasos sanguíneos y los nervios que entran por el hilio del ovario para nutrir e inervar el parénquima ovárico","Las células productoras de progesterona que se forman después de la ovulación durante la fase lútea del ciclo","Los conductos excretores que transportan el óvulo desde el interior del ovario hasta la trompa de Falopio"],correcta:0},
+{cat:"B13: Ap. Genital Femenino",texto:"¿Cuál es la función del ovario como glándula mixta?",opciones:["Como glándula exocrina produce el óvulo para la reproducción; como glándula endocrina produce hormonas feminizantes que dan a la mujer el aspecto femenino físico y psíquico","Como glándula exocrina produce las hormonas estrógenos que se vierten directamente a la sangre circulante","Como glándula endocrina produce el óvulo maduro que luego de la fecundación forma el embrión humano","Como glándula mixta produce únicamente la hormona folículo estimulante que regula el ciclo menstrual femenino"],correcta:0},
+{cat:"B13: Ap. Genital Femenino",texto:"¿Qué ocurre si el óvulo es fecundado por el espermatozoide?",opciones:["Da origen a un nuevo ser; el proceso se inicia con la formación del cigoto en la trompa de Falopio donde se produce la fecundación","El óvulo fecundado regresa al ovario para completar su maduración antes de implantarse en el útero o matriz","El útero comienza inmediatamente a expulsar el óvulo fecundado si no recibe la señal hormonal adecuada de la hipófisis","El óvulo fecundado permanece en la trompa y se divide allí durante los nueve meses del desarrollo fetal normal"],correcta:0},
+
+// BOLILLA 14: ÓRGANOS DE LOS SENTIDOS
+{cat:"B14: Órganos de los Sentidos",texto:"¿Cuáles son los cinco sentidos del ser humano según el módulo?",opciones:["La vista, el oído, el olfato, el tacto y el gusto; cada uno con estructuras anatómicas receptoras y vías nerviosas hacia el neuroeje","La vista, el oído, el tacto, el dolor y el equilibrio; estos cinco sentidos son los únicos reconocidos por la anatomía moderna","El oído, el olfato, el gusto, la propiocepción y el tacto; la vista no se considera un sentido sino un sistema de percepción","La vista, el oído, el olfato, la temperatura y el dolor; el gusto y el tacto son considerados submodalidades del mismo sentido"],correcta:0},
+{cat:"B14: Órganos de los Sentidos",texto:"¿Cuáles son las tres membranas concéntricas del ojo?",opciones:["La membrana esclerótica en la capa externa, la membrana úvea o coroides en la capa media y la membrana retina en la capa interna","La membrana conjuntival externa, la membrana corneal media y la membrana retiniana interna que contiene los fotorreceptores","La esclera externa, el cristalino en la capa media y la retina interna que capta la luz y la transforma en impulsos nerviosos","La córnea en la capa anterior externa, el humor vítreo en la capa media y la retina en la parte posterior interna"],correcta:0},
+{cat:"B14: Órganos de los Sentidos",texto:"¿Cuál es la función de la retina?",opciones:["Contiene las células receptoras del sentido de la vista y transforma la energía lumínica en impulsos nerviosos que llegan al cerebro","Mantiene la forma esférica del ojo mediante sus fibras de colágeno entretejidas que forman la capa blanquecina externa","Permite el paso de la luz hacia el interior del ojo gracias a su transparencia y la refracta hacia el cristalino","Produce el humor acuoso que ocupa la cámara anterior del ojo y nutre a las estructuras avasculares del globo ocular"],correcta:0},
+{cat:"B14: Órganos de los Sentidos",texto:"¿Cuáles son los tejidos transparentes del ojo?",opciones:["La córnea, el humor vítreo, el humor acuoso y el cristalino; todos transparentes para permitir el paso de la luz hasta la retina","La esclerótica, el humor acuoso y la retina; estos tejidos juntos permiten la transmisión de la imagen al cerebro","La córnea y el cristalino únicamente; los demás tejidos del ojo son opacos y cumplen funciones de protección","El iris, la córnea y el humor vítreo; el cristalino no es transparente sino translúcido por su composición proteica"],correcta:0},
+{cat:"B14: Órganos de los Sentidos",texto:"¿Cuál es la función de la esclerótica?",opciones:["Está formada por fibras de colágeno entretejidas en todas las direcciones y se encarga de mantener la forma del ojo","Contiene los vasos sanguíneos y los pigmentos que absorben la luz dispersa dentro del globo ocular en todo momento","Es la capa que contiene las células fotosensibles que captan la luz y la transforman en señales nerviosas visuales","Produce el humor vítreo que ocupa la cámara posterior del ojo y mantiene la presión intraocular constante"],correcta:0},
+{cat:"B14: Órganos de los Sentidos",texto:"¿A través de qué estructuras nerviosas viajan las sensaciones de los órganos de los sentidos hacia el neuroeje?",opciones:["A través de nervios periféricos identificados como Pares Craneales, por ejemplo el Par Craneal I o Nervio Olfatorio","A través de las raíces posteriores de la médula espinal que reciben todas las informaciones sensoriales del cuerpo","A través de la vía piramidal descendente que conecta la corteza cerebral motora con los músculos efectores periféricos","A través del sistema nervioso autónomo simpático que conduce todas las sensaciones exteroceptivas al hipotálamo"],correcta:0},
+
+// BOLILLA 15: SISTEMA NERVIOSO
+{cat:"B15: Sistema Nervioso",texto:"¿Cuáles son las dos divisiones anatómicas del Sistema Nervioso?",opciones:["El Sistema Nervioso Central que comprende el encéfalo y la médula espinal, y el Sistema Nervioso Periférico que comprende los nervios periféricos","El Sistema Nervioso Autónomo que regula las funciones involuntarias y el Sistema Nervioso Somático que controla las funciones voluntarias","El Sistema Nervioso Simpático que prepara al organismo para el estrés y el Sistema Nervioso Parasimpático que promueve el reposo","El Sistema Nervioso Central que incluye el cerebro y el cerebelo, y el Sistema Nervioso Periférico que incluye la médula espinal"],correcta:0},
+{cat:"B15: Sistema Nervioso",texto:"¿Cuántos Pares Craneales existen y cómo se identifican?",opciones:["Son 12 pares, se numeran con números romanos y tienen nombres propios; entran o salen al neuroeje por los agujeros del cráneo","Son 31 pares, se numeran con números arábigos y tienen nombres anatómicos; salen por los agujeros de conjunción vertebrales","Son 8 pares, se identifican por letras del alfabeto y corresponden a los nervios que inervan la cabeza y el cuello","Son 24 pares, numerados del I al XXIV, y corresponden a los nervios que conectan el encéfalo con los órganos de los sentidos"],correcta:0},
+{cat:"B15: Sistema Nervioso",texto:"¿Cuáles son las dos divisiones fisiológicas del Sistema Nervioso?",opciones:["El Sistema Nervioso Autónomo que controla funciones involuntarias como la contracción cardíaca, y el Sistema Nervioso Somático que controla funciones voluntarias como el movimiento","El Sistema Nervioso Central que regula las funciones rápidas y el Sistema Nervioso Periférico que regula las funciones lentas del organismo","El Sistema Nervioso Sensitivo que recibe estímulos del medio externo y el Sistema Nervioso Motor que produce respuestas musculares","El Sistema Nervioso Simpático que actúa de día y el Sistema Nervioso Parasimpático que actúa predominantemente de noche"],correcta:0},
+{cat:"B15: Sistema Nervioso",texto:"¿Dónde se ubica la médula espinal y cuánto mide?",opciones:["Se ubica en el raquis o conducto vertebral, mide 40 a 45 cm de longitud y se extiende entre la primera vértebra cervical y la primera lumbar","Se ubica en la cavidad craneana junto al encéfalo, mide 10 a 12 cm y se extiende desde el bulbo hasta el diencéfalo","Se ubica en el canal del sacro, mide 20 a 25 cm y se extiende desde la última vértebra lumbar hasta el cóccix","Se ubica en el mediastino posterior, mide 30 cm y se extiende entre la primera vértebra torácica y la última lumbar"],correcta:0},
+{cat:"B15: Sistema Nervioso",texto:"¿Cuántos Pares Raquídeos existen y cómo se organizan?",opciones:["Son 31 pares aproximadamente, salen por los agujeros de conjunción de la columna vertebral, individualmente o formando plexos como el Plexo Braquial","Son 12 pares, salen por los agujeros de la base del cráneo y forman los plexos cervical, braquial y lumbosacro","Son 24 pares, salen en grupos de dos por los agujeros de conjunción y se distribuyen en todo el cuerpo sin formar plexos","Son 8 pares cervicales, 12 dorsales y 5 lumbares; se numeran igual que las vértebras correspondientes del raquis"],correcta:0},
+{cat:"B15: Sistema Nervioso",texto:"¿Cuál es la función general del Sistema Nervioso?",opciones:["Recibir estímulos, interpretarlos y responder a esos estímulos; de este modo integra y comanda las funciones corporales","Producir hormonas que regulan el metabolismo y el crecimiento coordinando el funcionamiento de todos los órganos","Transportar el impulso eléctrico desde los músculos hacia el cerebro para registrar los movimientos del cuerpo","Controlar exclusivamente la vida de relación del individuo con el medio externo a través de los órganos de los sentidos"],correcta:0},
+
+// BOLILLA 16: SEGMENTOS DEL SN
+{cat:"B16: Segmentos del SN",texto:"¿Dónde se ubica el Cerebelo y cuál es su función principal?",opciones:["Se ubica en las fosas cerebelosas del hueso occipital y su función principal es la coordinación del movimiento voluntario, el equilibrio y el tono muscular","Se ubica en el lóbulo temporal del cerebro y su función es el procesamiento del lenguaje y la memoria de trabajo","Se ubica en el tálamo del diencéfalo y su función es la integración de todas las señales sensoriales que llegan al cortex","Se ubica en el lóbulo frontal del cerebro y su función es la planificación del movimiento y las funciones ejecutivas"],correcta:0},
+{cat:"B16: Segmentos del SN",texto:"¿Cuánto pesa y cuáles son las dimensiones del cerebro?",opciones:["Pesa alrededor de 1100 gramos; el eje vertical mide 11 a 12 cm, el eje transverso 13 a 14 cm y el eje anteroposterior 15 a 16 cm","Pesa alrededor de 500 gramos; el eje vertical mide 8 cm, el eje transverso 10 cm y el eje anteroposterior 12 cm","Pesa alrededor de 1500 gramos; es el órgano más pesado del cuerpo y tiene un eje anteroposterior de 20 cm","Pesa alrededor de 250 gramos al nacer y alcanza 1400 gramos en el adulto; duplica su tamaño en el primer año de vida"],correcta:0},
+{cat:"B16: Segmentos del SN",texto:"¿Cuáles son las cuatro cisuras y los cuatro lóbulos de la cara externa del cerebro?",opciones:["Las cisuras de Rolando, de Silvio y parieto-occipital externa demarcan los lóbulos frontal, parietal, temporal y occipital","Las cisuras frontal, parietal, temporal y occipital delimitan los lóbulos central, lateral, anterior y posterior del cerebro","Las cisuras de Broca, de Wernicke y silviana demarcan los lóbulos del lenguaje, la memoria y la percepción visual","Las cisuras transversa, sagital, coronal y horizontal delimitan cuatro cuadrantes en la cara externa del hemisferio"],correcta:0},
+{cat:"B16: Segmentos del SN",texto:"¿Qué es la corteza cerebral histológicamente?",opciones:["Es el manto externo del cerebro formado por sustancia gris con varias capas de células nerviosas que rodea una gran masa de sustancia blanca llamada centro oval","Es el centro interno del cerebro formado por sustancia blanca que contiene los cuerpos neuronales y las células gliales","Es una capa única de neuronas motoras que recubre el cerebro y envía axones hacia la médula espinal por la vía piramidal","Es el tejido formado por astrocitos y oligodendrocitos que cubre externamente el cerebro y produce el líquido cefalorraquídeo"],correcta:0},
+{cat:"B16: Segmentos del SN",texto:"¿Cuál es la diferencia funcional entre el hemisferio izquierdo y el hemisferio derecho?",opciones:["El hemisferio izquierdo es analítico y lógico para problemas de procesamiento secuencial; el hemisferio derecho es intuitivo para problemas de comprensión global","El hemisferio izquierdo controla el lado izquierdo del cuerpo y el hemisferio derecho controla el lado derecho del cuerpo","Ambos hemisferios tienen funciones idénticas y se compensan mutuamente si uno de ellos sufre alguna lesión neurológica","El hemisferio izquierdo regula funciones involuntarias y el hemisferio derecho regula funciones voluntarias del organismo"],correcta:0},
+{cat:"B16: Segmentos del SN",texto:"¿Qué es el Cuerpo Calloso?",opciones:["Es una formación de cordones blancos o sustancia blanca que une los dos hemisferios cerebrales entre sí permitiendo la comunicación interhemisférica","Es la estructura de células grises que forma el tálamo y actúa como estación de relevo de todas las vías sensitivas","Es el conjunto de fibras nerviosas que forman la vía piramidal y descienden desde la corteza motora hacia la médula","Es la comisura anterior del cerebro que conecta el lóbulo temporal de un hemisferio con el lóbulo frontal del otro"],correcta:0},
+
+// BOLILLA 17: MIEMBROS
+{cat:"B17: Miembros",texto:"¿Cuáles son los subsegmentos del Miembro Superior?",opciones:["El hombro, el brazo, el antebrazo y la mano, cada uno con sus respectivas partes óseas y partes blandas","El hombro, el codo, la muñeca y la mano con sus cinco dedos, articulados entre sí por articulaciones sinoviales","El brazo, el antebrazo, la mano y los dedos, con articulación proximal en la cintura escapular y distal en la mano","La axila, el brazo, el antebrazo y los dedos; el hombro no es un subsegmento sino una articulación de transición"],correcta:0},
+{cat:"B17: Miembros",texto:"¿Cuáles son los subsegmentos del Miembro Inferior?",opciones:["La cadera, el muslo, la pierna y el pie, cada uno con sus partes óseas y partes blandas correspondientes","El glúteo, el muslo, la pierna, el tobillo y el pie con sus cinco dedos como subsegmentos del miembro inferior","La pelvis, el fémur, la tibia y el pie; la cadera no es un subsegmento sino la articulación coxofemoral proximal","La ingle, el muslo, la rodilla, la pierna y el pie como cinco subsegmentos del miembro inferior en el adulto"],correcta:0},
+{cat:"B17: Miembros",texto:"¿Qué une la cintura escapular a la columna vertebral?",opciones:["Los omóplatos y las clavículas que, junto con la columna, forman la cintura escapular que une la columna al miembro superior","El esternón y las costillas superiores que articulan la columna con la cintura escapular a través de las articulaciones costoesternales","El húmero que articula directamente con la columna dorsal a través de la articulación glenohumeral proximal","La primera costilla y el manubrio esternal que se articulan con la clavícula para unirla a la columna vertebral"],correcta:0},
+{cat:"B17: Miembros",texto:"¿Qué forma la cintura pelviana y qué función cumple?",opciones:["La forman los huesos coxales o ilíacos junto con la columna en la porción inferior; cumple la función de unir la columna al miembro inferior","La forman el sacro y el cóccix articulados con los huesos ilíacos; cumple la función de proteger los órganos pélvicos","La forman los huesos del muslo junto con la columna lumbar; su función es sostener el peso del cuerpo en posición bípeda","La forman el pubis y el isquion solamente; cumple la función de proteger la vejiga y los órganos reproductores internos"],correcta:0},
+{cat:"B17: Miembros",texto:"¿Qué comprenden las partes blandas de los miembros?",opciones:["Las articulaciones, los músculos, los vasos sanguíneos, los elementos linfáticos, los nervios y la piel de cada segmento","Únicamente los músculos y los nervios periféricos que inervan y mueven los segmentos óseos de los miembros","Solo los vasos sanguíneos arteriales y venosos que irrigan y drenan los tejidos de los miembros superiores e inferiores","Los músculos, los tendones y las fascias que recubren y mueven los huesos; los vasos y nervios no son partes blandas"],correcta:0},
+{cat:"B17: Miembros",texto:"¿Cómo define el módulo al hueso iliaco en su desarrollo?",opciones:["En la etapa fetal está formado por tres huesos diferentes que son el isquion, el ilion y el pubis, que posteriormente se sueldan entre sí en el adulto","Es un hueso único desde el nacimiento que crece en tamaño pero nunca se divide en piezas separadas durante el desarrollo","En la niñez se compone de dos piezas simétricas derecha e izquierda que se fusionan en la pubertad en la línea media","Es un hueso par desde el nacimiento, formado por cinco núcleos de osificación que se unen progresivamente en la pubertad"],correcta:0},
+
+];
+
+const TOTAL = preguntas.length;
+let indice=0,puntaje=0,correctas=0,incorrectas=0;
+let timerInterval=null,tiempoRestante=TIEMPO,respondida=false;
+let opcionesMezcladas=[],indiceCorrecto=0,preguntasMezcladas=[];
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function iniciarJuego(){
+  document.getElementById('pantalla-inicio').style.display='none';
+  document.getElementById('pantalla-juego').style.display='block';
+  indice=0;puntaje=0;correctas=0;incorrectas=0;
+  preguntasMezcladas=shuffle(preguntas);
+  mostrarPregunta();
+}
+
+function mostrarPregunta(){
+  respondida=false;
+  const p=preguntasMezcladas[indice];
+  const rc=p.opciones[p.correcta];
+  const idx=shuffle([0,1,2,3]);
+  opcionesMezcladas=idx.map(i=>p.opciones[i]);
+  indiceCorrecto=opcionesMezcladas.indexOf(rc);
+  document.getElementById('num-pregunta').textContent=indice+1;
+  document.getElementById('puntaje-actual').textContent=puntaje;
+  document.getElementById('barra').style.width=((indice/TOTAL)*100)+'%';
+  document.getElementById('categoria-tag').textContent=p.cat;
+  document.getElementById('pregunta-texto').textContent=p.texto;
+  const letras=['A','B','C','D'];
+  const c=document.getElementById('opciones-container');
+  c.innerHTML='';
+  opcionesMezcladas.forEach((op,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opcion-btn';
+    btn.innerHTML=`<span class="letra-opcion">${letras[i]}</span>${op}`;
+    btn.onclick=()=>seleccionar(i,btn);
+    c.appendChild(btn);
+  });
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('btn-siguiente').style.display='none';
+  iniciarTimer();
+}
+
+function iniciarTimer(){
+  clearInterval(timerInterval);
+  tiempoRestante=TIEMPO;
+  const el=document.getElementById('timer');
+  el.textContent=tiempoRestante;
+  el.classList.remove('urgente');
+  timerInterval=setInterval(()=>{
+    tiempoRestante--;
+    el.textContent=tiempoRestante;
+    if(tiempoRestante<=6)el.classList.add('urgente');
+    if(tiempoRestante<=0){clearInterval(timerInterval);if(!respondida)tiempoAgotado();}
+  },1000);
+}
+
+function tiempoAgotado(){
+  respondida=true;incorrectas++;
+  const btns=document.querySelectorAll('.opcion-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[indiceCorrecto].classList.add('resaltar');
+  mostrarFeedback(false,'⏰ ¡Tiempo agotado! La respuesta correcta está resaltada.');
+  document.getElementById('btn-siguiente').style.display='block';
+}
+
+function seleccionar(i,btn){
+  if(respondida)return;
+  respondida=true;
+  clearInterval(timerInterval);
+  const btns=document.querySelectorAll('.opcion-btn');
+  btns.forEach(b=>b.disabled=true);
+  if(i===indiceCorrecto){
+    btn.classList.add('correcta');
+    const pts=Math.max(50,tiempoRestante*5);
+    puntaje+=pts;correctas++;
+    mostrarFeedback(true,`✅ ¡Correcto! +${pts} puntos`);
+  }else{
+    btn.classList.add('incorrecta');
+    btns[indiceCorrecto].classList.add('resaltar');
+    incorrectas++;
+    mostrarFeedback(false,'❌ Incorrecto. La respuesta correcta está resaltada en verde.');
+  }
+  document.getElementById('puntaje-actual').textContent=puntaje;
+  document.getElementById('btn-siguiente').style.display='block';
+}
+
+function mostrarFeedback(ok,msg){
+  const fb=document.getElementById('feedback');
+  fb.textContent=msg;
+  fb.className='feedback '+(ok?'correcto':'incorrecto');
+  fb.style.display='block';
+}
+
+function siguientePregunta(){
+  indice++;
+  if(indice>=TOTAL)mostrarResultado();
+  else mostrarPregunta();
+}
+
+function mostrarResultado(){
+  clearInterval(timerInterval);
+  document.getElementById('pantalla-juego').style.display='none';
+  document.getElementById('pantalla-resultado').style.display='block';
+  const pct=Math.round((correctas/TOTAL)*100);
+  document.getElementById('puntaje-final').textContent=puntaje;
+  document.getElementById('res-c').textContent=correctas;
+  document.getElementById('res-i').textContent=incorrectas;
+  document.getElementById('res-p').textContent=pct+'%';
+  let t,ti,su;
+  if(pct>=90){t='🏆';ti='¡Sobresaliente!';su='¡Dominio excepcional de Anatomofisiología! Estás listo para el final.';}
+  else if(pct>=70){t='🥇';ti='¡Muy bien!';su='Repasá las bolillas donde tuviste más errores.';}
+  else if(pct>=50){t='🥈';ti='¡Buen intento!';su='Revisá el módulo del Lic. Molina y volvé a intentarlo.';}
+  else{t='📚';ti='¡A estudiar más!';su='Revisá el módulo completo bolilla por bolilla. ¡Podés lograrlo!';}
+  document.getElementById('trofeo').textContent=t;
+  document.getElementById('res-titulo').textContent=ti;
+  document.getElementById('res-sub').textContent=su;
+  setTimeout(()=>{document.getElementById('barra-res').style.width=pct+'%';},100);
+}
+
+function reiniciar(){
+  document.getElementById('pantalla-resultado').style.display='none';
+  document.getElementById('pantalla-inicio').style.display='block';
+}
+</script>
+</body>
+</html>
