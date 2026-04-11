@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia · Microbiología · CENT N°74 ATSA</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060810;
+    --surface: #0c0f1c;
+    --card: #111525;
+    --border: #1a2035;
+    --accent: #22d3ee;
+    --accent2: #a78bfa;
+    --gold: #fbbf24;
+    --green: #4ade80;
+    --red: #f87171;
+    --teal: #2dd4bf;
+    --text: #e2e8f0;
+    --muted: #475569;
+    --radius: 16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 14px 50px;
+  }
+  body::before {
+    content:''; position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse 70% 45% at 10% 5%, rgba(34,211,238,.08) 0%, transparent 55%),
+      radial-gradient(ellipse 55% 38% at 88% 90%, rgba(167,139,250,.07) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 28% at 50% 45%, rgba(74,222,128,.04) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  .wrap { position:relative; z-index:1; width:100%; max-width:780px; }
+
+  header { text-align:center; padding:28px 0 24px; }
+  .inst-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(34,211,238,.1); border:1px solid rgba(34,211,238,.22);
+    color:var(--accent); font-size:11px; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase;
+    padding:5px 16px; border-radius:50px; margin-bottom:14px;
+  }
+  .inst-badge::before { content:'◉'; font-size:7px; }
+  header h1 {
+    font-family:'Unbounded',sans-serif;
+    font-size:clamp(20px,4vw,34px); font-weight:900; line-height:1.1; letter-spacing:-.02em;
+    background:linear-gradient(130deg,#fff 20%,var(--accent));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;
+  }
+  header p { color:var(--muted); font-size:13px; line-height:1.6; }
+
+  .score-row { display:flex; gap:10px; margin-bottom:16px; }
+  .chip { flex:1; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:9px 10px; text-align:center; }
+  .chip .v { font-family:'Unbounded',sans-serif; font-size:19px; font-weight:700; }
+  .chip .l { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-top:2px; }
+  .v.c { color:var(--green); } .v.w { color:var(--red); } .v.p { color:var(--gold); }
+
+  .prog-wrap { margin-bottom:14px; }
+  .prog-top { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .prog-bar { height:3px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .prog-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; transition:width .4s ease; }
+
+  .tipo-row { display:flex; align-items:center; gap:10px; margin-bottom:11px; }
+  .tipo-badge { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 12px; border-radius:50px; }
+  .tipo-badge.corta { background:rgba(34,211,238,.12); color:var(--accent); border:1px solid rgba(34,211,238,.28); }
+  .tipo-badge.larga { background:rgba(167,139,250,.12); color:var(--accent2); border:1px solid rgba(167,139,250,.28); }
+  .tipo-tema { font-size:11px; color:var(--muted); }
+
+  .timer-row { display:flex; align-items:center; gap:10px; margin-bottom:13px; }
+  .timer-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+  .timer-bar { flex:1; height:5px; background:var(--border); border-radius:5px; overflow:hidden; }
+  .timer-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--green),var(--gold)); transition:width .1s linear, background .3s; }
+  .timer-fill.urgent { background:linear-gradient(90deg,var(--red),var(--gold)); }
+  .timer-num { font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; min-width:28px; text-align:right; }
+
+  .q-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:24px 24px 20px;
+    margin-bottom:13px; box-shadow:0 10px 40px rgba(0,0,0,.45);
+    position:relative; overflow:hidden;
+  }
+  .q-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2),var(--teal));
+  }
+  .q-num { font-size:11px; color:var(--accent); font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px; }
+  .q-text { font-size:16px; font-weight:500; line-height:1.5; }
+
+  .options { display:flex; flex-direction:column; gap:9px; margin-bottom:14px; }
+  .opt {
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:11px; padding:12px 15px;
+    cursor:pointer; display:flex; align-items:flex-start; gap:12px;
+    font-size:14px; line-height:1.5;
+    transition:border-color .15s, background .15s, transform .1s;
+  }
+  .opt:hover:not(.locked) { border-color:var(--accent); background:rgba(34,211,238,.07); transform:translateX(4px); }
+  .opt.correct { border-color:var(--green); background:rgba(74,222,128,.1); }
+  .opt.wrong   { border-color:var(--red);   background:rgba(248,113,113,.08); }
+  .opt.locked  { cursor:default; }
+  .opt .lt {
+    width:26px; height:26px; border-radius:6px; flex-shrink:0;
+    background:var(--border); display:flex; align-items:center; justify-content:center;
+    font-family:'Unbounded',sans-serif; font-size:11px; font-weight:700;
+    transition:background .2s; margin-top:1px;
+  }
+  .opt.correct .lt { background:var(--green); color:#001a0a; }
+  .opt.wrong   .lt { background:var(--red);   color:#fff; }
+  .opt-txt { flex:1; }
+
+  .feedback { padding:11px 14px; border-radius:10px; font-size:13px; line-height:1.5; margin-bottom:13px; display:none; }
+  .feedback.show { display:block; }
+  .feedback.ok { background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.28); color:#86efac; }
+  .feedback.no { background:rgba(248,113,113,.09); border:1px solid rgba(248,113,113,.28); color:#fca5a5; }
+
+  .btn-next {
+    width:100%; padding:13px;
+    background:linear-gradient(130deg,var(--accent),var(--accent2));
+    color:#fff; font-family:'Unbounded',sans-serif; font-weight:700; font-size:13px;
+    border:none; border-radius:11px; cursor:pointer;
+    transition:opacity .2s, transform .1s; display:none; letter-spacing:.03em;
+  }
+  .btn-next:hover { opacity:.88; transform:scale(1.01); }
+  .btn-next.show { display:block; }
+
+  .results {
+    text-align:center; padding:40px 26px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:0 16px 60px rgba(0,0,0,.5);
+  }
+  .trophy { font-size:64px; margin-bottom:12px; }
+  .results h2 { font-family:'Unbounded',sans-serif; font-size:22px; font-weight:900; margin-bottom:8px; }
+  .results .pct {
+    font-family:'Unbounded',sans-serif; font-size:56px; font-weight:900;
+    background:linear-gradient(130deg,var(--gold),var(--accent));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .res-grid { display:flex; gap:10px; margin:14px 0 22px; }
+  .res-chip { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px; text-align:center; }
+  .res-chip .rv { font-family:'Unbounded',sans-serif; font-size:20px; font-weight:700; }
+  .res-chip .rl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-top:2px; }
+  .results p { color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:22px; }
+  .btn-restart {
+    padding:12px 38px;
+    background:linear-gradient(130deg,var(--accent),var(--accent2));
+    color:#fff; font-family:'Unbounded',sans-serif; font-weight:700; font-size:13px;
+    border:none; border-radius:11px; cursor:pointer; transition:opacity .2s;
+  }
+  .btn-restart:hover { opacity:.87; }
+  .footer { text-align:center; color:var(--muted); font-size:11px; margin-top:30px; line-height:1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="inst-badge">CENT N°74 ATSA · Prof. Lic. Francisco Molina</div>
+    <h1>MICROBIOLOGÍA</h1>
+    <p>Enfermero Profesional · Famailla 2024<br>72 preguntas · 12 temas · Cortas 25 s · Largas 30 s</p>
+  </header>
+
+  <div class="score-row">
+    <div class="chip"><div class="v c" id="sc">0</div><div class="l">Correctas</div></div>
+    <div class="chip"><div class="v w" id="sw">0</div><div class="l">Incorrectas</div></div>
+    <div class="chip"><div class="v p" id="sp">0</div><div class="l">Puntos</div></div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-top"><span id="pnum">Pregunta 1 de 72</span><span id="ppct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  </div>
+
+  <div id="game">
+    <div class="tipo-row">
+      <span class="tipo-badge corta" id="tipobadge">CORTA</span>
+      <span class="tipo-tema" id="tipotema"></span>
+    </div>
+    <div class="timer-row">
+      <span class="timer-lbl">Tiempo</span>
+      <div class="timer-bar"><div class="timer-fill" id="tbar"></div></div>
+      <span class="timer-num" id="tnum">25</span>
+    </div>
+    <div class="q-card">
+      <div class="q-num" id="qnum">PREGUNTA 1</div>
+      <div class="q-text" id="qtext"></div>
+    </div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next" id="btnNext" onclick="next()">Siguiente →</button>
+  </div>
+
+  <div id="results" class="results" style="display:none">
+    <div class="trophy" id="trophy">🏆</div>
+    <h2>Resultado final</h2>
+    <div class="pct" id="rpct"></div>
+    <div class="res-grid">
+      <div class="res-chip"><div class="rv" id="rc" style="color:var(--green)">0</div><div class="rl">Correctas</div></div>
+      <div class="res-chip"><div class="rv" id="rw" style="color:var(--red)">0</div><div class="rl">Incorrectas</div></div>
+      <div class="res-chip"><div class="rv" id="rp" style="color:var(--gold)">0</div><div class="rl">Puntos</div></div>
+    </div>
+    <p id="rmsg"></p>
+    <button class="btn-restart" onclick="restart()">Jugar de nuevo</button>
+  </div>
+
+  <div class="footer">
+    Trivia elaborada por Prof. Lic. Francisco Molina · CENT N°74 ATSA · Famailla, Tucumán<br>
+    Carrera Enfermero Profesional · Microbiología 2024 · Material didáctico de uso educativo
+  </div>
+</div>
+
+<script>
+// t:"C"=corta 25s | t:"L"=larga 30s
+const PREGUNTAS = [
+
+  // ══════════════════════════════════════════
+  // TEMA 1 — Microbiología General. Procariota/Eucariota. Hospedador-Parásito
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 1 · Microbiología General",
+   q:"¿De qué palabras griegas deriva el término 'microbiología' y qué significan?",
+   a:"Mikros (pequeño), bios (vida) y logos (ciencia): estudio de la vida microscópica",
+   ops:["Mikros (pequeño), bios (vida) y logos (ciencia): estudio de la vida microscópica",
+        "Mikros (invisible), bio (célula) y logos (análisis): análisis de células invisibles al ojo",
+        "Macro (grande), bios (organismo) y logos (estudio): estudio de grandes organismos vivos",
+        "Mikros (mínimo), pathos (enfermedad) y logos (tratamiento): tratamiento de enfermedades mínimas"],
+   exp:"Microbiología deriva de tres palabras griegas: Mikros (pequeño), bios (vida) y logos (ciencia), que conjuntamente significan el estudio de la vida microscópica. Estudia los organismos cuyo tamaño está por debajo del poder resolutivo del ojo humano."},
+
+  {t:"C", tema:"Tema 1 · Microbiología General",
+   q:"¿Cuál es la principal diferencia estructural entre una célula procariota y una eucariota?",
+   a:"La célula procariota carece de núcleo definido con membrana nuclear; la eucariota tiene núcleo verdadero con membrana",
+   ops:["La célula procariota carece de núcleo definido con membrana nuclear; la eucariota tiene núcleo verdadero con membrana",
+        "La célula procariota tiene núcleo con membrana doble; la eucariota tiene núcleo sin membrana y material genético disperso",
+        "La célula procariota es más grande que la eucariota y tiene mayor número de organelas especializadas en su citoplasma",
+        "La célula procariota solo existe en organismos pluricelulares; la eucariota existe únicamente en organismos unicelulares microscópicos"],
+   exp:"La diferencia clave es el núcleo: las células procariotas (bacterias) no tienen núcleo delimitado por membrana; el ADN flota libre en el citoplasma. Las células eucariotas (hongos, parásitos, células humanas) tienen un núcleo verdadero rodeado de membrana nuclear."},
+
+  {t:"C", tema:"Tema 1 · Microbiología General",
+   q:"¿Cómo se denomina el microorganismo que siempre causa enfermedad cuando infecta al hospedador?",
+   a:"Parásito obligado o patógeno obligado",
+   ops:["Parásito obligado o patógeno obligado",
+        "Parásito facultativo",
+        "Microorganismo saprófito",
+        "Comensal neutro"],
+   exp:"Los parásitos (o patógenos) obligados son aquellos que siempre ocasionan enfermedad cada vez que se encuentran parasitando al hospedador. Ejemplo: Treponema pallidum, Mycobacterium leprae. Los facultativos pueden o no causar enfermedad según las circunstancias del hospedador."},
+
+  {t:"C", tema:"Tema 1 · Microbiología General",
+   q:"¿Cuáles son los cuatro grupos principales de microorganismos que estudia la microbiología?",
+   a:"Bacterias, hongos, virus y parásitos",
+   ops:["Bacterias, hongos, virus y parásitos",
+        "Bacterias, algas, priones y protozoarios únicamente",
+        "Virus, células cancerígenas, toxinas y antibióticos",
+        "Hongos, levaduras, esporas y micotoxinas solamente"],
+   exp:"La microbiología estudia cuatro grupos principales de microorganismos: bacterias, hongos, virus y parásitos. Cada grupo tiene características estructurales, ciclos de vida y mecanismos de patogenicidad propios, abordados por disciplinas como bacteriología, micología, virología y parasitología."},
+
+  {t:"L", tema:"Tema 1 · Microbiología General",
+   q:"¿Cuáles son las disciplinas en que se divide la microbiología y qué estudia cada una?",
+   a:"Microbiología clínica (microorganismos causantes de enfermedades), inmunología (sistema inmune), virología (virus), micología (hongos) y parasitología (parásitos y sus enfermedades)",
+   ops:["Microbiología clínica (microorganismos causantes de enfermedades), inmunología (sistema inmune), virología (virus), micología (hongos) y parasitología (parásitos y sus enfermedades)",
+        "Anatomía microbiana, fisiología bacteriana, bioquímica viral y genética de hongos, todas independientes entre sí sin aplicación clínica",
+        "Solo virología y bacteriología; los hongos y parásitos son estudiados por la medicina interna sin disciplina específica propia",
+        "Radiología, farmacología, toxicología y epidemiología son las únicas ramas que integran la microbiología moderna aplicada"],
+   exp:"La microbiología se compone de disciplinas independientes: Microbiología clínica (microorganismos productores de enfermedades y sus procesos infecciosos), Inmunología (sistema inmune y defensa), Virología (virus y sus enfermedades), Micología (hongos y micosis), Parasitología (parásitos y enfermedades parasitarias). Todas tienen aplicación directa en enfermería y en el diagnóstico microbiológico."},
+
+  {t:"L", tema:"Tema 1 · Microbiología General",
+   q:"¿Qué es el vector biológico, en qué se diferencia del vector mecánico y cómo se aplica este concepto en enfermería?",
+   a:"El vector biológico participa activamente en el ciclo evolutivo del agente (ej: mosquito en malaria); el mecánico solo transporta pasivamente el patógeno (ej: mosca). Conocerlos permite al enfermero identificar vías de transmisión y diseñar medidas preventivas",
+   ops:["El vector biológico participa activamente en el ciclo evolutivo del agente (ej: mosquito en malaria); el mecánico solo transporta pasivamente el patógeno (ej: mosca). Conocerlos permite al enfermero identificar vías de transmisión y diseñar medidas preventivas",
+        "Ambos vectores son idénticos y solo difieren en el tamaño del organismo que transportan, sin consecuencias para el ciclo infeccioso",
+        "El vector biológico solo existe en enfermedades tropicales; el mecánico es exclusivo de enfermedades respiratorias en climas templados",
+        "Los vectores no tienen relevancia en enfermería ya que la transmisión de enfermedades infecciosas ocurre siempre por contacto directo"],
+   exp:"Vector mecánico: participa en la transmisión pasiva del agente patógeno sin intervenir en su ciclo evolutivo (ej: mosca o cucaracha que transportan bacterias entéricas). Vector biológico: elemento indispensable en el ciclo evolutivo del agente; el patógeno se reproduce o desarrolla dentro del vector (ej: mosquito Anopheles en malaria, Aedes aegypti en dengue). Para enfermería: identificar el vector orienta las medidas de control vectorial, la educación comunitaria y la vigilancia epidemiológica."},
+
+  // ══════════════════════════════════════════
+  // TEMA 2 — Sistema Inmunológico
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 2 · Sistema Inmunológico",
+   q:"¿Cómo se denomina la defensa inmunológica inespecífica o de primera línea del organismo?",
+   a:"Inmunidad innata o defensa primaria inespecífica",
+   ops:["Inmunidad innata o defensa primaria inespecífica",
+        "Inmunidad adquirida o defensa secundaria específica",
+        "Inmunidad humoral mediada por linfocitos B y anticuerpos",
+        "Inmunidad celular mediada exclusivamente por linfocitos T citotóxicos"],
+   exp:"La defensa primaria o inespecífica (inmunidad innata) actúa como primera barrera contra cualquier agente extraño sin necesidad de reconocimiento previo. Incluye: barreras físicas (piel, mucosas), barreras químicas (pH ácido, lisozima), células fagocíticas (neutrófilos, macrófagos) e inflamación."},
+
+  {t:"C", tema:"Tema 2 · Sistema Inmunológico",
+   q:"¿Cuál es la función principal de los linfocitos B en la inmunidad específica?",
+   a:"Producir anticuerpos (inmunoglobulinas) contra antígenos específicos",
+   ops:["Producir anticuerpos (inmunoglobulinas) contra antígenos específicos",
+        "Atacar directamente a las células infectadas por virus sin producir ningún tipo de anticuerpos",
+        "Secretar citoquinas que regulan la temperatura corporal durante los procesos febriles agudos",
+        "Fagocitar bacterias y presentar sus antígenos a otras células del sistema linfático"],
+   exp:"Los linfocitos B son células especializadas cuya función principal es producir anticuerpos (también llamados inmunoglobulinas o gammaglobulinas) contra antígenos específicos. Se desarrollan de células madre en la médula ósea y son los responsables de la inmunidad humoral."},
+
+  {t:"C", tema:"Tema 2 · Sistema Inmunológico",
+   q:"¿Cuál es la diferencia entre inmunidad natural y adquirida?",
+   a:"La natural es innata, presente desde el nacimiento; la adquirida se desarrolla tras exposición al antígeno (activa) o por transferencia de anticuerpos (pasiva)",
+   ops:["La natural es innata, presente desde el nacimiento; la adquirida se desarrolla tras exposición al antígeno (activa) o por transferencia de anticuerpos (pasiva)",
+        "La natural se obtiene solo mediante vacunas; la adquirida es heredada genéticamente de ambos progenitores sin exposición",
+        "Ambas son idénticas en mecanismo; la diferencia es solo la velocidad de respuesta ante el mismo tipo de patógeno",
+        "La natural protege solo contra virus; la adquirida protege solo contra bacterias y hongos patógenos"],
+   exp:"Inmunidad natural (innata): presente desde el nacimiento, inespecífica, no requiere exposición previa al patógeno (piel, mucosas, fagocitos). Inmunidad adquirida (adaptativa): se desarrolla tras el contacto con un antígeno. Puede ser activa (el organismo genera su propia respuesta tras infección o vacunación) o pasiva (se reciben anticuerpos de otra fuente, ej: leche materna, suero hiperinmune)."},
+
+  {t:"L", tema:"Tema 2 · Sistema Inmunológico",
+   q:"¿Cuáles son los cinco tipos de inmunoglobulinas, qué característica principal tiene cada una y cuál predomina en la respuesta primaria?",
+   a:"IgG (protección duradera, predomina en respuesta secundaria), IgA (secreciones: saliva, calostro), IgM (primera en aparecer, respuesta primaria), IgE (reacciones alérgicas) e IgD (función reguladora en linfocitos B)",
+   ops:["IgG (protección duradera, predomina en respuesta secundaria), IgA (secreciones: saliva, calostro), IgM (primera en aparecer, respuesta primaria), IgE (reacciones alérgicas) e IgD (función reguladora en linfocitos B)",
+        "Solo existen IgG e IgM; IgA, IgE e IgD son proteínas de la coagulación sin función inmunológica conocida",
+        "Todas las inmunoglobulinas son idénticas en función; la diferencia entre clases es solo estructural y no clínica",
+        "IgE es la más abundante en sangre y la principal en la respuesta primaria; IgG solo aparece en enfermedades autoinmunes"],
+   exp:"Las cinco clases de inmunoglobulinas: IgG: más abundante en suero, atraviesa la placenta (protección neonatal), memoria inmunológica, predomina en respuesta secundaria. IgA: en secreciones (saliva, lágrimas, calostro, mucosas); protección local. IgM: la primera en aparecer ante infección; pentamérica; marcador de infección reciente o respuesta primaria. IgE: mediadora de hipersensibilidad tipo I (alergias, anafilaxia); activa mastocitos. IgD: presente en superficie de linfocitos B, función reguladora."},
+
+  {t:"L", tema:"Tema 2 · Sistema Inmunológico",
+   q:"¿Cuáles son las funciones especializadas de los linfocitos T y cómo se relacionan con la inmunidad celular?",
+   a:"Los linfocitos T incluyen: T citotóxicos (destruyen células infectadas), T colaboradores o CD4 (activan linfocitos B y macrófagos) y T reguladores (controlan la respuesta inmune); median la inmunidad celular sin producir anticuerpos",
+   ops:["Los linfocitos T incluyen: T citotóxicos (destruyen células infectadas), T colaboradores o CD4 (activan linfocitos B y macrófagos) y T reguladores (controlan la respuesta inmune); median la inmunidad celular sin producir anticuerpos",
+        "Los linfocitos T solo producen anticuerpos IgM ante infecciones virales y no tienen ningún papel en la activación de macrófagos",
+        "Los linfocitos T son idénticos a los linfocitos B y ambos producen los mismos tipos de anticuerpos ante los mismos antígenos",
+        "Solo existe un tipo de linfocito T con función única: secretar interferón para inhibir la replicación viral en tejidos infectados"],
+   exp:"Los linfocitos T (células T) no producen anticuerpos moleculares. Sus funciones especializadas son: 1) Linfocitos T citotóxicos (CD8): atacan y destruyen directamente células infectadas por virus, células tumorales y células trasplantadas. 2) Linfocitos T colaboradores/helper (CD4): activan a los linfocitos B para producir anticuerpos y a los macrófagos para fagocitar; son las principales células diana del VIH. 3) Linfocitos T reguladores: modulan y frenan la respuesta inmune evitando autoinmunidad."},
+
+  // ══════════════════════════════════════════
+  // TEMA 3 — Bioseguridad
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 3 · Bioseguridad",
+   q:"¿Cuáles son los elementos de protección personal (EPP) básicos que debe usar el personal de salud en bioseguridad?",
+   a:"Guantes, barbijo/mascarilla, bata o delantal y protección ocular",
+   ops:["Guantes, barbijo/mascarilla, bata o delantal y protección ocular",
+        "Solo guantes de látex; los demás elementos son opcionales según el criterio del profesional de turno",
+        "Ropa de calle habitual sin ningún elemento adicional en la atención de pacientes de bajo riesgo",
+        "Solo mascarilla N95 en todos los procedimientos; los guantes no son necesarios si hay lavado de manos"],
+   exp:"Los elementos de protección personal (EPP) en bioseguridad incluyen como mínimo: guantes (barrera de contacto), barbijo/mascarilla (protección respiratoria y de mucosas), bata o delantal (protección de ropa y piel) y protección ocular (antiparras o escudo facial ante riesgo de salpicaduras). Se seleccionan según el nivel de riesgo del procedimiento."},
+
+  {t:"C", tema:"Tema 3 · Bioseguridad",
+   q:"¿En qué momento del cuidado del paciente es obligatorio el lavado de manos según los '5 momentos' de la OMS?",
+   a:"Antes del contacto con el paciente, antes de procedimiento aséptico, después de exposición a fluidos, después del contacto con el paciente y después del contacto con el entorno del paciente",
+   ops:["Antes del contacto con el paciente, antes de procedimiento aséptico, después de exposición a fluidos, después del contacto con el paciente y después del contacto con el entorno del paciente",
+        "Solo antes y después de cada turno de trabajo; no es necesario el lavado entre atenciones de distintos pacientes del mismo servicio",
+        "Únicamente después de procedimientos invasivos y al ingresar y salir de la unidad de cuidados intensivos",
+        "Solo cuando el paciente presenta infección activa conocida; en pacientes sanos no es obligatorio el lavado entre atenciones"],
+   exp:"La OMS estableció los '5 momentos del lavado de manos': 1) Antes del contacto con el paciente. 2) Antes de realizar un procedimiento aséptico. 3) Después del riesgo de exposición a fluidos corporales. 4) Después del contacto con el paciente. 5) Después del contacto con el entorno del paciente. Es la medida más eficaz para prevenir las infecciones asociadas a la atención de la salud."},
+
+  {t:"C", tema:"Tema 3 · Bioseguridad",
+   q:"¿Cómo se clasifican los residuos hospitalarios según su peligrosidad?",
+   a:"Residuos comunes (asimilables a domiciliarios), patogénicos (con riesgo biológico) y especiales (químicos, radiactivos)",
+   ops:["Residuos comunes (asimilables a domiciliarios), patogénicos (con riesgo biológico) y especiales (químicos, radiactivos)",
+        "Solo residuos líquidos y sólidos; no existe clasificación por nivel de peligrosidad en ninguna normativa vigente",
+        "Residuos verdes, amarillos y rojos según el color del recipiente, sin relación con el tipo de material que contienen",
+        "Solo residuos cortopunzantes y residuos orgánicos; los residuos químicos se eliminan junto con la basura domiciliaria"],
+   exp:"Los residuos hospitalarios se clasifican según peligrosidad: Residuos comunes: sin riesgo biológico ni químico, similares a domiciliarios (papeles, envases no contaminados). Residuos patogénicos: con carga biológica infecciosa (material en contacto con sangre, fluidos, cultivos, cortopunzantes). Residuos especiales: tóxicos, radioactivos o farmacéuticos con tratamiento específico. Cada tipo requiere contenedor, rotulado y disposición final diferenciados."},
+
+  {t:"L", tema:"Tema 3 · Bioseguridad",
+   q:"¿Cuáles son los cuatro niveles de bioseguridad (BSL) para patógenos y qué características tienen cada uno?",
+   a:"BSL-1 (microorganismos no patógenos, trabajo en mesa abierta), BSL-2 (patógenos moderados, cabina de seguridad), BSL-3 (patógenos por inhalación, presión negativa) y BSL-4 (patógenos letales sin tratamiento, traje hermético)",
+   ops:["BSL-1 (microorganismos no patógenos, trabajo en mesa abierta), BSL-2 (patógenos moderados, cabina de seguridad), BSL-3 (patógenos por inhalación, presión negativa) y BSL-4 (patógenos letales sin tratamiento, traje hermético)",
+        "Solo existen dos niveles: uno para bacterias y otro para virus; hongos y parásitos no tienen niveles de bioseguridad asignados",
+        "Los cuatro niveles son idénticos en medidas de protección; la diferencia es solo administrativa según el tipo de institución",
+        "BSL-4 es el más bajo y permite trabajar sin equipo de protección; BSL-1 es el más peligroso y requiere trajes especiales"],
+   exp:"Los niveles de bioseguridad (Biosafety Level, BSL): BSL-1: microorganismos sin riesgo conocido para adultos sanos; trabajo en mesa abierta con prácticas microbiológicas estándar. BSL-2: patógenos de riesgo moderado (VHB, Salmonella); uso de cabinas de seguridad, batas, guantes. BSL-3: patógenos que pueden causar enfermedades graves por inhalación (M. tuberculosis, Coxiella); laboratorio con presión negativa, doble puerta, filtros HEPA. BSL-4: patógenos letales sin tratamiento disponible (virus Ébola, Marburg); trajes de presión positiva, laboratorio hermético."},
+
+  {t:"L", tema:"Tema 3 · Bioseguridad",
+   q:"¿Qué conducta debe seguir el personal de enfermería ante un accidente de trabajo con material biológico cortopunzante?",
+   a:"Lavar la zona con agua y jabón, no comprimir ni succionar, notificar de inmediato al supervisor, registrar el incidente, realizar el protocolo de profilaxis post-exposición (PEP) para VIH/VHB según indicación médica y hacer seguimiento serológico",
+   ops:["Lavar la zona con agua y jabón, no comprimir ni succionar, notificar de inmediato al supervisor, registrar el incidente, realizar el protocolo de profilaxis post-exposición (PEP) para VIH/VHB según indicación médica y hacer seguimiento serológico",
+        "Comprimir fuertemente la herida para expulsar la sangre contaminada, no notificar para evitar trámites burocráticos y continuar trabajando con guantes dobles",
+        "Aplicar alcohol puro directamente en la herida, succionar con la boca para extraer el material infectado y esperar 48 horas antes de informar",
+        "Solo cambiar los guantes y continuar la actividad; los accidentes con material biológico no requieren ninguna acción adicional"],
+   exp:"Protocolo ante accidente con material biológico cortopunzante: 1) Lavar inmediatamente con agua y jabón abundante (NO comprimir ni succionar la herida). En mucosas: irrigar con agua o solución fisiológica. 2) Notificar de inmediato al supervisor/jefe de servicio. 3) Registrar el incidente (fecha, hora, tipo de material, paciente fuente). 4) Evaluar al paciente fuente (VIH, VHB, VHC). 5) Iniciar PEP (profilaxis post-exposición) para VIH dentro de las 2 horas si está indicado. 6) Seguimiento serológico a las 6 semanas, 3 y 6 meses."},
+
+  // ══════════════════════════════════════════
+  // TEMA 4 — Esterilización y Desinfección
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 4 · Esterilización y Desinfección",
+   q:"¿Cuál es la diferencia fundamental entre esterilización y desinfección?",
+   a:"La esterilización elimina TODOS los microorganismos incluidas las esporas; la desinfección elimina la mayoría de microorganismos patógenos pero no necesariamente las esporas",
+   ops:["La esterilización elimina TODOS los microorganismos incluidas las esporas; la desinfección elimina la mayoría de microorganismos patógenos pero no necesariamente las esporas",
+        "La desinfección elimina todos los microorganismos incluidas esporas; la esterilización solo reduce la carga microbiana a niveles seguros",
+        "Ambos procesos son equivalentes; la diferencia es solo el agente utilizado sin distinción en el nivel de reducción microbiana",
+        "La esterilización se aplica solo a superficies; la desinfección se aplica solo a materiales que entran en el cuerpo humano"],
+   exp:"Esterilización: proceso que destruye o elimina todas las formas de vida microbiana incluyendo esporas bacterianas. Se aplica a materiales que entrarán en contacto con tejidos estériles. Desinfección: proceso que elimina la mayoría de microorganismos patógenos (no necesariamente esporas) de superficies o instrumentos. La distinción es crítica en el procesamiento del material sanitario."},
+
+  {t:"C", tema:"Tema 4 · Esterilización y Desinfección",
+   q:"¿A qué temperatura y por cuánto tiempo trabaja el autoclave en la esterilización por calor húmedo?",
+   a:"121°C durante 15 minutos a presión de vapor",
+   ops:["121°C durante 15 minutos a presión de vapor",
+        "100°C durante 30 minutos sin presión adicional como en la ebullición simple",
+        "180°C durante 2 horas en horno de calor seco tipo Poupinel",
+        "37°C durante 24 horas en incubadora con atmósfera controlada de CO₂"],
+   exp:"El autoclave es el aparato para esterilización por calor húmedo (vapor a presión). Opera a 121°C durante 15 minutos. Ventajas: rápido calentamiento y penetración, no deja residuos tóxicos, bajo deterioro del material, económico. Desventaja: corroe metales no inoxidables. Es el método de referencia en esterilización hospitalaria."},
+
+  {t:"C", tema:"Tema 4 · Esterilización y Desinfección",
+   q:"Según la clasificación de Spaulding, ¿cómo se denominan los instrumentos que contactan con tejidos estériles o el sistema vascular?",
+   a:"Artículos críticos",
+   ops:["Artículos críticos",
+        "Artículos semicríticos",
+        "Artículos no críticos",
+        "Artículos de riesgo intermedio"],
+   exp:"La clasificación de Spaulding (1961) categoriza los instrumentos según el riesgo de infección: Artículos críticos: contactan con cavidades o tejidos estériles y sistema vascular; requieren esterilización (ej: bisturís, agujas, catéteres). Semicríticos: contactan mucosas o piel no intacta; requieren desinfección de alto nivel. No críticos: contactan piel íntegra; requieren desinfección de bajo/medio nivel (ej: tensiómetros, orinales)."},
+
+  {t:"L", tema:"Tema 4 · Esterilización y Desinfección",
+   q:"¿Cuál es la diferencia entre antiséptico y desinfectante y qué ejemplos de cada uno se usan en enfermería?",
+   a:"El antiséptico se aplica sobre tejidos vivos (piel, mucosas) para reducir microorganismos; el desinfectante se usa sobre superficies o materiales inanimados. Ejemplos: antisépticos: alcohol 70%, clorhexidina, yodopovidona. Desinfectantes: hipoclorito de sodio, glutaraldehído",
+   ops:["El antiséptico se aplica sobre tejidos vivos (piel, mucosas) para reducir microorganismos; el desinfectante se usa sobre superficies o materiales inanimados. Ejemplos: antisépticos: alcohol 70%, clorhexidina, yodopovidona. Desinfectantes: hipoclorito de sodio, glutaraldehído",
+        "Antiséptico y desinfectante son sinónimos; ambos se usan indistintamente en tejidos vivos y superficies con los mismos productos",
+        "El desinfectante se aplica en tejidos vivos y el antiséptico en superficies; ambos tienen la misma composición química y concentración",
+        "Los antisépticos solo se usan en cirugías y los desinfectantes solo en laboratorios; ninguno se usa en la práctica de enfermería de rutina"],
+   exp:"Antiséptico: agente químico aplicado sobre tejidos vivos (piel, mucosas) para destruir o inhibir microorganismos. Debe ser bien tolerado por el tejido. Ejemplos: alcohol isopropílico 70% (venopunctura), clorhexidina (preparación quirúrgica de piel, higiene bucal), yodopovidona (heridas, preparación prequirúrgica). Desinfectante: agente aplicado sobre objetos o superficies inanimadas. Ejemplos: hipoclorito de sodio (superficies, derrames de sangre), glutaraldehído (desinfección de alto nivel de endoscopios), compuestos de amonio cuaternario."},
+
+  {t:"L", tema:"Tema 4 · Esterilización y Desinfección",
+   q:"¿Cuáles son los pasos para la preparación y acondicionamiento del material a esterilizar en enfermería?",
+   a:"Limpieza mecánica del material, secado, inspección visual de integridad, empaquetado con material permeable al agente esterilizante, rotulado con fecha y método, y registro. El material limpio debe estar separado del estéril",
+   ops:["Limpieza mecánica del material, secado, inspección visual de integridad, empaquetado con material permeable al agente esterilizante, rotulado con fecha y método, y registro. El material limpio debe estar separado del estéril",
+        "Solo sumergir el material en hipoclorito de sodio durante 10 minutos y guardarlo en cualquier recipiente sin necesidad de secado ni empaque",
+        "Colocar el material directamente en el autoclave sin limpieza previa, ya que la temperatura alta eliminará toda la suciedad y microorganismos",
+        "Solo el médico puede preparar el material a esterilizar; el personal de enfermería no tiene responsabilidad en esta etapa del proceso"],
+   exp:"Preparación del material para esterilización: 1) Limpieza: eliminación de suciedad orgánica e inorgánica con agua, detergente enzimático y cepillado; la suciedad orgánica inactiva los agentes esterilizantes. 2) Enjuague y secado completo (el agua residual diluye el agente). 3) Inspección visual: verificar integridad, ausencia de óxido, cortes, roturas. 4) Empaquetado: papel de grado médico, tejido de polipropileno o bolsas transparentes permeables al vapor o ETO. 5) Rotulado: fecha de esterilización, fecha de vencimiento, contenido, método. 6) Separación: área limpia ≠ área estéril."},
+
+  // ══════════════════════════════════════════
+  // TEMA 5 — Infección Intrahospitalaria
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 5 · Infección Intrahospitalaria",
+   q:"¿Cómo se define una infección nosocomial o asociada a la atención de la salud (IAAS)?",
+   a:"Infección que aparece 48 horas o más después del ingreso hospitalario, no presente ni en incubación al momento de la admisión",
+   ops:["Infección que aparece 48 horas o más después del ingreso hospitalario, no presente ni en incubación al momento de la admisión",
+        "Cualquier infección diagnosticada en un paciente internado, independientemente del momento de aparición desde el ingreso",
+        "Infección adquirida en la comunidad antes del ingreso y que se manifiesta dentro de las primeras 24 horas de hospitalización",
+        "Solo las infecciones causadas por bacterias multirresistentes; las producidas por patógenos sensibles no son consideradas nosocomiales"],
+   exp:"La infección nosocomial (o IAAS: infección asociada a la atención de la salud) es aquella que aparece 48 horas o más después del ingreso hospitalario o dentro de los 30 días del alta, siempre que no estuviera presente ni en período de incubación al momento de la admisión. Las más frecuentes son: infecciones urinarias asociadas a catéter, neumonía asociada a ventilador, bacteriemia asociada a catéter e infección de sitio quirúrgico."},
+
+  {t:"C", tema:"Tema 5 · Infección Intrahospitalaria",
+   q:"¿Cuáles son los eslabones de la cadena epidemiológica de las infecciones nosocomiales?",
+   a:"Agente infeccioso, reservorio, puerta de salida, mecanismo de transmisión, puerta de entrada y huésped susceptible",
+   ops:["Agente infeccioso, reservorio, puerta de salida, mecanismo de transmisión, puerta de entrada y huésped susceptible",
+        "Solo el agente y el huésped; los otros eslabones son innecesarios para explicar la transmisión de infecciones hospitalarias",
+        "Temperatura, humedad, pH, presión osmótica y concentración de oxígeno en el ambiente hospitalario",
+        "Médico, enfermero, técnico, familiar y paciente como únicos actores de la cadena de transmisión nosocomial"],
+   exp:"La cadena epidemiológica de las IAAS tiene 6 eslabones: 1) Agente infeccioso (bacteria, virus, hongo). 2) Reservorio (paciente, personal de salud, ambiente, equipo). 3) Puerta de salida (secreciones, sangre, heces). 4) Mecanismo de transmisión (contacto directo/indirecto, gotas, aerosoles, vehículo común). 5) Puerta de entrada (heridas, catéteres, vía respiratoria). 6) Huésped susceptible (inmunodeprimido, anciano, neonato, postoperatorio). Romper cualquier eslabón interrumpe la cadena."},
+
+  {t:"C", tema:"Tema 5 · Infección Intrahospitalaria",
+   q:"¿Qué se entiende por factores de riesgo exógenos en la infección intrahospitalaria?",
+   a:"Factores externos al paciente relacionados con los procedimientos o el ambiente hospitalario, como catéteres, sondas, cirugías y equipos contaminados",
+   ops:["Factores externos al paciente relacionados con los procedimientos o el ambiente hospitalario, como catéteres, sondas, cirugías y equipos contaminados",
+        "Factores propios del paciente como inmunodeficiencia, edad avanzada, desnutrición y enfermedades crónicas previas",
+        "Factores climáticos y geográficos del entorno donde está ubicado el hospital que favorecen el crecimiento bacteriano",
+        "Solo los errores médicos y de enfermería; los factores ambientales del hospital no son considerados factores exógenos"],
+   exp:"Los factores de riesgo de IAAS se dividen en: Endógenos (propios del paciente): edad extrema, inmunodeficiencia, desnutrición, enfermedades crónicas, Flora microbiana del propio paciente. Exógenos (externos al paciente, del ambiente o de los procedimientos): catéteres urinarios y vasculares, tubo endotraqueal/ventilación mecánica, sondas, cirugías, endoscopios, instrumental contaminado, entorno hospitalario contaminado."},
+
+  {t:"L", tema:"Tema 5 · Infección Intrahospitalaria",
+   q:"¿Cuáles son las medidas más eficaces para prevenir las infecciones asociadas a la atención de la salud y cuál es el rol específico del enfermero?",
+   a:"Higiene de manos (medida más eficaz), uso correcto de EPP, técnica aséptica en procedimientos invasivos, cuidado de catéteres y sondas según protocolo, limpieza del entorno y educación del paciente y la familia",
+   ops:["Higiene de manos (medida más eficaz), uso correcto de EPP, técnica aséptica en procedimientos invasivos, cuidado de catéteres y sondas según protocolo, limpieza del entorno y educación del paciente y la familia",
+        "Solo la prescripción preventiva de antibióticos de amplio espectro a todos los pacientes internados desde el ingreso",
+        "Mantener las ventanas cerradas y usar desinfectante en spray cada 4 horas en todas las superficies del servicio sin otra medida adicional",
+        "El enfermero no tiene responsabilidad en la prevención de IAAS; es una función exclusiva del equipo de infectología y el comité de infecciones"],
+   exp:"Medidas de prevención de IAAS: 1) Higiene de manos: medida más eficaz y costo-efectiva (OMS: 5 momentos). 2) Precauciones estándar + específicas (aislamiento de contacto, aéreo, gotas según agente). 3) Técnica aséptica en procedimientos invasivos: inserción y mantenimiento de catéteres, SNG, SVP. 4) Protocolo de bundles (paquetes de medidas) para prevención de bacteriemia, neumonía y ITU asociadas a dispositivos. 5) Limpieza y desinfección del entorno. 6) Uso racional de antibióticos. El enfermero es el profesional en mayor contacto con el paciente: ejecuta, vigila y educa en todas estas medidas."},
+
+  {t:"L", tema:"Tema 5 · Infección Intrahospitalaria",
+   q:"¿Qué es el control de brotes epidémicos nosocomiales y qué acciones debe tomar el equipo de salud ante un brote?",
+   a:"Un brote es la aparición de más casos de una infección de lo esperado en un servicio o período. Las acciones incluyen: identificar casos, investigar la fuente, implementar medidas de control, notificar al comité de infecciones y evaluar el impacto",
+   ops:["Un brote es la aparición de más casos de una infección de lo esperado en un servicio o período. Las acciones incluyen: identificar casos, investigar la fuente, implementar medidas de control, notificar al comité de infecciones y evaluar el impacto",
+        "Un brote nosocomial es siempre causado por un solo microorganismo; las acciones consisten únicamente en administrar antibióticos a todos los pacientes expuestos",
+        "El control de brotes es responsabilidad exclusiva del ministerio de salud; el equipo hospitalario no tiene ninguna función en su manejo ni notificación",
+        "Un brote requiere cerrar el hospital por completo durante 30 días para eliminar todos los microorganismos del ambiente construido"],
+   exp:"Brote nosocomial: aparición de 2 o más casos relacionados epidemiológicamente en un servicio en un período dado, por encima de la tasa endémica esperada. Pasos ante un brote: 1) Confirmar el brote (revisar registros, definir caso). 2) Implementar medidas inmediatas de control (aislamiento, refuerzo de higiene de manos). 3) Investigación epidemiológica: identificar fuente, mecanismo de transmisión y factores de riesgo. 4) Tomar muestras ambientales y de pacientes para identificar el agente. 5) Notificar al comité de infecciones y autoridades sanitarias. 6) Evaluar el impacto de las medidas y elaborar informe final."},
+
+  // ══════════════════════════════════════════
+  // TEMA 6 — Bacterias: diagnóstico, Gram, antibiograma
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 6 · Bacterias y Diagnóstico",
+   q:"¿Qué información proporciona la coloración de Gram sobre una bacteria?",
+   a:"Permite clasificarlas en Gram positivas (violeta, pared gruesa de peptidoglucano) o Gram negativas (rosa, doble membrana), orientando el tratamiento antibiótico",
+   ops:["Permite clasificarlas en Gram positivas (violeta, pared gruesa de peptidoglucano) o Gram negativas (rosa, doble membrana), orientando el tratamiento antibiótico",
+        "Determina la resistencia a antibióticos con exactitud y elimina la necesidad de realizar un antibiograma posterior",
+        "Solo indica si la bacteria produce esporas o no; no aporta información sobre la estructura de la pared bacteriana",
+        "Identifica con certeza la especie bacteriana y su virulencia sin necesidad de ningún cultivo microbiológico adicional"],
+   exp:"La coloración de Gram tiñe las bacterias según la estructura de su pared celular: Gram positivas (color violeta): pared gruesa de peptidoglucano, retiene el cristal violeta. Ejemplos: Staphylococcus, Streptococcus, Clostridium. Gram negativas (color rosa/rojo): pared fina con doble membrana lipopolisacárida, no retiene el cristal violeta. Ejemplos: E. coli, Pseudomonas, Neisseria. Esta clasificación orienta la elección del antibiótico empírico."},
+
+  {t:"C", tema:"Tema 6 · Bacterias y Diagnóstico",
+   q:"¿Cómo se reproduce la bacteria y cuánto tiempo tarda aproximadamente en dividirse una bacteria de crecimiento rápido?",
+   a:"Por fisión binaria (división simple); una bacteria de crecimiento rápido se divide cada 20-30 minutos",
+   ops:["Por fisión binaria (división simple); una bacteria de crecimiento rápido se divide cada 20-30 minutos",
+        "Por meiosis, igual que las células eucariotas, produciendo células hijas con diferente material genético",
+        "Por gemación lateral, produciendo brotes que se desprenden de la célula madre cada 24 horas",
+        "Por conjugación exclusivamente, intercambiando material genético con otra bacteria antes de dividirse"],
+   exp:"Las bacterias se reproducen asexualmente por fisión binaria: la célula madre duplica su ADN y se divide en dos células hijas idénticas. Las bacterias de crecimiento rápido (ej: E. coli) se dividen cada 20-30 minutos, lo que significa que en pocas horas pueden producir millones de células a partir de una sola, explicando la rapidez de las infecciones bacterianas."},
+
+  {t:"C", tema:"Tema 6 · Bacterias y Diagnóstico",
+   q:"¿Qué evalúa el antibiograma por difusión en disco (método de Kirby-Bauer)?",
+   a:"La sensibilidad o resistencia de una bacteria a distintos antibióticos, midiendo el halo de inhibición alrededor de cada disco",
+   ops:["La sensibilidad o resistencia de una bacteria a distintos antibióticos, midiendo el halo de inhibición alrededor de cada disco",
+        "La concentración de antibiótico necesaria para esterilizar completamente un cultivo en 24 horas sin medir halos",
+        "El tipo de toxina producida por la bacteria para determinar si es patógena obligada o facultativa",
+        "La velocidad de crecimiento bacteriano en presencia de distintos medios de cultivo sólidos y líquidos"],
+   exp:"El antibiograma por difusión en disco (método de Kirby-Bauer): discos impregnados con distintos antibióticos se colocan sobre un cultivo bacteriano en agar. Después de la incubación se mide el diámetro del halo de inhibición (zona sin crecimiento) alrededor de cada disco. Un halo grande indica sensibilidad (S); uno pequeño o ausente indica resistencia (R). Permite seleccionar el antibiótico específico más adecuado para tratar la infección."},
+
+  {t:"L", tema:"Tema 6 · Bacterias y Diagnóstico",
+   q:"¿Cuáles son los principales mecanismos de acción de los antimicrobianos y en qué se basa esta clasificación?",
+   a:"Se clasifican según el blanco molecular: inhibición de síntesis de pared celular (penicilinas, cefalosporinas), de membrana (polimixinas), de síntesis proteica (aminoglucósidos, macrólidos), de síntesis de ADN (quinolonas) y de síntesis de folatos (sulfas)",
+   ops:["Se clasifican según el blanco molecular: inhibición de síntesis de pared celular (penicilinas, cefalosporinas), de membrana (polimixinas), de síntesis proteica (aminoglucósidos, macrólidos), de síntesis de ADN (quinolonas) y de síntesis de folatos (sulfas)",
+        "Solo se clasifican en bactericidas y bacteriostáticos sin ninguna distinción según el mecanismo molecular de acción",
+        "Solo existen antibióticos naturales derivados de hongos; todos actúan inhibiendo la síntesis de pared bacteriana de la misma manera",
+        "Los antimicrobianos se clasifican únicamente por su vía de administración: oral, intramuscular e intravenosa, sin diferencia en el mecanismo"],
+   exp:"Clasificación de antimicrobianos según mecanismo de acción: 1) Inhibición de síntesis de pared celular (bactericidas): penicilinas, cefalosporinas, vancomicina, carbapenems. 2) Alteración de membrana citoplasmática: polimixinas (activas contra Gram negativas). 3) Inhibición de síntesis proteica: aminoglucósidos (gentamicina), macrólidos (azitromicina), tetraciclinas, cloranfenicol. 4) Inhibición de síntesis/replicación de ADN: quinolonas (ciprofloxacino), rifampicina, metronidazol. 5) Inhibición de síntesis de folatos: trimetoprim-sulfametoxazol (TMP-SMX)."},
+
+  {t:"L", tema:"Tema 6 · Bacterias y Diagnóstico",
+   q:"¿Cuáles son las diferencias entre el diagnóstico microbiológico directo e indirecto y qué muestras se utilizan en cada caso?",
+   a:"Diagnóstico directo: detecta el agente o sus componentes (cultivo, tinción de Gram, PCR, antigenemia); requiere muestras de sangre, esputo, orina, LCR. Diagnóstico indirecto: detecta la respuesta inmune del huésped (serología, detección de anticuerpos)",
+   ops:["Diagnóstico directo: detecta el agente o sus componentes (cultivo, tinción de Gram, PCR, antigenemia); requiere muestras de sangre, esputo, orina, LCR. Diagnóstico indirecto: detecta la respuesta inmune del huésped (serología, detección de anticuerpos)",
+        "Ambos diagnósticos son equivalentes y solo difieren en el costo del análisis; la elección depende solo del presupuesto disponible",
+        "El diagnóstico directo detecta anticuerpos en sangre; el indirecto detecta el agente directamente en el tejido infectado",
+        "El diagnóstico directo solo se aplica a virus; el indirecto solo a bacterias; los hongos no tienen ningún diagnóstico microbiológico específico"],
+   exp:"Diagnóstico microbiológico directo: detecta el microorganismo o sus componentes en la muestra clínica. Métodos: cultivo en medios adecuados (gold standard), tinción de Gram/Ziehl-Neelsen, detección de antígenos (antigenemia, ELISA en muestra directa), PCR y otras técnicas moleculares. Muestras: sangre, orina, esputo, LCR, exudados, tejidos. Diagnóstico indirecto (serológico): detecta la respuesta inmune del huésped frente al agente; detección de anticuerpos (IgM = infección reciente/aguda; IgG = infección pasada o crónica). Útil cuando el agente es difícil de cultivar o la muestra directa no es posible."},
+
+  // ══════════════════════════════════════════
+  // TEMA 7 — Virus y Hongos
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 7 · Virus y Hongos",
+   q:"¿Cuál es la diferencia fundamental entre un virus y una bacteria en cuanto a su estructura?",
+   a:"Los virus son acelulares, no tienen metabolismo propio ni organelas; solo contienen ácido nucleico rodeado de cápside proteica y necesitan células hospedadoras para replicarse",
+   ops:["Los virus son acelulares, no tienen metabolismo propio ni organelas; solo contienen ácido nucleico rodeado de cápside proteica y necesitan células hospedadoras para replicarse",
+        "Los virus son células procariotas con membrana celular pero sin núcleo; las bacterias son eucariotas con núcleo bien definido",
+        "Los virus son más grandes que las bacterias y se observan fácilmente al microscopio óptico sin necesidad de tinción",
+        "Los virus tienen todas las organelas celulares incluyendo ribosomas y mitocondrias; las bacterias carecen de estas estructuras"],
+   exp:"Los virus son entidades acelulares (no son células). Estructura básica: ácido nucleico (ADN o ARN, simple o doble cadena) rodeado de una cápside proteica (formada por capsómeros). Algunos tienen envoltura lipídica. No tienen metabolismo propio, no pueden reproducirse independientemente y necesitan obligatoriamente invadir células hospedadoras para replicarse utilizando la maquinaria celular del huésped. A diferencia de las bacterias, no responden a los antibióticos."},
+
+  {t:"C", tema:"Tema 7 · Virus y Hongos",
+   q:"¿Qué es un bacteriófago?",
+   a:"Virus que infecta específicamente bacterias, puede lisar la célula bacteriana o integrarse en su genoma",
+   ops:["Virus que infecta específicamente bacterias, puede lisar la célula bacteriana o integrarse en su genoma",
+        "Bacteria que parasita hongos microscópicos produciendo enfermedades en pacientes inmunodeprimidos",
+        "Anticuerpo específico producido por los fagocitos para destruir bacterias en el interior de los macrófagos",
+        "Enzima lítica producida por los neutrófilos para destruir bacterias durante el proceso de fagocitosis"],
+   exp:"Un bacteriófago (o fago) es un virus que infecta específicamente bacterias. Puede seguir un ciclo lítico (se replica en la bacteria, la lisa y libera nuevos fagos) o lisogénico (se integra al cromosoma bacteriano como profago y se replica con ella). Los bacteriófagos tienen interés médico porque pueden transferir genes de virulencia entre bacterias (transducción) y se estudian como alternativa terapéutica a los antibióticos (fagoterapia)."},
+
+  {t:"C", tema:"Tema 7 · Virus y Hongos",
+   q:"¿Qué tipo de hongo oportunista causa infecciones graves en pacientes inmunocomprometidos, especialmente en cavidades y mucosas?",
+   a:"Cándida albicans (candidiasis)",
+   ops:["Cándida albicans (candidiasis)",
+        "Mycobacterium tuberculosis (tuberculosis pulmonar)",
+        "Clostridium difficile (colitis pseudomembranosa)",
+        "Staphylococcus aureus (bacteriemia asociada a catéter)"],
+   exp:"Cándida albicans es un hongo dimórfico oportunista que forma parte de la flora normal de mucosas (oral, vaginal, intestinal). En pacientes inmunocomprometidos (VIH, neutropenia, trasplante, uso prolongado de antibióticos o corticoides) puede causar candidiasis oral (muguet), esofágica, vaginal o candidiasis invasiva/sistémica. Es la principal causa de infección fúngica nosocomial."},
+
+  {t:"L", tema:"Tema 7 · Virus y Hongos",
+   q:"¿Cuáles son las dos morfologías de cápside viral más frecuentes y qué ejemplos de virus tienen cada tipo?",
+   a:"Cápside helicoidal (forma de barra o hilo, ej: virus de la influenza) e icosaédrica (forma esférica, ej: adenovirus, herpesvirus). Algunos virus combinan ambas (complejidad mixta)",
+   ops:["Cápside helicoidal (forma de barra o hilo, ej: virus de la influenza) e icosaédrica (forma esférica, ej: adenovirus, herpesvirus). Algunos virus combinan ambas (complejidad mixta)",
+        "Solo existe un tipo de cápside idéntica para todos los virus; la forma esférica icosaédrica es universal y no admite variaciones",
+        "Las cápsides son siempre amorfas sin estructura definida; la forma del virus es determinada únicamente por su envoltura lipídica",
+        "Cápside cuadrada (bacteriófagos) y cápside triangular (virus de plantas); los virus humanos no tienen cápside proteica organizada"],
+   exp:"Morfologías de la cápside viral: Helicoidal: los capsómeros se apilan formando una estructura helicoidal tipo tubo; puede ser rígida (TMV, virus del tabaco) o flexible; forma viriones en barra o filamento. Ejemplos en virus humanos: virus de la influenza (con envoltura), rabia. Icosaédrica: forma de poliedro regular con 20 caras triangulares; morfología casi esférica. Ejemplos: adenovirus, herpesvirus (VHS, VEB, CMV), poliovirus, rhinovirus. Complejidad mixta: algunos bacteriófagos tienen cápside icosaédrica con cola helicoidal."},
+
+  {t:"L", tema:"Tema 7 · Virus y Hongos",
+   q:"¿Cuáles son los principales hongos patógenos para humanos, qué infecciones producen y por qué la inmunidad celular es fundamental en su defensa?",
+   a:"Cándida (mucosas y sistémica), dermatofitos (tiñas cutáneas), Aspergillus (aspergilosis pulmonar en inmunodeprimidos) y Cryptococcus neoformans (meningitis en VIH). La inmunidad celular (linfocitos T CD4) es clave: su déficit explica las infecciones fúngicas oportunistas en VIH",
+   ops:["Cándida (mucosas y sistémica), dermatofitos (tiñas cutáneas), Aspergillus (aspergilosis pulmonar en inmunodeprimidos) y Cryptococcus neoformans (meningitis en VIH). La inmunidad celular (linfocitos T CD4) es clave: su déficit explica las infecciones fúngicas oportunistas en VIH",
+        "Solo existe un hongo patógeno humano conocido: Cándida albicans; todos los demás hongos son completamente inofensivos para el ser humano",
+        "Los hongos no causan enfermedades en humanos; solo son patógenos para plantas y animales de granja de importancia económica",
+        "La inmunidad humoral (anticuerpos IgE) es la única defensa relevante contra hongos; los linfocitos T no tienen ningún papel en micosis"],
+   exp:"Hongos patógenos relevantes: Cándida albicans: candidiasis oral, vaginal, esofágica, sistémica (oportunista). Dermatofitos (Trichophyton, Microsporum): tiñas de piel, pelo y uñas (tinea pedis, capitis, unguium). Aspergillus fumigatus: aspergilosis pulmonar invasiva en neutropénicos o trasplantados. Cryptococcus neoformans: meningitis criptocócica, especialmente en VIH avanzado (CD4 <100). La inmunidad celular (linfocitos T CD4, macrófagos activados) es la principal defensa contra hongos. En VIH, la pérdida de CD4 permite el desarrollo de infecciones fúngicas oportunistas graves que son enfermedades marcadoras de SIDA."},
+
+  // ══════════════════════════════════════════
+  // TEMA 8 — Enfermedades Inmunoprevenibles y Vacunas
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 8 · Enfermedades Inmunoprevenibles",
+   q:"¿Cuál es el agente etiológico del tétanos y por qué produce espasmos musculares?",
+   a:"Clostridium tetani, bacilo Gram positivo esporulado anaerobio; produce la toxina tetanospasmina que bloquea la inhibición neuronal causando espasmos",
+   ops:["Clostridium tetani, bacilo Gram positivo esporulado anaerobio; produce la toxina tetanospasmina que bloquea la inhibición neuronal causando espasmos",
+        "Bordetella pertussis, cocobacilo Gram negativo; produce una toxina que estimula directamente los músculos esqueléticos",
+        "Corynebacterium diphtheriae, bacilo Gram positivo; produce una toxina que daña el miocardio causando convulsiones",
+        "Neisseria meningitidis, diplococo Gram negativo; libera endotoxinas que producen espasmos por daño directo en el SNC"],
+   exp:"Clostridium tetani es un bacilo Gram positivo, esporulado, anaerobio estricto. Sus esporas persisten en suelo y materia orgánica. Ante una herida profunda en condiciones anaerobias, germina y produce la tetanospasmina, una neurotoxina que bloquea los neurotransmisores inhibitorios (GABA y glicina) en las sinapsis de la médula espinal, lo que produce contracción muscular sostenida (trismo, opistótonos, espasmos generalizados). Prevención: vacuna antitetánica (toxoide tetánico) en el Calendario Nacional."},
+
+  {t:"C", tema:"Tema 8 · Enfermedades Inmunoprevenibles",
+   q:"¿Cuál es la vía de transmisión del virus de la Hepatitis B y qué medidas de profilaxis existen?",
+   a:"Transmisión parenteral (sangre), sexual y vertical (madre-hijo); profilaxis: vacunación (3 dosis) y gammaglobulina hiperinmune en exposición de riesgo",
+   ops:["Transmisión parenteral (sangre), sexual y vertical (madre-hijo); profilaxis: vacunación (3 dosis) y gammaglobulina hiperinmune en exposición de riesgo",
+        "Transmisión exclusivamente fecal-oral por agua contaminada; profilaxis solo con hervir el agua antes de consumirla",
+        "Transmisión solo por vía aérea al toser o estornudar; profilaxis con mascarilla quirúrgica en todos los contactos",
+        "Transmisión solo por picadura de mosquito Aedes aegypti; sin vacuna disponible y sin medidas de profilaxis post-exposición"],
+   exp:"El virus de la Hepatitis B (VHB) se transmite por: vía parenteral (sangre y hemoderivados, compartir agujas, tatuajes, piercing), vía sexual (fluidos genitales) y vía vertical (de madre infectada al neonato en el parto). Es un riesgo ocupacional relevante para el personal de salud. Profilaxis: vacuna recombinante (3 dosis: 0, 1 y 6 meses), parte del Calendario Nacional en Argentina. Ante accidente laboral: gammaglobulina hiperinmune anti-VHB + inicio de vacunación en no vacunados."},
+
+  {t:"C", tema:"Tema 8 · Enfermedades Inmunoprevenibles",
+   q:"¿Qué tipo de vacuna contiene microorganismos vivos atenuados y qué ventaja tiene sobre las vacunas inactivadas?",
+   a:"Vacunas a virus/bacterias vivos atenuados (ej: triple viral, BCG, polio oral); generan respuesta inmune más duradera y sólida, similar a la infección natural",
+   ops:["Vacunas a virus/bacterias vivos atenuados (ej: triple viral, BCG, polio oral); generan respuesta inmune más duradera y sólida, similar a la infección natural",
+        "Las vacunas inactivadas generan mayor inmunidad que las atenuadas porque contienen el agente completo con toda su carga antigénica",
+        "Las vacunas con microorganismos vivos son más seguras en inmunocomprometidos que las inactivadas por no contener adyuvantes",
+        "No existen vacunas con microorganismos vivos; todas las vacunas modernas son subunitarias o de ARN mensajero sin componente vivo"],
+   exp:"Las vacunas con microorganismos vivos atenuados (debilitados) replican en el organismo pero sin causar enfermedad grave. Esto genera una respuesta inmune amplia (humoral y celular) y duradera, similar a la infección natural. Ejemplos: triple viral (sarampión, rubéola, parotiditis), BCG (tuberculosis), vacuna oral contra la poliomielitis (Sabin), fiebre amarilla, varicela. Contraindicadas en inmunodeprimidos y embarazadas. Las inactivadas no replican, son más seguras pero generalmente requieren refuerzos."},
+
+  {t:"L", tema:"Tema 8 · Enfermedades Inmunoprevenibles",
+   q:"¿Cuáles son las características epidemiológicas del sarampión y por qué sigue siendo un problema de salud pública a pesar de la vacunación?",
+   a:"El sarampión es altamente contagioso (R0 12-18), se transmite por gotas y aerosoles; el virus puede permanecer en el aire hasta 2 horas. Los brotes ocurren por coberturas vacunales <95% o acumulación de susceptibles no vacunados",
+   ops:["El sarampión es altamente contagioso (R0 12-18), se transmite por gotas y aerosoles; el virus puede permanecer en el aire hasta 2 horas. Los brotes ocurren por coberturas vacunales <95% o acumulación de susceptibles no vacunados",
+        "El sarampión tiene baja contagiosidad y solo afecta a adultos mayores no vacunados; los niños menores de 5 años son naturalmente inmunes",
+        "El sarampión se transmite solo por contacto directo con piel del enfermo y no por aerosoles; la mascarilla quirúrgica es suficiente para prevenir todo contagio",
+        "Los brotes de sarampión son imposibles en países con cualquier nivel de cobertura vacunal, aunque sea del 50% de la población infantil"],
+   exp:"El sarampión es causado por un Paramyxovirus. Características epidemiológicas: Transmisión: vía aérea (gotas y aerosoles); el virus permanece activo en el aire hasta 2 horas en ambientes cerrados. Contagiosidad: R0 (número reproductivo básico) de 12-18, uno de los más altos entre los patógenos humanos. Reservorio: exclusivamente humano. Problema actual: a pesar de la vacuna efectiva (triple viral ≥95% eficacia con 2 dosis), los brotes ocurren cuando la cobertura vacunal cae por debajo del 95% requerido para la inmunidad de rebaño, o en comunidades con vacunación insuficiente. La pandemia COVID-19 generó 'deuda inmunológica' con caída de coberturas."},
+
+  {t:"L", tema:"Tema 8 · Enfermedades Inmunoprevenibles",
+   q:"¿Cuáles son los agentes causantes de la meningitis purulenta bacteriana y qué características tiene su diagnóstico microbiológico?",
+   a:"Los principales agentes son Neisseria meningitidis, Streptococcus pneumoniae y Haemophilus influenzae tipo b. El diagnóstico se hace por cultivo y tinción del LCR; el LCR es turbio, con pleocitosis de PMN, proteínas altas y glucosa baja",
+   ops:["Los principales agentes son Neisseria meningitidis, Streptococcus pneumoniae y Haemophilus influenzae tipo b. El diagnóstico se hace por cultivo y tinción del LCR; el LCR es turbio, con pleocitosis de PMN, proteínas altas y glucosa baja",
+        "La meningitis purulenta solo es causada por virus y no responde a ningún antibiótico; el diagnóstico se hace con una TAC de cráneo",
+        "El único agente de meningitis bacteriana es Mycobacterium tuberculosis; el LCR siempre es cristalino y sin alteraciones del color",
+        "El diagnóstico de meningitis se hace únicamente con hemocultivos sin necesidad de realizar punción lumbar en ningún caso"],
+   exp:"Principales etiologías de meningitis bacteriana (purulenta) según grupo etario: Neonatos: E. coli, Streptococcus agalactiae (grupo B), Listeria. Niños/adolescentes: Neisseria meningitidis (meningococo), Streptococcus pneumoniae, Haemophilus influenzae tipo b. Adultos/ancianos: Streptococcus pneumoniae, Neisseria meningitidis, Listeria. Diagnóstico microbiológico: punción lumbar (PL) → LCR turbio (purulento), pleocitosis con predominio de PMN (>1000 cel/mm³), proteínas elevadas (>100 mg/dL), glucosa baja (<40 mg/dL, glucorraquia/glucemia <0.5). Tinción de Gram del LCR, cultivo en medios enriquecidos y hemocultivos."},
+
+  // ══════════════════════════════════════════
+  // TEMA 9 — Enfermedades Gastrointestinales
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 9 · Enfermedades Gastrointestinales",
+   q:"¿Cuál es el agente etiológico de la fiebre tifoidea y cuál es su principal vía de transmisión?",
+   a:"Salmonella typhi; transmisión fecal-oral a través de agua o alimentos contaminados con materia fecal",
+   ops:["Salmonella typhi; transmisión fecal-oral a través de agua o alimentos contaminados con materia fecal",
+        "Shigella sonnei; transmisión por vía respiratoria en ambientes cerrados con alta concentración de personas",
+        "Vibrio cholerae; transmisión por contacto directo con piel de enfermos con lesiones activas de cólera",
+        "Escherichia coli verotoxigénico; transmisión exclusiva por picadura de insecto vector en zonas tropicales"],
+   exp:"La fiebre tifoidea es causada por Salmonella typhi (y más levemente por S. paratyphi). Transmisión: fecal-oral a través de agua o alimentos contaminados con materia fecal de enfermos o portadores. Manifestaciones: fiebre alta progresiva, cefalalgia, estupor, lengua tostada, hepatoesplenomegalia, rash rosado (roséola tífica), diarrea y riesgo de perforación intestinal. Diagnóstico: hemocultivo (primera semana), coprocultivo (segunda semana), serología de Widal."},
+
+  {t:"C", tema:"Tema 9 · Enfermedades Gastrointestinales",
+   q:"¿Cuál es la característica que hace al cólera tan peligroso y cuál es la clave de su tratamiento?",
+   a:"Produce diarrea acuosa masiva ('agua de arroz') por toxina colérica que activa la secreción de agua y electrolitos; el tratamiento clave es la rehidratación oral o parenteral",
+   ops:["Produce diarrea acuosa masiva ('agua de arroz') por toxina colérica que activa la secreción de agua y electrolitos; el tratamiento clave es la rehidratación oral o parenteral",
+        "Produce hemólisis masiva y falla renal aguda; el tratamiento es exclusivamente hemodiálisis en unidades de cuidados intensivos",
+        "Produce convulsiones por toxina neurotrófica; el tratamiento es anticonvulsivante sin necesidad de hidratación adicional",
+        "Produce solo fiebre y dolores musculares sin diarrea; el tratamiento es reposo y antipiréticos sin necesidad de hidratación"],
+   exp:"Vibrio cholerae produce una enterotoxina (toxina colérica) que activa de forma permanente la adenilato ciclasa de los enterocitos → aumento masivo de AMPc → hipersecreción de agua, sodio, cloro, bicarbonato y potasio hacia la luz intestinal. Resulta en diarrea acuosa masiva ('agua de arroz') sin dolor ni fiebre, pudiendo llevar a shock hipovolémico y muerte en horas. El pilar del tratamiento es la rehidratación (oral con SRO en casos leves-moderados; endovenosa en casos graves). Los antibióticos (doxiciclina, azitromicina) reducen la duración y eliminan el agente."},
+
+  {t:"C", tema:"Tema 9 · Enfermedades Gastrointestinales",
+   q:"¿Qué enfermedad grave puede causar el Escherichia coli verotoxigénico (STEC) en niños pequeños?",
+   a:"Síndrome Urémico Hemolítico (SUH): anemia hemolítica, trombocitopenia e insuficiencia renal aguda",
+   ops:["Síndrome Urémico Hemolítico (SUH): anemia hemolítica, trombocitopenia e insuficiencia renal aguda",
+        "Meningitis purulenta con líquido cefalorraquídeo turbio y convulsiones en niños menores de 2 años",
+        "Neumonía atípica con patrón intersticial bilateral resistente a penicilinas y cefalosporinas de primera generación",
+        "Sepsis por Gram negativo con bacteriemia e hipotensión solo en adultos mayores de 65 años inmunodeprimidos"],
+   exp:"El E. coli productor de toxina Shiga (STEC), serotipo O157:H7 entre otros, puede causar en niños el Síndrome Urémico Hemolítico (SUH): triada de anemia hemolítica microangiopática, trombocitopenia y insuficiencia renal aguda oligúrica. Argentina tiene alta incidencia de SUH (principal causa de IRA en niños). Transmisión: carne molida poco cocida, leche sin pasteurizar, agua. El uso de antibióticos puede aumentar el riesgo de SUH al liberar más toxina."},
+
+  {t:"L", tema:"Tema 9 · Enfermedades Gastrointestinales",
+   q:"¿Cuáles son las diferencias epidemiológicas y fisiopatológicas entre la shigelosis y la infección por Salmonella no tifoidea?",
+   a:"Shigella (disentería): dosis infectante muy baja (10-100 bacterias), invasión de mucosa colónica, disentería con moco y sangre, muy contagiosa. Salmonella no tifoidea: dosis infectante alta (>10^5), autolimitada, gastroenteritis febril con diarrea acuosa, reservorio en aves y animales",
+   ops:["Shigella (disentería): dosis infectante muy baja (10-100 bacterias), invasión de mucosa colónica, disentería con moco y sangre, muy contagiosa. Salmonella no tifoidea: dosis infectante alta (>10^5), autolimitada, gastroenteritis febril con diarrea acuosa, reservorio en aves y animales",
+        "Ambas bacterias tienen idéntica fisiopatología, igual dosis infectante y el mismo reservorio; la única diferencia es el nombre del agente",
+        "Shigella solo afecta a adultos y causa bacteriemia sistémica; Salmonella solo afecta a niños y causa solo diarrea sin complicaciones",
+        "La shigelosis se transmite por vía respiratoria; la salmonelosis solo se transmite por contacto directo con animales de granja"],
+   exp:"Shigelosis (disentería bacilar): Shigella sonnei, flexneri, dysenteriae. Dosis infectante muy baja (10-100 UFC); alta contagiosidad de persona a persona (vía fecal-oral directa). Invasión y destrucción de la mucosa del colon → disentería (deposiciones frecuentes, pequeñas, con moco, sangre y pus), cólicos, tenesmo, fiebre alta. Salmonella no tifoidea (gastroenteritis): S. enteritidis, typhimurium. Dosis infectante alta (10⁵ UFC); reservorio en aves (huevo), reptiles, bovinos. Infección autolimitada (3-5 días): gastroenteritis febril con diarrea acuosa, náuseas, vómitos. En inmunodeprimidos y lactantes: bacteriemia."},
+
+  {t:"L", tema:"Tema 9 · Enfermedades Gastrointestinales",
+   q:"¿Cuáles son las medidas de profilaxis para las enfermedades gastrointestinales transmitidas por alimentos y agua?",
+   a:"Higiene de manos antes de manipular alimentos, cocción completa de carnes, pasteurización de lácteos, potabilización del agua, refrigeración adecuada, evitar contaminación cruzada entre alimentos crudos y cocidos",
+   ops:["Higiene de manos antes de manipular alimentos, cocción completa de carnes, pasteurización de lácteos, potabilización del agua, refrigeración adecuada, evitar contaminación cruzada entre alimentos crudos y cocidos",
+        "Solo el uso de antibióticos preventivos en toda la población durante los meses de verano cuando el riesgo aumenta por el calor",
+        "Únicamente lavar las frutas y verduras con agua; la carne siempre es segura y no requiere cocción completa para eliminar bacterias",
+        "Solo hervir el agua de consumo; los alimentos envasados y los productos de origen animal nunca representan riesgo de transmisión"],
+   exp:"Profilaxis de enfermedades gastrointestinales transmitidas por alimentos y agua: Higiene: lavado de manos antes de preparar y consumir alimentos, después de usar el baño y de manipular alimentos crudos. Cocción: temperatura interna segura (≥75°C en carnes, especialmente molida). Pasteurización de leche y derivados. Potabilización del agua (cloración, tratamiento). Refrigeración: <5°C para inhibir el crecimiento bacteriano. Evitar contaminación cruzada: utensilios separados para crudos y cocidos. Prohibición de consumo de aguas superficiales sin tratamiento. Vigilancia de manipuladores de alimentos."},
+
+  // ══════════════════════════════════════════
+  // TEMA 10 — Enfermedades de Transmisión Sexual
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 10 · Enfermedades de Transmisión Sexual",
+   q:"¿Cuál es el agente etiológico de la sífilis y cómo se clasifica según el estadio de la enfermedad?",
+   a:"Treponema pallidum; estadios: sífilis primaria (chancro), secundaria (rash, condilomas planos) y terciaria (gomas, neurosífilis, sífilis cardiovascular)",
+   ops:["Treponema pallidum; estadios: sífilis primaria (chancro), secundaria (rash, condilomas planos) y terciaria (gomas, neurosífilis, sífilis cardiovascular)",
+        "Neisseria gonorrhoeae; estadios: gonorrea aguda (uretritis), crónica (artritis gonocócica) y diseminada (sepsis por diplococo)",
+        "Chlamydia trachomatis; estadios: uretritis no gonocócica, linfogranuloma venéreo y tracoma ocular según el serovar infectante",
+        "Treponema pallidum; estadios: latente temprana, latente tardía y crónica; sin estadio primario ni manifestación cutánea inicial"],
+   exp:"La sífilis es causada por Treponema pallidum, espiroqueta de parásito obligado intracelular que no se puede cultivar in vitro. Estadios: Primaria: chancro sifilítico (úlcera indolora genital o extragenital) + adenopatías. Secundaria (6-8 semanas): rash cutáneo palmoplantar, condilomas planos, lesiones mucosas, alopecia. Latente: asintomática (temprana <1 año, tardía >1 año). Terciaria (años/décadas): gomas sifilíticos, neurosífilis, sífilis cardiovascular. Diagnóstico: VDRL/RPR (no treponémicas) + FTA-ABS/TPHA (treponémicas). Tratamiento: penicilina G benzatínica."},
+
+  {t:"C", tema:"Tema 10 · Enfermedades de Transmisión Sexual",
+   q:"¿Cuál es la célula diana del VIH y por qué su destrucción produce inmunodeficiencia?",
+   a:"El linfocito T CD4 (T cooperador); su destrucción elimina la 'dirección' de la respuesta inmune, dejando al organismo sin defensa frente a infecciones oportunistas",
+   ops:["El linfocito T CD4 (T cooperador); su destrucción elimina la 'dirección' de la respuesta inmune, dejando al organismo sin defensa frente a infecciones oportunistas",
+        "El linfocito B; su destrucción impide la producción de anticuerpos pero mantiene intacta la inmunidad celular contra virus",
+        "El neutrófilo; su destrucción elimina la fagocitosis y predispone exclusivamente a infecciones bacterianas extracelulares",
+        "El glóbulo rojo; su destrucción produce anemia grave que lleva a hipoxia tisular e inmunosupresión secundaria"],
+   exp:"El VIH (Virus de la Inmunodeficiencia Humana) utiliza el receptor CD4 para ingresar a los linfocitos T CD4 (helper/cooperadores). Estos linfocitos son el 'director' de la respuesta inmune: activan linfocitos B (anticuerpos) y macrófagos, y coordinan la respuesta celular. Al destruirlos progresivamente, el VIH genera inmunodeficiencia severa: cuando el conteo CD4 cae <200 cel/mm³ se define SIDA, con aparición de infecciones oportunistas (P. jirovecii, toxoplasma, CMV, Cryptococcus) y tumores (Sarcoma de Kaposi, linfomas)."},
+
+  {t:"C", tema:"Tema 10 · Enfermedades de Transmisión Sexual",
+   q:"¿Cuáles son las vías de transmisión del VIH?",
+   a:"Vía sexual (fluidos genitales), parenteral (sangre, agujas compartidas) y vertical (madre a hijo durante embarazo, parto o lactancia)",
+   ops:["Vía sexual (fluidos genitales), parenteral (sangre, agujas compartidas) y vertical (madre a hijo durante embarazo, parto o lactancia)",
+        "Solo vía respiratoria al toser o estornudar; el VIH se transmite como el virus de la influenza estacional",
+        "Vía fecal-oral por agua contaminada y vía aérea; el VIH puede sobrevivir hasta 48 horas en superficies secas a temperatura ambiente",
+        "Solo por picadura de mosquito Aedes aegypti; el contacto sexual y el contacto sanguíneo no son vías de transmisión del VIH"],
+   exp:"El VIH se transmite exclusivamente por tres vías: 1) Sexual: a través de semen, secreciones vaginales o sangre durante relaciones sexuales sin preservativo (anal de mayor riesgo, vaginal, oral menor riesgo). 2) Parenteral: sangre y hemoderivados infectados, compartir agujas en usuarios de drogas IV, tatuajes/piercing con material contaminado, accidente laboral con cortopunzante. 3) Vertical (madre a hijo): transplacentaria (embarazo), durante el parto (mayor riesgo) o por lactancia materna. NO se transmite por saliva, lágrimas, sudor, contacto casual, mosquitos ni superficies."},
+
+  {t:"L", tema:"Tema 10 · Enfermedades de Transmisión Sexual",
+   q:"¿Cuáles son las características del diagnóstico microbiológico de la gonorrea y qué implicancias tiene la resistencia a antibióticos de Neisseria gonorrhoeae?",
+   a:"La gonorrea se diagnostica por tinción de Gram (diplococos intracelulares en PMN), cultivo en medios selectivos (Thayer-Martin) y PCR. La resistencia creciente a penicilinas, quinolonas y cefalosporinas obliga a usar ceftriaxona+azitromicina como tratamiento dual",
+   ops:["La gonorrea se diagnostica por tinción de Gram (diplococos intracelulares en PMN), cultivo en medios selectivos (Thayer-Martin) y PCR. La resistencia creciente a penicilinas, quinolonas y cefalosporinas obliga a usar ceftriaxona+azitromicina como tratamiento dual",
+        "La gonorrea solo se diagnostica por serología (detección de anticuerpos IgG en sangre); el cultivo no es posible porque N. gonorrhoeae no crece en ningún medio artificial",
+        "La gonorrea no presenta resistencia a antibióticos; la penicilina oral en dosis única sigue siendo el tratamiento de primera elección universal",
+        "El diagnóstico es exclusivamente clínico por el aspecto del exudado; no se recomienda ningún tipo de análisis microbiológico para confirmar el caso"],
+   exp:"Neisseria gonorrhoeae, diplococo Gram negativo intracelular. Diagnóstico: Tinción de Gram de exudado uretral/endocervical: diplococos Gram negativos dentro de PMN (sensibilidad >95% en hombres sintomáticos, menor en mujeres). Cultivo: medio selectivo de Thayer-Martin (inhibe flora normal, enriquecido para gonococos); indispensable para antibiograma. PCR/NAAT: alta sensibilidad y especificidad, permite muestras de sitios no cultivables. Resistencia antimicrobiana: N. gonorrhoeae ha desarrollado resistencia a sulfonamidas, penicilinas, tetraciclinas y quinolonas. Tratamiento actual OMS/OPS: ceftriaxona 500 mg IM dosis única + azitromicina 1 g oral (tratamiento dual para retrasar resistencia a cefalosporinas)."},
+
+  {t:"L", tema:"Tema 10 · Enfermedades de Transmisión Sexual",
+   q:"¿Cuáles son las medidas de profilaxis para las infecciones de transmisión sexual y cuál es el rol de enfermería en la consejería?",
+   a:"Uso consistente de preservativo, reducción de parejas sexuales, testeo periódico, tratamiento de la pareja, PrEP para VIH en grupos de riesgo y vacunación (VHB, HPV). Enfermería brinda consejería sin juicio, detecta, notifica y educa",
+   ops:["Uso consistente de preservativo, reducción de parejas sexuales, testeo periódico, tratamiento de la pareja, PrEP para VIH en grupos de riesgo y vacunación (VHB, HPV). Enfermería brinda consejería sin juicio, detecta, notifica y educa",
+        "La única medida eficaz es el abstinencia sexual total; el preservativo tiene 0% de eficacia y no se recomienda en ningún grupo de edad",
+        "La profilaxis es responsabilidad exclusiva de infectólogos y urólogos; el enfermero no tiene rol en la prevención de ITS",
+        "Solo la vacunación previene las ITS; las medidas conductuales como el uso de preservativo no han demostrado ninguna eficacia"],
+   exp:"Profilaxis de ITS: Preservativo masculino/femenino: eficaz para reducir transmisión de VIH, gonorrea, sífilis, clamidia, VHB, VHC y HPV cuando se usa correctamente y de manera consistente. Reducción del número de parejas y conocimiento del estado serológico. Testeo periódico: detección temprana permite tratamiento oportuno e interrupción de la cadena de transmisión. Tratamiento de la pareja sexual: fundamental para evitar reinfección. PrEP (profilaxis pre-exposición con antirretrovirales): para personas VIH negativas con alto riesgo de adquisición. Vacunas: VHB (obligatoria en Argentina), HPV (bivalente/cuadrivalente/nonavalente, Calendario Nacional). Rol de enfermería: consejería sin juicio ni discriminación, detección de casos, notificación obligatoria, educación sexual, entrega de preservativos, adherencia al tratamiento."},
+
+  // ══════════════════════════════════════════
+  // TEMA 11 — Infecciones Urinarias
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 11 · Infecciones Urinarias",
+   q:"¿Cuál es el agente etiológico más frecuente de las infecciones urinarias (ITU) en la comunidad?",
+   a:"Escherichia coli (responsable del 80-85% de las ITU no complicadas de la comunidad)",
+   ops:["Escherichia coli (responsable del 80-85% de las ITU no complicadas de la comunidad)",
+        "Staphylococcus aureus (responsable de la mayoría de las pielonefritis en adultos mayores hospitalizados)",
+        "Candida albicans (el hongo más frecuente en ITU de todos los grupos etarios sin distinción)",
+        "Pseudomonas aeruginosa (el agente más frecuente de ITU en pacientes ambulatorios sanos sin factores de riesgo)"],
+   exp:"Escherichia coli es responsable del 80-85% de las infecciones urinarias no complicadas en la comunidad (cistitis, uretritis). Otros agentes frecuentes: Staphylococcus saprophyticus (en mujeres jóvenes), Klebsiella pneumoniae, Proteus mirabilis. En ITU hospitalarias o complicadas (catéter, instrumentación): E. coli sigue siendo frecuente pero aumentan Klebsiella, Pseudomonas, Enterococcus y Cándida."},
+
+  {t:"C", tema:"Tema 11 · Infecciones Urinarias",
+   q:"¿Cuáles son los síntomas clásicos de una cistitis bacteriana no complicada?",
+   a:"Disuria (ardor al orinar), polaquiuria (aumento de la frecuencia), urgencia miccional y orina turbia o maloliente, sin fiebre",
+   ops:["Disuria (ardor al orinar), polaquiuria (aumento de la frecuencia), urgencia miccional y orina turbia o maloliente, sin fiebre",
+        "Fiebre alta, escalofríos, dolor lumbar intenso y hematuria macroscópica como síntomas de presentación de la cistitis simple",
+        "Solo hematuria macroscópica y anemia; la cistitis bacteriana no produce ardor ni aumento de la frecuencia miccional",
+        "Oliguria progresiva, edema de miembros inferiores y hipertensión arterial como manifestaciones de la cistitis bacteriana"],
+   exp:"La cistitis bacteriana no complicada se presenta con: Disuria (dolor/ardor al orinar), polaquiuria (micciones frecuentes de poco volumen), urgencia miccional (necesidad imperiosa de orinar), orina turbia, maloliente o con hematuria macroscópica. Generalmente sin fiebre (que indicaría compromiso del tracto superior = pielonefritis). Es más frecuente en mujeres por la anatomía (uretra corta, proximidad al ano). Diagnóstico: urocultivo con ≥10⁵ UFC/mL del mismo agente."},
+
+  {t:"C", tema:"Tema 11 · Infecciones Urinarias",
+   q:"¿Por qué las mujeres tienen mayor predisposición a las infecciones urinarias que los hombres?",
+   a:"Por la uretra femenina más corta (~4 cm vs ~20 cm) y su mayor proximidad al ano, lo que facilita la colonización ascendente por enterobacterias",
+   ops:["Por la uretra femenina más corta (~4 cm vs ~20 cm) y su mayor proximidad al ano, lo que facilita la colonización ascendente por enterobacterias",
+        "Porque el sistema inmune femenino produce menos IgA secretora en la mucosa urinaria que el masculino",
+        "Porque el pH urinario femenino es más alcalino y favorece el crecimiento de enterobacterias en la vejiga",
+        "Porque los riñones femeninos filtran menos orina por hora, lo que genera mayor concentración de bacterias en la vejiga"],
+   exp:"La mayor susceptibilidad femenina a ITU tiene base anatómica: la uretra femenina mide aproximadamente 4 cm (vs 20 cm en el hombre), es más corta y su meato uretral externo está próximo al introito vaginal y al ano. Esto facilita el acceso ascendente de bacterias colónicas (especialmente E. coli) desde el periné hacia la uretra y vejiga. Factores adicionales: actividad sexual (desplaza bacterias perineales hacia la uretra), embarazo (dilatación ureteral), menopausia (cambios del epitelio urinario por déficit estrogénico)."},
+
+  {t:"L", tema:"Tema 11 · Infecciones Urinarias",
+   q:"¿Cuáles son las diferencias entre cistitis y pielonefritis en cuanto a clínica, diagnóstico y tratamiento?",
+   a:"Cistitis: síntomas bajos (disuria, polaquiuria), sin fiebre, urocultivo positivo, tratamiento oral 3-7 días. Pielonefritis: fiebre alta, escalofríos, dolor lumbar (puñopercusión positiva), leucocitosis, hemocultivos, tratamiento parenteral en casos graves",
+   ops:["Cistitis: síntomas bajos (disuria, polaquiuria), sin fiebre, urocultivo positivo, tratamiento oral 3-7 días. Pielonefritis: fiebre alta, escalofríos, dolor lumbar (puñopercusión positiva), leucocitosis, hemocultivos, tratamiento parenteral en casos graves",
+        "Cistitis y pielonefritis son sinónimos; ambas presentan fiebre alta y requieren tratamiento endovenoso de 21 días mínimo",
+        "La cistitis siempre requiere cirugía; la pielonefritis se trata solo con reposo y aumento de la ingesta de líquidos sin antibióticos",
+        "La pielonefritis no produce fiebre y se confunde siempre con una apendicitis; la cistitis siempre produce fiebre como síntoma cardinal"],
+   exp:"Cistitis (ITU baja): afecta vejiga y uretra. Clínica: disuria, polaquiuria, urgencia, orina turbia/maloliente, sin fiebre. Diagnóstico: sedimento urinario (piuria, bacteriuria) + urocultivo. Tratamiento: antibiótico oral 3-7 días (TMP-SMX, nitrofurantoína, fosfomicina). Pielonefritis aguda (ITU alta): afecta parénquima renal. Clínica: fiebre >38°C, escalofríos, dolor lumbar unilateral, puñopercusión renal positiva, náuseas/vómitos, sepsis en casos graves. Diagnóstico: urocultivo + hemocultivos + laboratorio (leucocitosis, PCR elevada) + ecografía renal si complicación. Tratamiento: antibiótico IV en pielonefritis grave (fluoroquinolonas, cefalosporinas de 3ª generación, aminoglucósidos) o VO en formas leves/moderadas, 10-14 días."},
+
+  {t:"L", tema:"Tema 11 · Infecciones Urinarias",
+   q:"¿Cuáles son las medidas preventivas para las ITU asociadas a sonda vesical (CAUTI) y cuál es el rol de enfermería?",
+   a:"Indicación precisa de la sonda, inserción con técnica aséptica, sistema cerrado, higiene del meato diaria, retirada precoz de la sonda, no desconectar el sistema y movilizar la bolsa por debajo del nivel de la vejiga",
+   ops:["Indicación precisa de la sonda, inserción con técnica aséptica, sistema cerrado, higiene del meato diaria, retirada precoz de la sonda, no desconectar el sistema y movilizar la bolsa por debajo del nivel de la vejiga",
+        "Administrar antibióticos profilácticos a todos los pacientes con sonda vesical desde el primer día de colocación hasta su retiro",
+        "Solo cambiar la sonda cada 24 horas; no es necesaria ninguna técnica aséptica en la inserción si el paciente está en aislamiento",
+        "Solo usar sondas de silicona de gran calibre; el calibre es el único factor que previene las ITU asociadas a dispositivos urinarios"],
+   exp:"Prevención de CAUTI (Catheter-Associated Urinary Tract Infection): 1) Indicación correcta y necesaria (no usar sonda por comodidad del personal). 2) Inserción con técnica aséptica estricta. 3) Sistema de drenaje cerrado y estéril (nunca desconectar). 4) Mantener el sistema de drenaje siempre por debajo del nivel de la vejiga (previene reflujo). 5) Higiene del meato uretral con agua y jabón diariamente. 6) Retirar la sonda lo antes posible (cada día con sonda aumenta el riesgo un 3-7%). 7) No tomar muestras de orina desconectando el sistema; usar el puerto específico con antisepsia. Rol de enfermería: ejecutar, documentar y monitorear todos estos cuidados; es la principal responsable de la prevención de CAUTI."},
+
+  // ══════════════════════════════════════════
+  // TEMA 12 — Enfermedades Respiratorias
+  // ══════════════════════════════════════════
+  {t:"C", tema:"Tema 12 · Enfermedades Respiratorias",
+   q:"¿Cuál es el principal agente bacteriano causante de la Neumonía Adquirida en la Comunidad (NAC) en adultos?",
+   a:"Streptococcus pneumoniae (neumococo), coco Gram positivo en diplococo",
+   ops:["Streptococcus pneumoniae (neumococo), coco Gram positivo en diplococo",
+        "Mycobacterium tuberculosis, bacilo ácido-alcohol resistente de crecimiento muy lento",
+        "Pseudomonas aeruginosa, bacilo Gram negativo característico de infecciones nosocomiales en ventilados",
+        "Legionella pneumophila, bacilo Gram negativo asociado a torres de enfriamiento y sistemas de agua"],
+   exp:"Streptococcus pneumoniae (neumococo) es el principal agente bacteriano de la NAC en adultos (30-40% de los casos bacterianos). Es un coco Gram positivo dispuesto en diplococo o cadenas cortas, con cápsula polisacárida que confiere virulencia y resistencia a la fagocitosis. Causa cuadros típicos de neumonía lobar con fiebre alta, escalofrío, tos productiva y esputo herrumbroso. Profilaxis: vacuna antineumocócica (PCV13 y PPSV23)."},
+
+  {t:"C", tema:"Tema 12 · Enfermedades Respiratorias",
+   q:"¿Qué tinción específica se utiliza para diagnosticar Mycobacterium tuberculosis y cuál es el resultado esperado?",
+   a:"Tinción de Ziehl-Neelsen; el bacilo aparece de color rojo (ácido-alcohol resistente, BAAR) sobre fondo azul",
+   ops:["Tinción de Ziehl-Neelsen; el bacilo aparece de color rojo (ácido-alcohol resistente, BAAR) sobre fondo azul",
+        "Tinción de Gram; el bacilo aparece de color violeta (Gram positivo) formando cadenas largas en esputos",
+        "Tinción de Wright-Giemsa; el bacilo aparece de color verde fluorescente cuando se expone a luz ultravioleta",
+        "Tinción de India ink; el bacilo forma un halo negro de cápsula visible alrededor del microorganismo en el LCR"],
+   exp:"Mycobacterium tuberculosis posee una pared celular rica en ácidos micólicos (lipídica) que retiene el colorante fucsina después de la decoloración con alcohol-ácido → ácido-alcohol resistente (BAAR). La tinción de Ziehl-Neelsen tiñe el bacilo de rojo/rosado sobre un fondo azul. Un resultado positivo de BAAR en esputo es diagnóstico presuntivo de tuberculosis pulmonar; se complementa con cultivo (Löwenstein-Jensen, demora 3-8 semanas) y PCR/Xpert MTB/RIF para confirmación y detección de resistencia."},
+
+  {t:"C", tema:"Tema 12 · Enfermedades Respiratorias",
+   q:"¿Cuál es la vía de transmisión de la tuberculosis y qué condiciones favorecen su contagio?",
+   a:"Vía aérea por inhalación de microgotas (núcleos de Wells) expulsadas al toser o estornudar; favorecen el contagio: hacinamiento, mala ventilación, contacto prolongado e inmunosupresión",
+   ops:["Vía aérea por inhalación de microgotas (núcleos de Wells) expulsadas al toser o estornudar; favorecen el contagio: hacinamiento, mala ventilación, contacto prolongado e inmunosupresión",
+        "Vía fecal-oral por agua contaminada con esputos; el hacinamiento no influye en su transmisión",
+        "Solo por contacto directo con lesiones cutáneas abiertas; no se transmite por vía respiratoria en ningún caso",
+        "Por picadura de mosquito en zonas tropicales; la transmisión persona a persona no existe en la tuberculosis"],
+   exp:"Mycobacterium tuberculosis se transmite por vía aérea: los enfermos bacilíferos (esputo BAAR positivo) al toser, estornudar, cantar o hablar liberan aerosoles con microgotas (núcleos de Wells de 1-5 μm) que contienen bacilos y permanecen suspendidas en el aire de ambientes cerrados. Los factores que favorecen la transmisión: hacinamiento, ventilación deficiente, contacto estrecho y prolongado con enfermo bacilífero, inmunosupresión del contacto (VIH, desnutrición, tratamiento con inmunosupresores). Medidas de control: precauciones de aislamiento aéreo, habitación con presión negativa, mascarilla N95 para el personal."},
+
+  {t:"L", tema:"Tema 12 · Enfermedades Respiratorias",
+   q:"¿Cuáles son las características de la brucelosis y el carbunco como zoonosis y qué riesgo representan para el personal de salud?",
+   a:"Brucelosis: zoonosis por Brucella spp. transmitida por contacto con animales o ingesta de lácteos no pasteurizados; fiebre ondulante. Carbunco: Bacillus anthracis, esporulado; formas cutánea, pulmonar (bioterrorismo) y gastrointestinal. Ambas requieren bioseguridad nivel 3",
+   ops:["Brucelosis: zoonosis por Brucella spp. transmitida por contacto con animales o ingesta de lácteos no pasteurizados; fiebre ondulante. Carbunco: Bacillus anthracis, esporulado; formas cutánea, pulmonar (bioterrorismo) y gastrointestinal. Ambas requieren bioseguridad nivel 3",
+        "Brucelosis y carbunco son enfermedades exclusivas de animales que nunca se transmiten a humanos bajo ninguna circunstancia",
+        "Ambas son enfermedades virales transmitidas por mosquitos sin ningún riesgo para el personal de salud ni para trabajadores rurales",
+        "Solo el carbunco es una zoonosis; la brucelosis es una infección exclusivamente intrahospitalaria sin reservorio animal conocido"],
+   exp:"Brucelosis: causada por Brucella abortus (bovinos), B. melitensis (caprinos/ovinos), B. suis (porcinos). Transmisión: contacto con animales infectados (veterinarios, trabajadores rurales), ingestión de lácteos no pasteurizados. Clínica: fiebre ondulante (con picos vespertinos), sudoración nocturna, artralgias, hepatoesplenomegalia. Riesgo laboral: personal de laboratorio (agente de BSL-3). Carbunco: Bacillus anthracis, bacilo esporulado Gram positivo. Tres formas: cutánea (carbunco cutáneo, espora por piel lacerada), pulmonar (inhalación de esporas, mortalidad >80%, bioterrorismo) y gastrointestinal. Esporas persistentes en suelo por décadas. Riesgo para personal de salud en manipulación de muestras; notificación obligatoria inmediata."},
+
+  {t:"L", tema:"Tema 12 · Enfermedades Respiratorias",
+   q:"¿Cuáles son las medidas de prevención y control de la tuberculosis, incluyendo el tratamiento y la importancia de la adherencia?",
+   a:"Diagnóstico precoz de casos, tratamiento DOTS con isoniazida+rifampicina+pirazinamida+etambutol durante 6 meses, vacuna BCG al nacer, aislamiento respiratorio, búsqueda de contactos y tratamiento de la tuberculosis latente (TBL)",
+   ops:["Diagnóstico precoz de casos, tratamiento DOTS con isoniazida+rifampicina+pirazinamida+etambutol durante 6 meses, vacuna BCG al nacer, aislamiento respiratorio, búsqueda de contactos y tratamiento de la tuberculosis latente (TBL)",
+        "Solo la vacuna BCG en adultos mayores de 60 años; los menores de edad no requieren vacunación ni tratamiento profiláctico",
+        "El tratamiento es de 10 días con una sola dosis diaria de rifampicina; no es necesario el aislamiento respiratorio en ningún caso",
+        "La tuberculosis no requiere ninguna medida de control porque los antibióticos disponibles la curan en 48 horas con una sola dosis"],
+   exp:"Estrategia de control de la tuberculosis: 1) Diagnóstico precoz: BAAR de esputo, cultivo, Xpert MTB/RIF, PPD/IGRA para TBL. 2) Tratamiento directamente observado (DOTS/TAES): fase intensiva (2 meses): isoniazida (H) + rifampicina (R) + pirazinamida (Z) + etambutol (E). Fase de continuación (4 meses): isoniazida + rifampicina. Total: 6 meses. La adherencia es crítica: abandonar el tratamiento genera TB resistente (MDR-TB, XDR-TB). 3) Vacuna BCG: al nacer, previene formas graves en niños (meningitis TBC, TB miliar). 4) Aislamiento aéreo: hasta negativización del esputo. 5) Búsqueda de contactos y tratamiento de TBL (isoniazida 6-9 meses o rifampicina 4 meses). 6) Control de factores sociales: hacinamiento, desnutrición, VIH."}
+];
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let preguntas,idx,correctas,incorrectas,puntos,timerInterval,tiempoRestante,respondida;
+
+function init(){
+  preguntas=shuffle([...PREGUNTAS]);
+  idx=0; correctas=0; incorrectas=0; puntos=0;
+  document.getElementById('results').style.display='none';
+  document.getElementById('game').style.display='block';
+  updateScore(); loadQ();
+}
+
+function loadQ(){
+  respondida=false;
+  const p=preguntas[idx];
+  const total=preguntas.length;
+  const esL=(p.t==="L");
+  const tQ=esL?30:25;
+
+  const tb=document.getElementById('tipobadge');
+  tb.textContent=esL?'LARGA':'CORTA';
+  tb.className='tipo-badge '+(esL?'larga':'corta');
+  document.getElementById('tipotema').textContent=p.tema;
+  document.getElementById('qnum').textContent=`PREGUNTA ${idx+1}`;
+  document.getElementById('qtext').textContent=p.q;
+  document.getElementById('pnum').textContent=`Pregunta ${idx+1} de ${total}`;
+  const pct=Math.round(idx/total*100);
+  document.getElementById('ppct').textContent=pct+'%';
+  document.getElementById('pfill').style.width=pct+'%';
+
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('btnNext').className='btn-next';
+
+  const ops=shuffle([...p.ops]);
+  const letters=['A','B','C','D'];
+  const cont=document.getElementById('opts');
+  cont.innerHTML='';
+  ops.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='opt';
+    d.innerHTML=`<span class="lt">${letters[i]}</span><span class="opt-txt">${o}</span>`;
+    d.onclick=()=>answer(d,o,p);
+    cont.appendChild(d);
+  });
+
+  clearInterval(timerInterval);
+  tiempoRestante=tQ;
+  updateTimer(tQ);
+  timerInterval=setInterval(()=>tick(tQ),1000);
+}
+
+function tick(max){
+  tiempoRestante--;
+  updateTimer(max);
+  if(tiempoRestante<=0){ clearInterval(timerInterval); timeUp(); }
+}
+
+function updateTimer(max){
+  const pct=(tiempoRestante/max)*100;
+  const bar=document.getElementById('tbar');
+  bar.style.width=pct+'%';
+  bar.className='timer-fill'+(tiempoRestante<=5?' urgent':'');
+  document.getElementById('tnum').textContent=tiempoRestante;
+}
+
+function timeUp(){
+  if(respondida)return;
+  respondida=true; incorrectas++;
+  updateScore();
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const p=preguntas[idx];
+  document.querySelectorAll('.opt').forEach(o=>{
+    if(o.querySelector('.opt-txt').textContent.trim()===p.a) o.classList.add('correct');
+  });
+  showFeedback(false,p.exp);
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function answer(el,chosen,p){
+  if(respondida)return;
+  respondida=true;
+  clearInterval(timerInterval);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const ok=chosen===p.a;
+  if(ok){
+    el.classList.add('correct');
+    const max=p.t==="L"?30:25;
+    const bonus=Math.round(tiempoRestante/max*50)+50;
+    puntos+=bonus; correctas++;
+  } else {
+    el.classList.add('wrong'); incorrectas++;
+    document.querySelectorAll('.opt').forEach(o=>{
+      if(o.querySelector('.opt-txt').textContent.trim()===p.a) o.classList.add('correct');
+    });
+  }
+  updateScore();
+  showFeedback(ok,p.exp);
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function showFeedback(ok,exp){
+  const fb=document.getElementById('feedback');
+  fb.className='feedback show '+(ok?'ok':'no');
+  fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+exp;
+}
+
+function updateScore(){
+  document.getElementById('sc').textContent=correctas;
+  document.getElementById('sw').textContent=incorrectas;
+  document.getElementById('sp').textContent=puntos;
+}
+
+function next(){
+  idx++;
+  if(idx>=preguntas.length){ showResults(); return; }
+  loadQ();
+}
+
+function showResults(){
+  clearInterval(timerInterval);
+  document.getElementById('game').style.display='none';
+  const r=document.getElementById('results');
+  r.style.display='block';
+  const total=preguntas.length;
+  const pct=Math.round(correctas/total*100);
+  document.getElementById('rpct').textContent=pct+'%';
+  document.getElementById('rc').textContent=correctas;
+  document.getElementById('rw').textContent=incorrectas;
+  document.getElementById('rp').textContent=puntos;
+  let trophy='📚',msg='';
+  if(pct>=90){trophy='🏆';msg=`¡Excelente! ${correctas}/${total} correctas. Dominio sobresaliente de Microbiología.`;}
+  else if(pct>=75){trophy='🥇';msg=`¡Muy bien! ${correctas}/${total} correctas. Sólido manejo de los contenidos.`;}
+  else if(pct>=60){trophy='🥈';msg=`Bien. ${correctas}/${total} correctas. Repasá los temas donde fallaste.`;}
+  else if(pct>=40){trophy='🥉';msg=`Regular. ${correctas}/${total} correctas. Repasá el módulo completo.`;}
+  else{trophy='📚';msg=`${correctas}/${total} correctas. El módulo requiere un repaso profundo.`;}
+  document.getElementById('trophy').textContent=trophy;
+  document.getElementById('rmsg').textContent=msg;
+  document.getElementById('pfill').style.width='100%';
+  document.getElementById('ppct').textContent='100%';
+}
+
+function restart(){ init(); }
+init();
+</script>
+</body>
+</html>
