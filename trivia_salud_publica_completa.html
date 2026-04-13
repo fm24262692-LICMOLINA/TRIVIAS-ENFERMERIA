@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia Salud Pública — Lic. Francisco Molina</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --g1:#1e6b4a;--g2:#2d9e6b;--gl:#e6f7ef;
+    --b1:#1a5276;--b2:#2980b9;--bl:#eaf4fb;
+    --red:#e74c3c;--redl:#fdedec;
+    --text:#1a1a2e;--muted:#6b7280;--border:#e5e7eb;
+    --card:#fff;--bg:#f0f4f8;
+    --radius:16px;--rsm:10px;
+  }
+  body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#e8f8f0 0%,#eaf4fb 50%,#fef9e7 100%);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem 1rem 3rem}
+  #app{width:100%;max-width:700px}
+
+  /* HEADER */
+  .hdr{background:var(--card);border-radius:var(--radius);padding:1.4rem 1.5rem 1.2rem;margin-bottom:1.2rem;text-align:center;box-shadow:0 4px 24px rgba(30,107,74,.1);position:relative;overflow:hidden}
+  .hdr::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#1e6b4a,#2980b9,#f39c12)}
+  .hdr-icon{font-size:2.4rem;margin-bottom:.35rem;display:block}
+  .hdr h1{font-family:'Montserrat',sans-serif;font-size:1.5rem;font-weight:900;color:var(--text);letter-spacing:1px;text-transform:uppercase}
+  .hdr .prof{font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.3rem}
+  .hdr .inst{font-size:.8rem;color:var(--muted);margin-top:.45rem;line-height:1.6}
+  .hdr .badge{display:inline-block;margin-top:.7rem;background:var(--gl);color:var(--g1);font-size:.75rem;font-weight:700;padding:4px 16px;border-radius:99px;letter-spacing:.5px;text-transform:uppercase}
+
+  /* MENÚ */
+  .menu-card{background:var(--card);border-radius:var(--radius);padding:1.4rem;margin-bottom:1rem;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+  .menu-card h2{font-family:'Montserrat',sans-serif;font-size:1.1rem;font-weight:900;color:var(--text);margin-bottom:1rem;text-align:center}
+  .all-btn{width:100%;padding:13px;font-size:.95rem;font-family:'Nunito',sans-serif;font-weight:800;border:none;border-radius:var(--rsm);background:linear-gradient(90deg,var(--g1),var(--b1));color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(30,107,74,.25);transition:opacity .15s,transform .15s;margin-bottom:10px}
+  .all-btn:hover{opacity:.92;transform:translateY(-1px)}
+  .sep{margin:10px 0;font-size:.82rem;color:var(--muted);text-align:center;font-weight:700}
+  .tema-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tema-btn{padding:10px 12px;font-size:.8rem;font-family:'Nunito',sans-serif;font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);background:var(--card);color:var(--text);cursor:pointer;text-align:center;transition:all .15s;line-height:1.35}
+  .tema-btn:hover{border-color:var(--g2);background:var(--gl)}
+
+  /* PROGRESO */
+  .prog-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+  .prog-wrap{flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--g2),var(--b2));border-radius:99px;transition:width .4s ease}
+  .prog-lbl{font-size:.82rem;color:var(--muted);font-weight:700;min-width:52px;text-align:right}
+
+  /* PREGUNTA */
+  .q-card{background:var(--card);border-radius:var(--radius);padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+  .q-meta{font-size:.74rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:.5rem}
+  .q-txt{font-size:.98rem;color:var(--text);font-weight:700;line-height:1.55}
+
+  /* TEMPORIZADOR */
+  .timer-row{display:flex;align-items:center;gap:14px;margin-bottom:1rem;background:var(--card);border-radius:var(--rsm);padding:.75rem 1rem;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+  .tcircle{position:relative;width:56px;height:56px;flex-shrink:0}
+  .tcircle svg{transform:rotate(-90deg)}
+  .tnum{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:800;color:var(--text)}
+  .tinfo{flex:1}
+  .tinfo .tlbl{font-size:.85rem;color:var(--muted)}
+  .tinfo .tmsg{font-size:.78rem;color:var(--muted);margin-top:2px}
+
+  /* OPCIONES */
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+  .opt{padding:11px 13px;font-size:.85rem;font-family:'Nunito',sans-serif;font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);background:var(--card);color:var(--text);cursor:pointer;text-align:left;line-height:1.45;transition:all .15s ease;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+  .opt:hover:not(:disabled){border-color:var(--g2);background:var(--gl);transform:translateY(-1px)}
+  .opt.ok{background:var(--gl);border-color:var(--g2);color:var(--g1)}
+  .opt.wrong{background:var(--redl);border-color:var(--red);color:#7f1d1d}
+  .opt:disabled{cursor:default;transform:none}
+
+  /* FEEDBACK */
+  .fb{min-height:40px;font-size:.9rem;font-weight:700;margin-bottom:.75rem;padding:0 .25rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .fb.ok{color:var(--g1)}
+  .fb.fail{color:#b91c1c}
+
+  /* BOTONES NAV */
+  .nav-btn{width:100%;padding:13px;font-size:1rem;font-family:'Nunito',sans-serif;font-weight:800;border:none;border-radius:var(--rsm);background:linear-gradient(90deg,var(--g1),var(--b1));color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(30,107,74,.25);transition:opacity .15s,transform .15s}
+  .nav-btn:hover{opacity:.93;transform:translateY(-1px)}
+  .sec-btn{width:100%;padding:11px;font-size:.95rem;font-family:'Nunito',sans-serif;font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);background:var(--card);color:var(--text);cursor:pointer;margin-top:10px;transition:background .15s}
+  .sec-btn:hover{background:var(--bg)}
+
+  /* RESULTADO */
+  .result{background:var(--card);border-radius:var(--radius);padding:2.2rem 1.5rem;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+  .result h2{font-family:'Montserrat',sans-serif;font-size:1.4rem;font-weight:900;color:var(--text);margin-bottom:.5rem}
+  .score-big{font-family:'Montserrat',sans-serif;font-size:4rem;font-weight:900;color:var(--g1);line-height:1;margin:1rem 0 .25rem}
+  .score-sub{font-size:.95rem;color:var(--muted);margin-bottom:1rem}
+  .result-msg{font-size:1rem;font-weight:700;color:var(--text);padding:.75rem 1rem;background:var(--bg);border-radius:var(--rsm);margin-bottom:1.5rem}
+  .result-foot{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem}
+
+  @media(max-width:480px){
+    .opts{grid-template-columns:1fr}
+    .tema-grid{grid-template-columns:1fr}
+    .hdr h1{font-size:1.2rem}
+    .score-big{font-size:3rem}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <span class="hdr-icon">🏛️</span>
+    <h1>Trivia de Salud Pública</h1>
+    <div class="prof">Lic. Francisco Molina</div>
+    <div class="inst">CENT N° 74 — ATSA<br>Carrera de Enfermero Profesional — 2° Año</div>
+    <div class="badge">🌍 Repaso · Salud Pública</div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+const TIME = 25;
+
+const temas = [
+  "Tema 1 — Proceso Salud-Enfermedad",
+  "Tema 2 — Atención Primaria de la Salud",
+  "Tema 3 — Políticas Nacionales de Salud",
+  "Tema 4 — Salud Pública y Derechos Humanos",
+  "Tema 5 — Seguridad Social y Reformas",
+  "Tema 6 — Epidemiología",
+  "Tema 7 — Prevención y Epidemias",
+  "Tema 8 — Promoción de la Salud",
+  "Tema 9 — Estilos de Vida Saludables",
+  "Tema 10 — Programación Local de Salud"
+];
+
+const allQ = [
+
+// ── TEMA 1 ── Proceso Salud-Enfermedad (13)
+{t:0,q:"¿Cómo definió la OMS la salud en 1948?",opts:["Ausencia de enfermedades diagnosticadas","Estado de completo bienestar físico, mental y social","Capacidad de trabajar sin limitaciones físicas","Equilibrio entre el individuo y su ambiente"],a:1},
+{t:0,q:"¿Cuál fue la concepción de salud en la era paleolítica?",opts:["Naturista, basada en el equilibrio con el ambiente","Somática, centrada en la exploración del cuerpo","Mágica, atribuida a causas sobrenaturales","Psicológica, enfocada en el estado mental"],a:2},
+{t:0,q:"¿Qué son los factores biológicos en el proceso salud-enfermedad?",opts:["Nivel educativo, pobreza y categoría profesional","Edad, sexo, raza, composición genética y estado inmunológico","Calentamiento global, hacinamiento y drogadicción","Autoestima, estilo de vida y respuesta al estrés"],a:1},
+{t:0,q:"¿Cuál es la concepción político-legal de la salud?",opts:["La salud como condicionante de la productividad económica","La salud como ausencia de enfermedad orgánica","La salud como derecho y obligación universal con reconocimiento legal","La salud como estado positivo alcanzado solo por colectivos sociales"],a:2},
+{t:0,q:"¿Qué plantea el modelo biopsicosocial del proceso salud-enfermedad?",opts:["La enfermedad se explica solo por factores biológicos medibles","El enfermar resulta de factores complejos: biológicos, psicológicos, sociales y ambientales","Solo los factores psicológicos determinan la aparición de enfermedades","La enfermedad es únicamente producto de agentes infecciosos externos"],a:1},
+{t:0,q:"¿Qué estudia la dimensión biopsicosocial del hombre?",opts:["Solo las enfermedades físicas y sus tratamientos quirúrgicos","El proceso salud-enfermedad en su contexto socioeconómico, considerando factores humanos, ambientales y sociales","Únicamente los factores genéticos que determinan las enfermedades","Los avances tecnológicos aplicados al diagnóstico clínico"],a:1},
+{t:0,q:"¿Cuáles son los factores económicos que influyen en la salud?",opts:["Contaminación, hacinamiento y cambios demográficos","Autoestima, estrés y conductas individuales","Nivel socioeconómico, categoría profesional, nivel educativo y pobreza","Raza, herencia genética y composición corporal"],a:2},
+{t:0,q:"¿Qué plantea la concepción sanitaria de la salud?",opts:["La salud como mercancía con precio y costo medible","La salud como estado positivo y colectivo basado en la prevención y la transmisión social","La salud como derecho político reconocido por el Estado","La salud como ausencia de síntomas físicos observables"],a:1},
+{t:0,q:"¿Cuáles son los factores psicológicos que influyen en el proceso salud-enfermedad?",opts:["Edad, sexo, raza y composición genética","Pobreza, nivel educativo y categoría laboral","Autoestima, patrón de conducta, estilo de vida y respuesta al estrés","Contaminación, clima y hacinamiento ambiental"],a:2},
+{t:0,q:"¿Cuándo surge la concepción psicológica de la salud?",opts:["En la era paleolítica, con los shamanes como actores principales","A inicios del siglo XIX con el desarrollo de la medicina social","A inicios del siglo XVIII, atribuyendo la salud a lo intangible del cuerpo","Durante la segunda guerra mundial en países industrializados"],a:2},
+{t:0,q:"¿Qué sostiene el enfoque de causalidad compleja en salud?",opts:["La enfermedad siempre tiene una causa única y bien identificable","Las causas son complejas y dinámicas: sociales, culturales, económicas y ambientales interactuando","La causalidad es siempre lineal y predecible en salud pública","Solo los factores biológicos explican la aparición de enfermedades"],a:1},
+{t:0,q:"¿Qué son los problemas de salud según el módulo?",opts:["Exclusivamente enfermedades diagnosticadas por laboratorio","Solo enfermedades infecciosas que afectan a poblaciones enteras","Cualquier daño o riesgo que constituya un peligro presente o futuro para la salud de la población","Únicamente alteraciones físicas observables con instrumentos clínicos"],a:2},
+{t:0,q:"¿Qué caracteriza a la estratificación social y económica en Argentina?",opts:["Toda la población parte del mismo punto de partida para desarrollarse","Existen estratos definidos donde el estatus depende de riqueza, educación, utilidad y biología","La clasificación social es solo por capacidades individuales sin influencia del origen","En Argentina no hay diferencias de estatus entre grupos sociales"],a:1},
+
+// ── TEMA 2 ── Atención Primaria de la Salud (13)
+{t:1,q:"¿Dónde se declaró la Atención Primaria de la Salud como estrategia fundamental?",opts:["En la Convención de Ginebra en 1980","En la Declaración de Alma-Ata en 1978","En el Plan Federal de Salud de Argentina en 2004","En el Programa OPS-OMS de Washington en 1990"],a:1},
+{t:1,q:"¿Cuál es la definición de APS según Alma-Ata?",opts:["Atención médica exclusiva para enfermedades crónicas en hospitales especializados","Asistencia sanitaria esencial, puesta al alcance de todos, con plena participación y costo sostenible","Programa de vacunación y control de enfermedades infecciosas en zonas rurales","Sistema privado de salud orientado a sectores de bajos recursos económicos"],a:1},
+{t:1,q:"¿Cuáles son los componentes estratégicos de la APS?",opts:["Vacunación, nutrición, agua potable y control de epidemias","Cobertura total, articulación intersectorial, participación social y tecnología apropiada","Hospitalización, cirugía, diagnóstico especializado y rehabilitación","Solo medicamentos básicos y control de enfermedades endémicas"],a:1},
+{t:1,q:"¿Qué es la participación social en el marco de la APS?",opts:["La supervisión estatal de los servicios de salud privados","El proceso por el que individuos y familias asumen responsabilidad por su salud y bienestar","La intervención exclusiva del equipo médico en las decisiones sanitarias","El pago de tasas por servicios de salud en el primer nivel de atención"],a:1},
+{t:1,q:"¿Qué significa cobertura total en la APS?",opts:["Atender solo a los sectores con mayor poder adquisitivo","Poner los servicios sanitarios al alcance de toda la población, especialmente los más vulnerables","Ofrecer servicios exclusivamente en hospitales centrales de alta complejidad","Proporcionar atención médica solo a trabajadores formales con obra social"],a:1},
+{t:1,q:"¿Qué es la programación integrada en la APS?",opts:["Un plan nacional elaborado exclusivamente por el Ministerio de Salud","Técnica participativa que detecta problemas sentidos de la comunidad y los aborda con consenso","Sistema de registro hospitalario para medir la eficiencia de los servicios","Protocolo de derivación de pacientes entre niveles de atención"],a:1},
+{t:1,q:"¿En qué consiste la articulación intersectorial en salud?",opts:["La coordinación exclusiva entre hospitales de distinta complejidad","La búsqueda de cooperación entre el sector salud, comunidad, organizaciones y distintas disciplinas","El trabajo individual de cada profesional de salud sin coordinación","Solo la relación entre el médico y el paciente en el consultorio"],a:1},
+{t:1,q:"¿Qué es la tecnología apropiada en el contexto de la APS?",opts:["Los equipos de alta complejidad en hospitales de tercer nivel","Métodos y técnicas prácticos, científicamente fundados y adaptados a las necesidades de cada comunidad","La tecnología más costosa disponible en el mercado internacional de salud","Solo equipos importados de países desarrollados aplicados en zonas rurales"],a:1},
+{t:1,q:"¿Cuál es el objetivo de la diversidad cultural en la APS?",opts:["Uniformar los cuidados médicos sin considerar diferencias culturales","Aumentar la calidad asistencial garantizando accesibilidad, aceptación y eficacia para personas de distintas culturas","Imponer el modelo médico occidental a todas las comunidades","Eliminar las prácticas tradicionales de salud de los pueblos indígenas"],a:1},
+{t:1,q:"¿Qué establece el Programa Nacional de Garantía de Calidad de la Atención Médica?",opts:["La privatización de los servicios de salud pública en Argentina","Bases para mejorar la calidad, habilitación y categorización de establecimientos de salud en el país","Solo normas de control de enfermedades infecciosas en hospitales","El financiamiento exclusivo de obras sociales para la atención médica"],a:1},
+{t:1,q:"¿Qué se entiende por nuevas modalidades de organización en la APS?",opts:["Mantener la centralización hospitalaria como modelo dominante de salud","Buscar equilibrio entre planificación centralizada y descentralización con participación comunitaria activa","Reemplazar centros de salud por hospitales de alta complejidad","Reducir el personal de salud en el primer nivel de atención"],a:1},
+{t:1,q:"¿Cuál es el rol del recurso humano en la estrategia de APS?",opts:["Solo médicos especialistas pueden integrar el equipo de APS","Médicos generalistas con formación integral que trabajen en equipo y respeten los saberes comunitarios","Exclusivamente enfermeros sin participación de otros profesionales","Solo personal administrativo para coordinar los turnos médicos"],a:1},
+{t:1,q:"¿Qué significa asistir con equidad en la APS?",opts:["Dar exactamente lo mismo a todos los pacientes sin distinción","Dar a cada uno lo que necesita según su realidad cultural y social","Priorizar siempre a los pacientes de mayor poder adquisitivo","Ofrecer más servicios a quienes pagan más por su cobertura de salud"],a:1},
+
+// ── TEMA 3 ── Políticas Nacionales de Salud (13)
+{t:2,q:"¿Cuáles son los tres subsistemas del sistema de salud argentino?",opts:["Nacional, provincial y municipal","Público, obras sociales y privado","Hospitalario, ambulatorio y preventivo","Primario, secundario y terciario"],a:1},
+{t:2,q:"¿Qué caracteriza al subsistema público de salud en Argentina?",opts:["Atiende solo a personas con obra social sindical","Presta servicios a toda la población sin exclusión y cubre financieramente a la no asegurada","Solo atiende emergencias médicas sin consultas programadas","Depende exclusivamente del gobierno nacional sin participación provincial"],a:1},
+{t:2,q:"¿Qué es el primer nivel de atención médica?",opts:["Hospitales especializados con diagnóstico sofisticado","Centros que previenen enfermedades, atienden patologías frecuentes y tienen relación directa con la comunidad","Unidades de terapia intensiva para enfermedades críticas","Hospitales de mediana complejidad con internación quirúrgica"],a:1},
+{t:2,q:"¿A qué se refiere la regionalización sanitaria?",opts:["La centralización de todos los servicios de salud en hospitales de referencia","Sistematización territorial con propósito sanitario que facilita redes de servicios y mejora el acceso","La privatización de hospitales públicos en distintas regiones del país","El traslado de pacientes entre provincias para atención especializada"],a:1},
+{t:2,q:"¿Cuál es la función de la OMS?",opts:["Controlar el comercio internacional de medicamentos","Lograr que todos los pueblos puedan gozar el máximo grado de salud posible","Solo financiar hospitales en países en desarrollo","Regular los estudios clínicos de nuevos medicamentos"],a:1},
+{t:2,q:"¿Cuál es la función principal de la OPS?",opts:["Administrar los hospitales públicos de América Latina","Promover y coordinar esfuerzos para combatir enfermedades y estimular el bienestar en las Américas","Solo distribuir vacunas en países de bajos ingresos","Regular las obras sociales de los países miembro"],a:1},
+{t:2,q:"¿Cuáles son los componentes principales de una política nacional de salud?",opts:["Solo intervenciones farmacológicas para enfermedades crónicas","Intervenciones en determinantes estructurales, cambios en estilos de vida y empoderamiento de la comunidad","Exclusivamente campañas de vacunación y control de brotes epidémicos","Solo regulación de obras sociales y medicina prepaga"],a:1},
+{t:2,q:"¿Qué propuso el Plan Federal de Salud 2004-2007?",opts:["La privatización del sistema público de salud argentino","Articulación nación-provincias, reforma progresiva y APS como organizador del sistema sanitario","La eliminación del sistema de obras sociales en Argentina","Solo reformas en hospitales de tercer nivel de complejidad"],a:1},
+{t:2,q:"¿Qué es el tercer nivel de atención médica?",opts:["Centros de salud comunitarios del primer nivel de atención","Hospitales o centros especializados para patologías complejas con diagnóstico y tratamiento sofisticados","Salas de primeros auxilios con atención básica de emergencias","Hospitales generales con las cuatro clínicas básicas únicamente"],a:1},
+{t:2,q:"¿Cuál es el objetivo de un sistema de salud universal?",opts:["Atender solo a personas con capacidad de pago","Que todas las personas puedan acceder a él sin exclusión alguna","Dar cobertura exclusiva a trabajadores formales del sector público","Solo brindar atención médica gratuita en zonas rurales"],a:1},
+{t:2,q:"¿Qué implica la referencia y contrarreferencia en el sistema de salud?",opts:["Derivar pacientes al extranjero para tratamientos especializados","El sistema de derivación bidireccional entre niveles de atención que conforma la red sanitaria","Solo el traslado de pacientes desde el tercer al primer nivel","La centralización de todas las consultas en hospitales de alta complejidad"],a:1},
+{t:2,q:"¿Qué problema tiene el sistema de salud argentino en cuanto a cobertura?",opts:["Cobertura homogénea sin desigualdades entre regiones del país","Cobertura desigual con diferencias por región, sector y nivel socioeconómico de la población","Solo el subsector privado tiene problemas de acceso y cobertura","La cobertura es deficiente solo en zonas urbanas grandes"],a:1},
+{t:2,q:"¿Qué es el Programa Remediar?",opts:["Un programa de control de enfermedades endémicas en zonas rurales","Un programa de provisión de medicamentos básicos gratuitos en centros de atención primaria","Un sistema de regulación de obras sociales nacionales","Solo un programa de vacunación para zonas de alta vulnerabilidad"],a:1},
+
+// ── TEMA 4 ── Salud Pública y Derechos Humanos (13)
+{t:3,q:"¿Cómo definió Winslow la Salud Pública en 1920?",opts:["Atención médica organizada para poblaciones en emergencia","Ciencia y arte de evitar enfermedades, alargar la vida y fomentar la salud mediante el esfuerzo comunitario","Sistema de hospitales públicos orientados a la población vulnerable","Solo la vigilancia epidemiológica de enfermedades infecciosas"],a:1},
+{t:3,q:"¿Cuáles son los fines y objetivos de la Salud Pública?",opts:["Solo financiar hospitales y distribuir medicamentos","Vigilar el estado de salud de la población y garantizar las mejores políticas y servicios sanitarios","Controlar exclusivamente las enfermedades crónicas no transmisibles","Administrar los recursos humanos del sistema de salud"],a:1},
+{t:3,q:"¿Qué establece el artículo 25 de la Declaración Universal de Derechos Humanos?",opts:["Toda persona tiene derecho al trabajo y la educación sin restricciones","Toda persona tiene derecho a un nivel de vida adecuado que incluya salud, alimentación, vivienda y asistencia médica","Solo los ciudadanos tienen derecho a los servicios de salud pública","El Estado tiene obligación de garantizar salud solo a trabajadores activos"],a:1},
+{t:3,q:"¿Qué es el derecho a la supervivencia en la Convención sobre los Derechos del Niño?",opts:["El derecho del niño a participar activamente en la sociedad","El derecho a la vida y a tener cubiertas las necesidades básicas: albergue, nutrición y acceso a servicios médicos","El derecho a ser protegido de todas las formas de explotación y abuso","El derecho del niño a expresarse sobre asuntos que afectan su propia vida"],a:1},
+{t:3,q:"¿Qué comprende el derecho al desarrollo en la Convención sobre Derechos del Niño?",opts:["Solo el derecho a la atención médica preventiva desde el nacimiento","Las condiciones para que el niño alcance su máximo potencial: educación, juego, cultura e información","El derecho a ser protegido de la explotación laboral y el abuso","El derecho a participar en organizaciones y reuniones pacíficas"],a:1},
+{t:3,q:"¿Qué implica el derecho a la protección jurídica especial del niño?",opts:["El derecho del niño a recibir educación en su propio idioma","Salvaguardar al niño de todas formas de abuso, abandono y explotación, incluyendo protección especial en conflictos","Solo el derecho a la salud preventiva y la vacunación","El derecho a expresar sus opiniones en asuntos que lo afectan"],a:2},
+{t:3,q:"¿Qué garantiza el derecho a la participación y ciudadanía del niño?",opts:["Solo el derecho a recibir educación formal completa","Que el niño asuma un papel activo en la comunidad, con libertad de expresión, asociación y participación","El derecho a la protección contra toda forma de discriminación","El derecho a un nivel de vida adecuado y atención médica básica"],a:1},
+{t:3,q:"¿Qué son las Funciones Esenciales de Salud Pública (FESP)?",opts:["Protocolos clínicos para el tratamiento de enfermedades crónicas","Las condiciones que permiten un mejor desempeño de la práctica de la salud pública en sus distintos ámbitos","Solo las funciones administrativas de los hospitales públicos","Las regulaciones para el funcionamiento de obras sociales y prepagas"],a:1},
+{t:3,q:"¿Qué incluye la FESP de monitoreo y análisis de la situación de salud?",opts:["Solo el control de calidad de los medicamentos en el mercado","Identificar desigualdades, riesgos, necesidades de la población y evaluar el desempeño de servicios de salud","El control exclusivo de enfermedades infecciosas en hospitales","Solo la medición de la mortalidad sin análisis de factores causales"],a:1},
+{t:3,q:"¿Qué es la salud como derecho humano según el marco internacional?",opts:["Un servicio que solo corresponde a quienes trabajan formalmente","El derecho al disfrute del más alto nivel posible de bienestar físico, mental y social reconocido en tratados internacionales","Solo un beneficio que el Estado otorga según disponibilidad de recursos","Un derecho aplicable solo a menores de 18 años según la Convención del Niño"],a:1},
+{t:3,q:"¿Qué implica la responsabilidad del Estado en el derecho a la salud?",opts:["Solo financiar parcialmente los servicios médicos de emergencia","Dictar leyes, políticas y programas para llevar el derecho a la salud a la práctica para toda la población","Solo controlar la calidad de los establecimientos de salud privados","Únicamente garantizar vacunas y medicamentos esenciales"],a:1},
+{t:3,q:"¿Cuándo fue aprobada la Convención sobre los Derechos del Niño?",opts:["En 1978 junto con la Declaración de Alma-Ata","En 1989 reconociendo derechos de supervivencia, desarrollo, participación y protección","En 1948 junto con la Declaración Universal de Derechos Humanos","En 1966 con el Pacto Internacional de Derechos Económicos, Sociales y Culturales"],a:1},
+{t:3,q:"¿Qué establece la FESP de promoción de la salud?",opts:["Solo la distribución de medicamentos en centros de atención primaria","Acciones de promoción dirigidas a jóvenes y niños con colaboración activa en escuelas, iglesias y lugares de trabajo","Exclusivamente el control de enfermedades infecciosas transmisibles","Solo campañas de vacunación en poblaciones de alto riesgo sanitario"],a:1},
+
+// ── TEMA 5 ── Seguridad Social y Reformas (13)
+{t:4,q:"¿Qué es la seguridad social en el sistema de salud argentino?",opts:["Sistema exclusivo de atención médica para trabajadores del Estado","Conjunto de medidas de bienestar mediante redistribución solidaria de aportes y contribuciones","Solo el PAMI para jubilados y pensionados de Argentina","El sistema privado de medicina prepaga para sectores de altos ingresos"],a:1},
+{t:4,q:"¿Cuáles son las obras sociales?",opts:["Empresas privadas de medicina prepaga con fines de lucro","Entidades encargadas de la gestión de la seguridad social que cubren a personas asociadas por su actividad laboral","Hospitales públicos que atienden a la población de bajos recursos","Organismos internacionales que financian la salud en Argentina"],a:1},
+{t:4,q:"¿Qué es el Programa Médico Obligatorio (PMO)?",opts:["Un plan de vacunación obligatorio para toda la población","Canasta estandarizada de prestaciones que deben garantizar las obras sociales a sus beneficiarios","Solo un programa de atención de enfermedades crónicas","Un protocolo de emergencias médicas en hospitales públicos"],a:1},
+{t:4,q:"¿Cuáles son los tres subsectores del sistema de salud argentino según el Tema 5?",opts:["Nacional, provincial y municipal sin distinción","Público, privado y seguridad social como subsectores distintos","Hospitalario, ambulatorio y de urgencias como niveles","Preventivo, curativo y rehabilitador como etapas del proceso"],a:1},
+{t:4,q:"¿Qué fue el Sistema Nacional Integrado de Salud (SNIS)?",opts:["Un programa de vacunación nacional implementado en los años 70","El intento más radical de unificación del sector público de salud en Argentina, derogado en 1976","El actual sistema de obras sociales nacionales y provinciales","Un programa de regionalización hospitalaria en Buenos Aires"],a:1},
+{t:4,q:"¿Qué implicó la reforma de los sistemas de salud en Argentina en los años 90?",opts:["La estatización de todos los servicios médicos privados","Reconversión de obras sociales, libertad de elección, PMO y desregulación del sistema","La eliminación del sistema de medicina prepaga en el país","Solo cambios en la legislación laboral sin impacto en la salud"],a:1},
+{t:4,q:"¿Qué es la salud como inversión social?",opts:["El cobro de aranceles en hospitales públicos para financiar servicios","La consideración del sector salud como una actividad que genera productividad y debe ser eficiente como empresa pública","Solo el gasto del Estado en construcción de hospitales nuevos","La privatización de servicios de salud para mejorar su eficiencia"],a:1},
+{t:4,q:"¿Qué establece la Ley N° 5652 de Tucumán?",opts:["La privatización de los hospitales provinciales de Tucumán","La creación del SIPROSA declarando que la salud es un derecho y el Estado es su garante","Solo la reglamentación de los centros de salud privados","El sistema de arancelamiento hospitalario en la provincia"],a:1},
+{t:4,q:"¿Qué aportó la gestión del Dr. Ramón Carrillo al sistema de salud argentino?",opts:["La privatización del sistema hospitalario durante el gobierno peronista","Una notable expansión asistencial pública con el número de camas hospitalarias aumentando de 66.300 a 134.218","La creación de las obras sociales sindicales en los años 40","Solo la formación de recursos humanos especializados en salud pública"],a:1},
+{t:4,q:"¿Cuántas personas cubren aproximadamente las obras sociales en Argentina?",opts:["Solo los jubilados y pensionados afiliados al PAMI","Cerca de 18.3 millones de personas distribuidas en casi 300 entidades","Solo los trabajadores del sector público nacional y provincial","Menos de 5 millones de personas en grandes centros urbanos"],a:1},
+{t:4,q:"¿Qué controló la Superintendencia de Servicios de Salud creada en 1996?",opts:["Solo los hospitales públicos sin control sobre obras sociales","Las obras sociales, el cumplimiento del PMO y la calidad del sistema de seguro de salud","Exclusivamente las empresas de medicina prepaga del sector privado","Solo los medicamentos y productos farmacéuticos en el mercado"],a:1},
+{t:4,q:"¿Qué implicó el proceso de desregulación de las obras sociales?",opts:["La eliminación de todas las obras sociales en Argentina","La posibilidad de que los beneficiarios elijan libremente su obra social, reduciendo el número total de entidades","La obligatoriedad de afiliarse a la misma obra social toda la vida laboral","Solo cambios en los aportes patronales sin libertad de elección"],a:1},
+{t:4,q:"¿Cuál es el impacto de la pobreza y el desempleo sobre la salud?",opts:["No tienen impacto comprobado en los indicadores de salud","Deterioran las condiciones de vida y debilitan la cobertura de obras sociales afectando el acceso a la salud","Solo afectan la salud mental sin consecuencias físicas medibles","Tienen impacto solo en la mortalidad infantil sin otras consecuencias"],a:1},
+
+// ── TEMA 6 ── Epidemiología (13)
+{t:5,q:"¿Cuál es el propósito de la Epidemiología según el módulo?",opts:["Solo estudiar enfermedades infecciosas en poblaciones hospitalarias","Describir y explicar la dinámica de la salud poblacional e identificar determinantes de las condiciones de salud","Exclusivamente contar casos de enfermedades en registros estadísticos","Solo administrar programas de vacunación en centros de salud"],a:1},
+{t:5,q:"¿Quién es considerado precursor de la Epidemiología con sus escritos sobre aires, aguas y lugares?",opts:["Luis Pasteur, con su teoría del germen en el siglo XIX","John Snow, con su estudio sobre el cólera en Londres","Hipócrates, de la Escuela de Cos en la Antigua Grecia","Ignaz Semmelweis con el lavado de manos en obstetricia"],a:2},
+{t:5,q:"¿Qué describió John Snow en 1854 que fue un hito epidemiológico?",opts:["La teoría de los gérmenes como causa de enfermedades","La epidemia de cólera en Londres y su transmisión por agua contaminada de una bomba callejera","El lavado de manos para prevenir la fiebre puerperal","Los primeros registros estadísticos de mortalidad en Europa"],a:1},
+{t:5,q:"¿Cuáles son los tres componentes de la triada epidemiológica?",opts:["Agente, huésped y vector de transmisión","Persona, lugar y tiempo como ejes descriptivos de la epidemiología","Prevención, diagnóstico y tratamiento de enfermedades","Incidencia, prevalencia y mortalidad como indicadores"],a:1},
+{t:5,q:"¿Qué es la teoría de los miasmas?",opts:["La teoría que atribuía las enfermedades a microorganismos vivos","La que atribuía enfermedades a emanaciones de sustancias fétidas; fue dominante hasta fines del siglo XIX","La teoría moderna de causalidad compleja en enfermedades crónicas","La teoría que explica las epidemias por factores socioeconómicos"],a:1},
+{t:5,q:"¿Qué demostró Semmelweis con el lavado de manos?",opts:["Que los gérmenes son la causa principal de enfermedades infecciosas","Que la fiebre puerperal se reducía lavando las manos entre paciente y paciente, sin conocer los microorganismos","Que el cólera se transmitía por el agua contaminada de pozos callejeros","Que las vacunas podían prevenir enfermedades infecciosas graves"],a:1},
+{t:5,q:"¿Qué aportó Luis Pasteur al desarrollo de la Epidemiología?",opts:["La descripción de la epidemia de cólera en Londres en 1854","La demostración de que microorganismos vivos causaban procesos de enfermedad","El descubrimiento del sistema de alcantarillado como medida sanitaria","La creación de los primeros registros de mortalidad en Francia"],a:1},
+{t:5,q:"¿Cuáles son los campos de aplicación de la Epidemiología en salud pública?",opts:["Solo el estudio de enfermedades infecciosas y su control","Conocer la situación de salud, analizar factores de riesgo y planificar, ejecutar y evaluar servicios de salud","Exclusivamente la estadística vital de nacimientos y defunciones","Solo la investigación clínica en ensayos controlados"],a:1},
+{t:5,q:"¿Qué es la vigilancia epidemiológica?",opts:["El control policial de personas con enfermedades contagiosas","La observación y análisis continuo de la distribución de enfermedades para que la prevención sea oportuna","Solo el registro hospitalario de enfermedades diagnosticadas","El monitoreo exclusivo de enfermedades infecciosas graves"],a:1},
+{t:5,q:"¿Qué es un grupo vulnerable en epidemiología?",opts:["Solo personas mayores de 65 años en centros urbanos","Grupos de población con mayor probabilidad de enfermar o morir debido a factores biológicos, sociales o económicos","Exclusivamente niños menores de 5 años en zonas rurales","Solo trabajadores de la salud expuestos a enfermedades infecciosas"],a:1},
+{t:5,q:"¿Qué diferencia hay entre Epidemiología descriptiva y analítica?",opts:["Son iguales sin diferencias metodológicas ni objetivos distintos","La descriptiva describe cómo se distribuye la enfermedad; la analítica analiza factores que la explican y los diferencia","La descriptiva estudia enfermedades crónicas y la analítica solo infecciosas","La descriptiva es cuantitativa y la analítica es exclusivamente cualitativa"],a:1},
+{t:5,q:"¿Qué es el concepto de riesgo en epidemiología?",opts:["Solo la exposición a agentes infecciosos conocidos","La probabilidad de que un individuo o grupo desarrolle un daño a su salud dada la exposición a determinados factores","Solo la mortalidad de una enfermedad en una población","El porcentaje de personas enfermas en un momento dado"],a:1},
+{t:5,q:"¿Cómo contribuyó el Renacimiento al desarrollo de la Epidemiología?",opts:["Solo con el descubrimiento de los microorganismos como agentes causales","Impulsó una actividad sistemática para reconocer causas de enfermedad y llevar registros de morbilidad y mortalidad","La eliminación de la teoría mágica y su reemplazo por la teoría somática","Solo con el desarrollo de la cirugía moderna y la anatomía descriptiva"],a:1},
+
+// ── TEMA 7 ── Prevención y Epidemias (13)
+{t:6,q:"¿Cuáles son los tres niveles de prevención según Leavell y Clark?",opts:["Individual, familiar y comunitario","Primario, secundario y terciario aplicados en distintos momentos del proceso salud-enfermedad","Biológico, psicológico y social según los factores de la enfermedad","Clínico, epidemiológico y social como enfoques distintos"],a:1},
+{t:6,q:"¿En qué consiste la prevención primaria?",opts:["Diagnóstico precoz y tratamiento oportuno de enfermedades","Acciones antes de que aparezca la enfermedad para reducir su incidencia en la población","Rehabilitación de personas con secuelas de enfermedades","Solo la vacunación como única medida preventiva en salud pública"],a:1},
+{t:6,q:"¿Qué es la prevención secundaria?",opts:["Acciones de rehabilitación para reintegrar al individuo a la sociedad","Diagnóstico precoz y tratamiento oportuno para detener la enfermedad y limitar la incapacidad","Medidas antes de que la enfermedad aparezca para reducir factores de riesgo","Solo la vigilancia epidemiológica de enfermedades infecciosas"],a:1},
+{t:6,q:"¿Qué es la prevención terciaria?",opts:["Acciones para evitar la aparición de enfermedades en poblaciones sanas","Diagnóstico en fase subclínica antes de que aparezcan síntomas","Rehabilitación y reducción de incapacidades para que el individuo se reintegre a la sociedad","Solo la administración de medicamentos preventivos en grupos de riesgo"],a:2},
+{t:6,q:"¿Cómo se define una epidemia?",opts:["Cualquier enfermedad que afecta a una sola persona de forma grave","Ocurrencia de casos de una enfermedad que excede claramente la incidencia esperada en una población","Solo enfermedades con alta mortalidad que afectan a países enteros","Enfermedad endémica que siempre está presente en una región determinada"],a:1},
+{t:6,q:"¿Qué es la endemia?",opts:["Una enfermedad que aparece de forma epidémica durante las estaciones frías","La presencia constante de una enfermedad en una región geográfica determinada","Solo una enfermedad que afecta a animales y puede transmitirse a humanos","Una enfermedad que se extiende a varios continentes simultáneamente"],a:1},
+{t:6,q:"¿Qué es el perfil epidemiológico de una población?",opts:["Solo el listado de enfermedades infecciosas de una región","Descripción de los problemas de salud más relevantes, sus causas, distribución y determinantes en una población","El registro de defunciones sin análisis de causas ni factores","Solo los indicadores de mortalidad infantil y materna"],a:1},
+{t:6,q:"¿Para qué se usa la Epidemiología en los servicios de salud?",opts:["Solo para controlar enfermedades tropicales en zonas endémicas","Para identificar problemas prioritarios, definir acciones y diseñar programas de salud con participación comunitaria","Exclusivamente para registrar nacimientos y defunciones en el registro civil","Solo para calcular costos del sistema de salud sin planificación sanitaria"],a:1},
+{t:6,q:"¿Qué son los factores de riesgo en epidemiología?",opts:["Solo los agentes biológicos causantes de enfermedades infecciosas","Características o circunstancias asociadas a mayor probabilidad de desarrollar una enfermedad o daño","Solo conductas individuales como el tabaquismo y el alcoholismo","Únicamente factores genéticos hereditarios de una persona"],a:1},
+{t:6,q:"¿Cuál es el esquema de Leavell y Clark en prevención?",opts:["Un modelo que clasifica enfermedades por su gravedad clínica","Marco conceptual que relaciona los niveles de prevención con los períodos de la historia natural de la enfermedad","Solo un protocolo de tratamiento médico para enfermedades crónicas","Un sistema de clasificación de hospitales por nivel de complejidad"],a:1},
+{t:6,q:"¿Cómo se controla una epidemia según la Epidemiología?",opts:["Solo con medicamentos y vacunas sin medidas ambientales","Identificando la fuente, el modo de transmisión, los grupos afectados e implementando medidas de control específicas","Únicamente con aislamiento total de la población afectada","Solo reportando los casos a las autoridades sin intervención directa"],a:1},
+{t:6,q:"¿Qué es la mortalidad evitable?",opts:["Solo la mortalidad por accidentes de tráfico prevenibles","Las muertes que podrían haberse evitado con acciones oportunas como control prenatal y atención ambulatoria eficiente","Solo la mortalidad infantil por enfermedades con vacuna disponible","Exclusivamente las muertes por enfermedades crónicas no tratadas"],a:1},
+{t:6,q:"¿Cuáles son las enfermedades emergentes y reemergentes mencionadas en el módulo?",opts:["Solo el dengue y la malaria como enfermedades emergentes en Argentina","Hantavirus, leishmaniasis, dengue (relacionadas con el ambiente) y triquinosis y SUH (relacionadas con hábitos alimentarios)","Solo el SIDA y la tuberculosis como enfermedades reemergentes","Exclusivamente enfermedades respiratorias en zonas industrializadas"],a:1},
+
+// ── TEMA 8 ── Promoción de la Salud (13)
+{t:7,q:"¿En qué se diferencia la promoción de la salud de la prevención de enfermedades?",opts:["Son exactamente lo mismo sin diferencias conceptuales ni prácticas","La promoción busca mejorar positivamente el bienestar y los determinantes de salud; la prevención busca reducir enfermedades específicas","La promoción es solo para enfermedades crónicas y la prevención para infecciosas","Solo el nivel educativo del equipo de salud distingue una de la otra"],a:1},
+{t:7,q:"¿Cuál es el foco de las intervenciones en promoción de la salud?",opts:["Solo los individuos enfermos en hospitales de alta complejidad","Los determinantes de salud en la población, incluyendo factores sociales, ambientales y conductuales","Exclusivamente el diagnóstico precoz de enfermedades crónicas","Solo la distribución de medicamentos preventivos en la comunidad"],a:1},
+{t:7,q:"¿Qué es el fortalecimiento de la acción comunitaria en salud?",opts:["La intervención exclusiva del Estado sin participación ciudadana","El proceso de empoderar a la comunidad para que tome decisiones y acciones en favor de su propia salud","Solo la construcción de infraestructura sanitaria en zonas vulnerables","La capacitación de médicos especialistas en áreas de alta complejidad"],a:1},
+{t:7,q:"¿Cuáles son los actores intervinientes en las intervenciones de promoción de salud?",opts:["Solo el equipo médico hospitalario sin otros actores sociales","Equipos de salud, comunidad, organizaciones civiles, sector educativo, gobierno y actores sociales de distintos ámbitos","Exclusivamente las obras sociales como financiadoras de programas","Solo los agentes sanitarios en el primer nivel de atención"],a:1},
+{t:7,q:"¿Qué metodologías se usan en promoción de la salud?",opts:["Solo consultas médicas individuales en consultorios especializados","Talleres comunitarios, educación sanitaria, trabajo en red, actividades grupales y programas intersectoriales","Exclusivamente intervenciones farmacológicas preventivas","Solo campañas de vacunación masiva en escuelas y centros de salud"],a:1},
+{t:7,q:"¿Qué es la educación para la salud en el contexto de la promoción?",opts:["La enseñanza de ciencias médicas en universidades y facultades","Proceso que facilita el aprendizaje relacionado con la salud para que las personas tomen decisiones saludables","Solo la información sobre medicamentos y tratamientos clínicos","Exclusivamente la formación de personal de enfermería y medicina"],a:1},
+{t:7,q:"¿Cuál es el papel del sector salud en la promoción de la salud?",opts:["Actuar de forma aislada sin coordinación con otros sectores sociales","Ser uno de los actores que trabaja en coordinación intersectorial junto a educación, vivienda, trabajo y comunidad","Solo prescribir medicamentos preventivos sin otras acciones","Exclusivamente controlar brotes epidémicos cuando aparecen"],a:1},
+{t:7,q:"¿Qué significa promover un ambiente saludable?",opts:["Solo construir espacios verdes en zonas urbanas densamente pobladas","Generar entornos físicos y sociales que favorezcan la salud: agua segura, vivienda digna, espacios seguros y sin violencia","Exclusivamente controlar la contaminación del aire en ciudades industriales","Solo garantizar la disponibilidad de alimentos básicos en zonas rurales"],a:1},
+{t:7,q:"¿Cuál es la diferencia entre la promoción dirigida a individuos y a comunidades?",opts:["No hay diferencia; se aplican las mismas estrategias en ambos casos","Las individuales buscan cambios de conducta personal; las comunitarias buscan transformar determinantes sociales y estructurales","La individual es más efectiva que la comunitaria en todos los contextos","Solo la comunidad puede beneficiarse de la promoción de la salud"],a:1},
+{t:7,q:"¿Qué es la intersectorialidad en la promoción de la salud?",opts:["La división de responsabilidades solo dentro del sector salud","La acción coordinada entre distintos sectores (salud, educación, trabajo, medio ambiente) para mejorar determinantes de salud","Solo la coordinación entre hospitales públicos y privados","La competencia entre distintos profesionales de la salud por recursos"],a:1},
+{t:7,q:"¿Qué importancia tienen las escuelas en la promoción de la salud?",opts:["No tienen rol específico en la promoción de la salud comunitaria","Son espacios privilegiados para la educación sanitaria, la formación de hábitos saludables y la detección precoz de problemas de salud","Solo son lugares donde se aplican vacunas del calendario escolar","Exclusivamente centros de distribución de materiales educativos sobre enfermedades"],a:1},
+{t:7,q:"¿Qué son los factores protectores en promoción de la salud?",opts:["Solo los medicamentos preventivos disponibles en farmacias públicas","Condiciones individuales, familiares y sociales que reducen la probabilidad de daño a la salud y favorecen el bienestar","Exclusivamente las vacunas del calendario nacional de inmunizaciones","Solo los controles médicos periódicos en el primer nivel de atención"],a:1},
+{t:7,q:"¿Cómo se mide el impacto de las intervenciones de promoción de salud?",opts:["Solo con el número de consultas médicas atendidas en el período","Con indicadores de salud poblacional, cambios en determinantes, encuestas de calidad de vida y comparación de resultados antes y después","Exclusivamente con el gasto en medicamentos del sistema de salud","Solo con el número de hospitalizaciones evitadas por año"],a:1},
+
+// ── TEMA 9 ── Estilos de Vida Saludables (13)
+{t:8,q:"¿Por qué el tabaquismo es considerado una adicción que debe abordarse como política pública?",opts:["Porque afecta solo la imagen estética de las personas","Porque es una adicción que deben prohibirse sus publicidades dirigidas a jóvenes y gravarse con impuestos para financiar programas de cesación","Porque solo afecta al fumador y no a las personas cercanas","Porque su tratamiento es exclusivamente individual y voluntario"],a:1},
+{t:8,q:"¿Cuáles son las intervenciones en estilos de vida que menciona el módulo?",opts:["Solo vacunación y control de enfermedades infecciosas","Reducción de tabaco y alcohol, buenas prácticas sexuales, actividad física, alimentación saludable y control del uso de drogas","Solo control del peso corporal mediante dieta restrictiva","Exclusivamente la prescripción médica de medicamentos preventivos"],a:1},
+{t:8,q:"¿Qué porcentaje de enfermedades está relacionado con comportamientos alimenticios según el módulo?",opts:["Menos del 10% de las enfermedades a nivel mundial","Al menos el 30% de las enfermedades están relacionadas con comportamientos alimenticios","Más del 80% de todas las enfermedades conocidas","Solo las enfermedades gastrointestinales sin otras patologías"],a:1},
+{t:8,q:"¿Por qué la actividad física es una intervención importante en estilos de vida saludables?",opts:["Solo mejora la imagen corporal sin efectos en enfermedades crónicas","Previene enfermedades como la hipertensión y la diabetes tipo 2, especialmente en personas obesas y sedentarias","Solo es relevante para atletas y deportistas de alto rendimiento","Solo tiene efecto en personas menores de 30 años sin impacto en adultos mayores"],a:1},
+{t:8,q:"¿Cuál es la medida de política pública recomendada para reducir el consumo de tabaco?",opts:["Solo informar sobre los daños del tabaco sin restricciones legales","Prohibir publicidad dirigida a jóvenes, aplicar altos impuestos, prohibir el consumo en espacios públicos y financiar programas de cesación","Solo tratar individualmente a quienes desean dejar de fumar","Únicamente etiquetar los paquetes con advertencias sanitarias"],a:1},
+{t:8,q:"¿Qué responsabilidades individuales mencionan el Tema 9 sobre estilos de vida?",opts:["Solo cumplir con las vacunas del calendario nacional","Adoptar conductas saludables en alimentación, actividad física, prácticas sexuales seguras y abstención de sustancias dañinas","Exclusivamente visitar al médico ante la aparición de síntomas","Solo participar en programas de salud organizados por el Estado"],a:1},
+{t:8,q:"¿Qué política se recomienda para el control del alcohol según el módulo?",opts:["Prohibir totalmente el consumo de bebidas alcohólicas","Tasar según el contenido de alcohol, restringir el consumo en espacios públicos y tratar a los adictos sin penalizarlos","Solo campañas informativas sin restricciones legales ni impuestos","Exclusivamente prohibir la publicidad sin otras medidas regulatorias"],a:1},
+{t:8,q:"¿Cuáles son los indicadores de intervenciones alimentarias mencionados en el módulo?",opts:["Solo el porcentaje de personas que realizan actividad física regular","Índice de masa corporal, consumo de frutas y vegetales, lactancia infantil e incidencia de infecciones alimentarias","Solo la tasa de mortalidad por enfermedades cardiovasculares","Exclusivamente el porcentaje de personas con sobrepeso u obesidad"],a:1},
+{t:8,q:"¿Qué dice el módulo sobre el enfoque de la adicción a drogas?",opts:["Los adictos deben ser penalizados y privados de libertad","Los individuos adictos deben ser asistidos y no penalizados; los distribuidores de drogas deben ser los penalizados","Solo tratamiento voluntario sin ninguna intervención estatal","Exclusivamente programas de información sin acceso a tratamiento"],a:1},
+{t:8,q:"¿Por qué el tabaquismo en Argentina es un problema de salud pública relevante?",opts:["Solo afecta a personas mayores de 70 años sin impacto en jóvenes","Más del 45% de los hombres de 16 a 64 años fuma, lo que incrementa factores de riesgo para enfermedades crónicas","Solo produce problemas estéticos sin consecuencias para la salud física","El tabaquismo ya fue erradicado en Argentina gracias a las políticas públicas"],a:1},
+{t:8,q:"¿Cuáles son las responsabilidades del Estado en la construcción de estilos de vida saludables?",opts:["Solo brindar información sin regular conductas de los ciudadanos","Regular publicidad nociva, aplicar impuestos a productos dañinos, prohibir su uso en espacios públicos y financiar programas de prevención","Exclusivamente construir instalaciones deportivas en zonas urbanas","Solo financiar tratamientos para personas con enfermedades crónicas"],a:1},
+{t:8,q:"¿Qué es la lactancia infantil exclusiva y por qué es relevante?",opts:["Solo un complemento opcional al uso de fórmulas lácteas industriales","La alimentación del lactante exclusivamente con leche materna hasta los 4-6 meses, que es un indicador de intervención nutricional clave","Solo un método de planificación familiar sin impacto nutricional","Exclusivamente relevante en países en desarrollo con problemas de acceso al agua"],a:1},
+{t:8,q:"¿Qué es el índice de masa corporal (IMC) como indicador de salud?",opts:["Solo una medida estética sin relación con la salud orgánica","Un indicador que relaciona el peso con la talla para evaluar el estado nutricional de la población como parte de las intervenciones de estilo de vida","Solo relevante en deportistas y personas que realizan actividad física intensa","Exclusivamente utilizado en diagnóstico de enfermedades metabólicas graves"],a:1},
+
+// ── TEMA 10 ── Programación Local de Salud (13)
+{t:9,q:"¿Qué es la programación local de salud?",opts:["Un plan nacional uniforme aplicado sin adaptaciones regionales","Modelo de organización que planifica acciones de salud en un territorio definido, con objetivos claros y participación de la comunidad","Solo el registro administrativo de actividades realizadas en centros de salud","Exclusivamente la planificación de la construcción de nuevos hospitales"],a:1},
+{t:9,q:"¿Cuáles son los objetivos de la programación local de salud?",opts:["Solo reducir el gasto en salud del sistema público","Identificar necesidades de la población, establecer prioridades, planificar acciones y evaluar resultados en el territorio","Exclusivamente controlar enfermedades infecciosas en el primer nivel","Solo coordinar los turnos médicos en centros de atención primaria"],a:1},
+{t:9,q:"¿Qué es la evaluación estratégica en la programación local?",opts:["Solo la auditoría contable de gastos en salud del período","El análisis de fortalezas, oportunidades, debilidades y amenazas para orientar las acciones del programa de salud","La medición exclusiva de la cantidad de consultas realizadas","Solo la evaluación del desempeño individual de los profesionales"],a:1},
+{t:9,q:"¿Qué son los determinantes en la programación local de salud?",opts:["Solo los factores genéticos individuales de la población objetivo","Los factores sociales, económicos, ambientales y culturales que condicionan la situación de salud de una comunidad","Exclusivamente las enfermedades prevalentes en la región","Solo los recursos disponibles en el sistema de salud local"],a:1},
+{t:9,q:"¿Cuáles son los pasos básicos para diseñar un programa local de salud?",opts:["Solo asignar presupuesto y contratar personal de salud","Diagnóstico de situación, identificación de problemas, establecimiento de prioridades, planificación de acciones, ejecución y evaluación","Exclusivamente la capacitación del personal antes de iniciar actividades","Solo la comunicación de los objetivos a la comunidad sin diagnóstico previo"],a:1},
+{t:9,q:"¿Qué es el diagnóstico de situación en la programación local?",opts:["Solo un análisis médico de los pacientes del centro de salud","El análisis de la situación de salud de la comunidad que incluye datos epidemiológicos, socioeconómicos y de servicios de salud disponibles","Exclusivamente un inventario de insumos y equipos médicos del centro","Solo la opinión del equipo de salud sin participación comunitaria"],a:1},
+{t:9,q:"¿Por qué es importante la priorización de problemas en salud pública local?",opts:["Los recursos son ilimitados por lo que no es necesario priorizar","Porque los recursos son limitados y es necesario orientarlos a los problemas más urgentes, frecuentes y con mayor posibilidad de resolución","Solo para cumplir con los requisitos administrativos del Ministerio","Exclusivamente para informar a los organismos internacionales sobre la situación local"],a:1},
+{t:9,q:"¿Qué rol tiene la comunidad en la programación local de salud?",opts:["Ningún rol; la programación es exclusivamente técnica y profesional","Un rol activo y protagonista en la identificación de problemas, la planificación y la evaluación de las acciones de salud","Solo recibir la información sobre los programas sin participar","Únicamente colaborar con el transporte de personal de salud a zonas rurales"],a:1},
+{t:9,q:"¿Qué es la programación local participativa (PLP)?",opts:["Un sistema de registro de actividades sin participación ciudadana","Técnica que usa talleres o asambleas comunitarias para detectar problemas prioritarios y encararlos con consenso del grupo","Solo la planificación unilateral del equipo de salud sin comunidad","Exclusivamente reuniones de directivos hospitalarios para planificar servicios"],a:1},
+{t:9,q:"¿Cómo se mide la eficacia de un programa local de salud?",opts:["Solo por el número de personas atendidas en el período","Comparando los resultados obtenidos con los objetivos planificados, usando indicadores de salud pertinentes y relevantes","Exclusivamente por el gasto ejecutado versus el presupuesto asignado","Solo por la opinión del personal de salud sobre el programa"],a:1},
+{t:9,q:"¿Cuáles son los actores que participan en la programación local de salud?",opts:["Solo el médico director del centro de salud sin otros actores","Equipo de salud, comunidad, autoridades locales, organizaciones civiles y otros sectores como educación y trabajo","Exclusivamente los organismos internacionales como OPS y OMS","Solo el personal administrativo del Ministerio de Salud provincial"],a:1},
+{t:9,q:"¿Qué es la eficiencia en el contexto de la programación de salud?",opts:["Solo alcanzar las metas sin importar los recursos utilizados","Obtener los mejores resultados posibles con los recursos disponibles, evitando desperdicios y optimizando el gasto","Exclusivamente el gasto máximo para lograr la mayor cobertura posible","Solo la rapidez con que se implementan las acciones planificadas"],a:1},
+{t:9,q:"¿Por qué es necesaria la evaluación continua en los programas locales de salud?",opts:["No es necesaria si la planificación inicial fue bien realizada","Permite detectar desvíos, ajustar acciones, rendir cuentas a la comunidad y mejorar los resultados del programa de salud","Solo para cumplir con exigencias burocráticas del Ministerio","Exclusivamente para justificar el presupuesto ante los organismos de auditoría"],a:1},
+];
+
+let temaSeleccionado = null;
+let questions=[], current=0, score=0;
+let timer=null, timeLeft=TIME, answered=false;
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function prepQ(pool,n){
+  return shuffle(pool).slice(0,n).map(q=>{
+    const correct=q.opts[q.a];
+    const opts=shuffle([...q.opts]);
+    return{...q,shuffled:opts,correct};
+  });
+}
+
+function renderStart(){
+  clearInterval(timer);
+  const btns=temas.map((t,i)=>`<button class="tema-btn" onclick="selTema(${i})">${t}</button>`).join('');
+  document.getElementById('content').innerHTML=`
+    <div class="menu-card">
+      <h2>Elegí el modo de juego</h2>
+      <button class="all-btn" onclick="iniciarTodos()">🎯 Todos los temas — 13 preguntas aleatorias (130 en total)</button>
+      <div class="sep">── O practicá por tema ──</div>
+      <div class="tema-grid">${btns}</div>
+    </div>`;
+}
+
+function selTema(idx){
+  temaSeleccionado=idx;
+  const pool=allQ.filter(q=>q.t===idx);
+  questions=prepQ(pool,pool.length);
+  current=0;score=0;renderQ();
+}
+
+function iniciarTodos(){
+  temaSeleccionado=null;
+  questions=prepQ(allQ,13);
+  current=0;score=0;renderQ();
+}
+
+function renderQ(){
+  answered=false;timeLeft=TIME;
+  clearInterval(timer);
+  const q=questions[current];
+  const total=questions.length;
+  const pct=Math.round((current/total)*100);
+  const C=2*Math.PI*24;
+
+  document.getElementById('content').innerHTML=`
+    <div class="prog-row">
+      <div class="prog-wrap"><div class="prog-fill" id="pbar" style="width:${pct}%"></div></div>
+      <div class="prog-lbl">${current+1} / ${total}</div>
+    </div>
+    <div class="q-card">
+      <div class="q-meta">${temas[q.t]}</div>
+      <div class="q-txt">${q.q}</div>
+    </div>
+    <div class="timer-row">
+      <div class="tcircle">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle cx="28" cy="28" r="24" fill="none" stroke="#e5e7eb" stroke-width="5"/>
+          <circle id="tarc" cx="28" cy="28" r="24" fill="none" stroke="#1e6b4a" stroke-width="5"
+            stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="0" stroke-linecap="round"/>
+        </svg>
+        <div class="tnum" id="tnum">${TIME}</div>
+      </div>
+      <div class="tinfo">
+        <div class="tlbl" id="tlbl">Segundos restantes</div>
+        <div class="tmsg">¡Elegí tu respuesta!</div>
+      </div>
+    </div>
+    <div class="opts" id="opts">
+      ${q.shuffled.map((o,i)=>`<button class="opt" onclick="choose(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="fb" id="fb"></div>
+    <button class="nav-btn" id="nb" style="display:none" onclick="next()">${current+1<total?'Siguiente →':'Ver resultados'}</button>`;
+
+  timer=setInterval(()=>{
+    timeLeft--;
+    const el=document.getElementById('tnum');
+    const arc=document.getElementById('tarc');
+    const lbl=document.getElementById('tlbl');
+    if(el)el.textContent=timeLeft;
+    if(arc){arc.style.strokeDashoffset=(C*(1-timeLeft/TIME)).toFixed(1);arc.style.stroke=timeLeft<=7?'#e74c3c':'#1e6b4a';}
+    if(lbl)lbl.style.color=timeLeft<=7?'#b91c1c':'';
+    if(timeLeft<=0){clearInterval(timer);if(!answered)timeUp();}
+  },1000);
+}
+
+function choose(idx){
+  if(answered)return;
+  answered=true;clearInterval(timer);
+  const q=questions[current];
+  const btns=document.querySelectorAll('.opt');
+  const fb=document.getElementById('fb');
+  const nb=document.getElementById('nb');
+  btns.forEach(b=>b.disabled=true);
+  btns.forEach((b,i)=>{if(q.shuffled[i]===q.correct)b.classList.add('ok');});
+  if(q.shuffled[idx]===q.correct){
+    score++;btns[idx].classList.add('ok');
+    fb.innerHTML='✅ ¡Correcto!';fb.className='fb ok';
+  }else{
+    btns[idx].classList.add('wrong');
+    fb.innerHTML='❌ Incorrecto. La respuesta correcta está marcada en verde.';fb.className='fb fail';
+  }
+  nb.style.display='block';
+}
+
+function timeUp(){
+  answered=true;
+  const q=questions[current];
+  const btns=document.querySelectorAll('.opt');
+  const fb=document.getElementById('fb');
+  const nb=document.getElementById('nb');
+  btns.forEach(b=>b.disabled=true);
+  btns.forEach((b,i)=>{if(q.shuffled[i]===q.correct)b.classList.add('ok');});
+  fb.innerHTML='⏱️ ¡Tiempo! La respuesta correcta está marcada en verde.';fb.className='fb fail';
+  nb.style.display='block';
+}
+
+function next(){
+  current++;
+  if(current>=questions.length)renderResult();
+  else renderQ();
+}
+
+function renderResult(){
+  clearInterval(timer);
+  const total=questions.length;
+  const pct=Math.round((score/total)*100);
+  let msg='';
+  if(pct>=85)msg='🏆 ¡Excelente! Estás muy preparado/a para el examen.';
+  else if(pct>=60)msg='👍 Buen repaso. Revisá los temas donde fallaste.';
+  else msg='📖 Seguí estudiando, ¡podés mejorar mucho!';
+  const nombre=temaSeleccionado!==null?temas[temaSeleccionado]:'Todos los temas';
+  document.getElementById('content').innerHTML=`
+    <div class="result">
+      <h2>Trivia finalizada</h2>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">${nombre}</div>
+      <div class="score-big">${score}/${total}</div>
+      <div class="score-sub">${pct}% de respuestas correctas</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-foot">Salud Pública · Lic. Francisco Molina<br>CENT N° 74 — ATSA — 2° Año</div>
+      <button class="nav-btn" onclick="renderStart()">Volver al menú principal</button>
+      ${temaSeleccionado!==null?`<button class="sec-btn" onclick="selTema(${temaSeleccionado})">Repetir este tema</button>`:`<button class="sec-btn" onclick="iniciarTodos()">Jugar de nuevo</button>`}
+    </div>`;
+}
+
+renderStart();
+</script>
+</body>
+</html>
