@@ -3,481 +3,397 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TriviaEnfer 🏥 | Enfermería en Alto Riesgo</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Trivia - Enfermería en Alto Riesgo</title>
 <style>
   :root {
-    --azul: #0f4c81;
-    --azul2: #1565c0;
-    --verde: #00897b;
-    --rojo: #c62828;
-    --amarillo: #f9a825;
-    --naranja: #e65100;
-    --fondo: #06121e;
-    --card: #0d1f30;
-    --card2: #112537;
-    --texto: #e1f0ff;
-    --gris: #7b9bb5;
+    --primary: #c0392b;
+    --primary-dark: #922b21;
+    --secondary: #1a1a2e;
+    --accent: #e74c3c;
+    --gold: #f39c12;
+    --bg: #0f0f1a;
+    --card: #1e1e30;
+    --card2: #252540;
+    --text: #e8e8f0;
+    --text2: #a0a0c0;
+    --correct: #27ae60;
+    --wrong: #e74c3c;
+    --timer-ok: #27ae60;
+    --timer-warn: #f39c12;
+    --timer-danger: #e74c3c;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--fondo);
-    color: var(--texto);
-    min-height: 100vh;
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+  
+  /* PANTALLA MENU */
+  #menuScreen { display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+  .logo { text-align: center; margin: 30px 0 20px; }
+  .logo h1 { font-size: 1.8em; color: var(--primary); text-shadow: 0 0 20px rgba(192,57,43,0.5); letter-spacing: 2px; }
+  .logo p { color: var(--text2); font-size: 0.95em; margin-top: 6px; }
+  .subtitulo { color: var(--gold); font-size: 1em; text-align: center; margin-bottom: 18px; font-weight: bold; }
+  .grid-temas { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; width: 100%; max-width: 900px; }
+  .tema-btn {
+    background: var(--card);
+    border: 1px solid #333355;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    color: var(--text);
+  }
+  .tema-btn:hover { background: var(--card2); border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(192,57,43,0.3); }
+  .tema-btn .num { font-size: 0.75em; color: var(--primary); font-weight: bold; letter-spacing: 1px; }
+  .tema-btn .nombre { font-size: 1em; font-weight: 600; margin-top: 3px; }
+  .tema-btn .info { font-size: 0.8em; color: var(--text2); margin-top: 4px; }
+  .tema-btn.completado { border-color: var(--correct); }
+  .tema-btn.completado .num { color: var(--correct); }
+  
+  /* PANTALLA JUEGO */
+  #gameScreen { display: none; flex-direction: column; min-height: 100vh; padding: 0; }
+  .header-game {
+    background: var(--card);
+    padding: 12px 18px;
+    border-bottom: 2px solid var(--primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .header-game .tema-titulo { font-size: 0.95em; font-weight: bold; color: var(--gold); flex: 1; }
+  .header-game .progreso { font-size: 0.85em; color: var(--text2); }
+  .btn-volver { background: transparent; border: 1px solid #555; border-radius: 8px; padding: 6px 12px; color: var(--text2); cursor: pointer; font-size: 0.85em; }
+  .btn-volver:hover { background: var(--card2); color: var(--text); }
+  
+  .game-body { padding: 20px; flex: 1; display: flex; flex-direction: column; align-items: center; }
+  
+  /* TIMER */
+  .timer-wrap { width: 100%; max-width: 600px; margin-bottom: 16px; }
+  .timer-bar-outer { background: #333; border-radius: 10px; height: 10px; overflow: hidden; }
+  .timer-bar { height: 10px; border-radius: 10px; transition: width 1s linear, background 0.5s; background: var(--timer-ok); }
+  .timer-num { text-align: right; font-size: 0.85em; margin-top: 4px; color: var(--text2); }
+  
+  /* PREGUNTA */
+  .pregunta-card { background: var(--card); border-radius: 14px; padding: 22px; width: 100%; max-width: 600px; margin-bottom: 18px; border: 1px solid #333355; }
+  .pregunta-num { font-size: 0.75em; color: var(--text2); margin-bottom: 8px; letter-spacing: 1px; }
+  .pregunta-texto { font-size: 1.1em; font-weight: 600; line-height: 1.4; }
+  
+  /* OPCIONES */
+  .opciones { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 10px; }
+  .opcion-btn {
+    background: var(--card);
+    border: 2px solid #333355;
+    border-radius: 10px;
+    padding: 13px 16px;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text);
+    font-size: 0.97em;
+    transition: all 0.15s;
     display: flex;
     align-items: center;
-    justify-content: center;
-    overflow-x: hidden;
+    gap: 10px;
   }
-  body::before {
-    content: '';
-    position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: radial-gradient(ellipse at 15% 25%, rgba(15,76,129,0.18) 0%, transparent 50%),
-                radial-gradient(ellipse at 85% 75%, rgba(0,137,123,0.10) 0%, transparent 50%);
-    pointer-events: none; z-index: 0;
-  }
-  .container { width: 100%; max-width: 760px; padding: 20px; position: relative; z-index: 1; }
-
-  /* INICIO */
-  #pantalla-inicio { text-align: center; animation: fadeInUp 0.6s ease; }
-  .logo-emoji { font-size: 3rem; display: block; margin-bottom: 8px; animation: pulse 2s infinite; }
-  .logo { font-family: 'Fredoka One', cursive; font-size: 2.8rem; background: linear-gradient(135deg, #1976d2, #00897b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; }
-  .profesor-badge { display: inline-block; background: linear-gradient(135deg, #4a148c, #7b1fa2); padding: 8px 22px; border-radius: 30px; font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; color: white; }
-  .inst-badge { display: inline-block; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 4px 14px; border-radius: 20px; font-size: 0.78rem; color: var(--gris); margin-bottom: 10px; }
-  .subtitulo { font-size: 0.97rem; color: var(--gris); margin-bottom: 18px; }
-  .badge-materia { display: inline-block; background: linear-gradient(135deg, #0f4c81, #1565c0); padding: 6px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; margin-bottom: 22px; letter-spacing: 1px; }
-  .temas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 22px; }
-  @media(max-width:520px){ .temas-grid { grid-template-columns: repeat(2,1fr); } }
-  .tema-chip { background: var(--card); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 8px 6px; text-align: center; font-size: 0.72rem; font-weight: 700; line-height: 1.3; color: #90caf9; }
-  .tema-chip .ic { font-size: 1.1rem; display: block; margin-bottom: 3px; }
-  .stats-inicio { display: flex; justify-content: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
-  .stat-item { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 20px; text-align: center; }
-  .stat-num { font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--amarillo); }
-  .stat-label { font-size: 0.75rem; color: var(--gris); margin-top: 2px; }
-  .btn-jugar { background: linear-gradient(135deg, #0f4c81, #00897b); color: white; border: none; padding: 17px 56px; font-size: 1.2rem; font-family: 'Fredoka One', cursive; border-radius: 50px; cursor: pointer; letter-spacing: 1px; box-shadow: 0 8px 30px rgba(15,76,129,0.5); transition: transform 0.2s, box-shadow 0.2s; }
-  .btn-jugar:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 40px rgba(15,76,129,0.7); }
-  .firma { margin-top: 16px; font-size: 0.78rem; color: rgba(255,255,255,0.2); }
-
-  /* JUEGO */
-  #pantalla-juego { display: none; animation: fadeInUp 0.5s ease; }
-  .header-juego { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
-  .progreso-texto { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--gris); }
-  .progreso-texto span { color: var(--amarillo); font-size: 1.3rem; }
-  .puntaje-display { background: var(--card); border: 1px solid rgba(249,168,37,0.3); border-radius: 12px; padding: 7px 15px; font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--amarillo); }
-  .barra-progreso { background: rgba(255,255,255,0.08); border-radius: 10px; height: 7px; margin-bottom: 14px; overflow: hidden; }
-  .barra-fill { height: 100%; background: linear-gradient(90deg, #1565c0, #00897b); border-radius: 10px; transition: width 0.5s ease; }
-  .timer-container { display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
-  .timer-circle { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka One', cursive; font-size: 1.4rem; border: 3px solid #1565c0; background: var(--card); transition: border-color 0.3s, color 0.3s; }
-  .timer-circle.urgente { border-color: var(--rojo); color: var(--rojo); animation: tiembla 0.3s infinite; }
-  .tema-header { text-align: center; margin-bottom: 10px; }
-  .categoria-tag { display: inline-block; background: rgba(21,101,192,0.2); border: 1px solid rgba(21,101,192,0.4); color: #90caf9; padding: 4px 14px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-  .enfermeria-tag { display: inline-block; background: rgba(0,137,123,0.2); border: 1px solid rgba(0,137,123,0.4); color: #80cbc4; padding: 3px 10px; border-radius: 14px; font-size: 0.7rem; font-weight: 700; margin-left: 6px; }
-  .pregunta-card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 24px; margin-bottom: 16px; }
-  .pregunta-texto { font-size: 1.1rem; font-weight: 700; line-height: 1.5; color: #e3f2fd; }
-  .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  @media(max-width:480px){ .opciones { grid-template-columns: 1fr; } }
-  .opcion-btn { background: var(--card2); border: 2px solid rgba(255,255,255,0.09); color: var(--texto); padding: 14px 15px; border-radius: 13px; font-size: 0.93rem; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.2s; line-height: 1.4; }
-  .opcion-btn:hover:not(:disabled) { border-color: #1565c0; background: rgba(21,101,192,0.18); transform: translateY(-2px); }
-  .opcion-btn.correcta { background: rgba(0,137,123,0.2); border-color: var(--verde); color: #80cbc4; animation: correctaAnim 0.4s ease; }
-  .opcion-btn.incorrecta { background: rgba(198,40,40,0.15); border-color: var(--rojo); color: #ef9a9a; }
-  .opcion-btn.resaltar { background: rgba(0,137,123,0.15); border-color: var(--verde); }
+  .opcion-btn:hover:not(:disabled) { background: var(--card2); border-color: var(--primary); }
+  .opcion-btn .letra { font-weight: bold; color: var(--primary); font-size: 1em; min-width: 20px; }
+  .opcion-btn.correcto { background: rgba(39,174,96,0.2); border-color: var(--correct); }
+  .opcion-btn.incorrecto { background: rgba(231,76,60,0.15); border-color: var(--wrong); }
+  .opcion-btn.correcto .letra { color: var(--correct); }
+  .opcion-btn.incorrecto .letra { color: var(--wrong); }
   .opcion-btn:disabled { cursor: default; }
-  .letra-opcion { display: inline-block; width: 24px; height: 24px; border-radius: 7px; background: rgba(255,255,255,0.1); text-align: center; line-height: 24px; margin-right: 7px; font-size: 0.8rem; }
-  .feedback { text-align: center; padding: 12px 16px; border-radius: 13px; font-weight: 800; font-size: 0.97rem; margin-bottom: 12px; display: none; animation: fadeInUp 0.3s ease; }
-  .feedback.correcto { background: rgba(0,137,123,0.15); border: 1px solid rgba(0,137,123,0.4); color: #80cbc4; }
-  .feedback.incorrecto { background: rgba(198,40,40,0.12); border: 1px solid rgba(198,40,40,0.3); color: #ef9a9a; }
-  .btn-siguiente { width: 100%; background: linear-gradient(135deg, #1565c0, #0d47a1); color: white; border: none; padding: 14px; border-radius: 13px; font-size: 1rem; font-family: 'Fredoka One', cursive; cursor: pointer; display: none; transition: opacity 0.2s, transform 0.2s; }
-  .btn-siguiente:hover { opacity: 0.9; transform: translateY(-2px); }
-  .prof-mini { text-align: center; font-size: 0.72rem; color: rgba(255,255,255,0.18); margin-top: 10px; }
-
-  /* RESULTADO */
-  #pantalla-resultado { display: none; text-align: center; animation: fadeInUp 0.6s ease; }
-  .trofeo { font-size: 5rem; margin-bottom: 12px; animation: bounce 1s ease; }
-  .resultado-titulo { font-family: 'Fredoka One', cursive; font-size: 2.2rem; margin-bottom: 8px; }
-  .resultado-sub { color: var(--gris); font-size: 0.97rem; margin-bottom: 22px; }
-  .puntaje-final { font-family: 'Fredoka One', cursive; font-size: 4.2rem; background: linear-gradient(135deg, var(--amarillo), var(--naranja)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 6px; }
-  .puntaje-de { color: var(--gris); font-size: 0.92rem; margin-bottom: 22px; }
-  .stats-res { display: flex; justify-content: center; gap: 13px; margin-bottom: 22px; flex-wrap: wrap; }
-  .stat-r { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 13px 18px; min-width: 105px; }
-  .stat-r-num { font-family: 'Fredoka One', cursive; font-size: 1.8rem; }
-  .stat-r-num.v { color: var(--verde); }
-  .stat-r-num.r { color: var(--rojo); }
-  .stat-r-num.a { color: var(--amarillo); }
-  .stat-r-label { font-size: 0.76rem; color: var(--gris); margin-top: 3px; }
-  .barra-res { background: rgba(255,255,255,0.08); border-radius: 10px; height: 13px; margin-bottom: 22px; overflow: hidden; }
-  .barra-res-fill { height: 100%; border-radius: 10px; transition: width 1s ease 0.3s; background: linear-gradient(90deg, var(--rojo), var(--amarillo), var(--verde)); }
-  .btn-reiniciar { background: linear-gradient(135deg, #0f4c81, #00897b); color: white; border: none; padding: 14px 46px; font-size: 1.1rem; font-family: 'Fredoka One', cursive; border-radius: 50px; cursor: pointer; box-shadow: 0 8px 28px rgba(15,76,129,0.45); transition: transform 0.2s; }
-  .btn-reiniciar:hover { transform: translateY(-3px) scale(1.03); }
-  .firma-res { margin-top: 16px; font-size: 0.78rem; color: rgba(255,255,255,0.2); }
-
-  @keyframes fadeInUp { from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);} }
-  @keyframes pulse { 0%,100%{transform:scale(1);}50%{transform:scale(1.1);} }
-  @keyframes bounce { 0%,100%{transform:translateY(0);}30%{transform:translateY(-20px);}60%{transform:translateY(-10px);} }
-  @keyframes correctaAnim { 0%{transform:scale(1);}50%{transform:scale(1.04);}100%{transform:scale(1);} }
-  @keyframes tiembla { 0%,100%{transform:rotate(0);}25%{transform:rotate(-3deg);}75%{transform:rotate(3deg);} }
+  
+  /* FEEDBACK */
+  .feedback { width: 100%; max-width: 600px; border-radius: 10px; padding: 12px 16px; margin-top: 14px; text-align: center; font-weight: 600; font-size: 0.95em; display: none; }
+  .feedback.correcto { background: rgba(39,174,96,0.2); border: 1px solid var(--correct); color: var(--correct); }
+  .feedback.incorrecto { background: rgba(231,76,60,0.15); border: 1px solid var(--wrong); color: #ff6b6b; }
+  .feedback.tiempo { background: rgba(243,156,18,0.15); border: 1px solid var(--gold); color: var(--gold); }
+  
+  .btn-siguiente { display: none; background: var(--primary); border: none; border-radius: 10px; padding: 13px 30px; color: white; font-size: 1em; font-weight: bold; cursor: pointer; margin-top: 14px; width: 100%; max-width: 600px; }
+  .btn-siguiente:hover { background: var(--primary-dark); }
+  
+  /* PANTALLA RESULTADO */
+  #resultScreen { display: none; flex-direction: column; align-items: center; min-height: 100vh; padding: 30px 20px; }
+  .result-card { background: var(--card); border-radius: 16px; padding: 30px; width: 100%; max-width: 500px; text-align: center; border: 2px solid var(--primary); }
+  .result-titulo { font-size: 1.5em; font-weight: bold; color: var(--gold); margin-bottom: 10px; }
+  .result-tema { font-size: 0.9em; color: var(--text2); margin-bottom: 24px; }
+  .result-puntaje { font-size: 3.5em; font-weight: bold; color: var(--primary); }
+  .result-total { font-size: 1em; color: var(--text2); margin-bottom: 20px; }
+  .result-msg { font-size: 1.05em; margin-bottom: 24px; color: var(--text); }
+  .barra-result { background: #333; border-radius: 10px; height: 14px; margin: 10px 0 24px; overflow: hidden; }
+  .barra-result-fill { height: 14px; border-radius: 10px; background: var(--primary); transition: width 1s ease; }
+  .btns-result { display: flex; flex-direction: column; gap: 10px; }
+  .btn-reintentar { background: var(--primary); border: none; border-radius: 10px; padding: 13px; color: white; font-weight: bold; cursor: pointer; font-size: 1em; }
+  .btn-reintentar:hover { background: var(--primary-dark); }
+  .btn-menu { background: transparent; border: 2px solid #555; border-radius: 10px; padding: 12px; color: var(--text); font-weight: bold; cursor: pointer; font-size: 1em; }
+  .btn-menu:hover { background: var(--card2); }
+  
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; margin-top: 6px; }
+  .badge-excelente { background: rgba(39,174,96,0.2); color: var(--correct); border: 1px solid var(--correct); }
+  .badge-bien { background: rgba(243,156,18,0.2); color: var(--gold); border: 1px solid var(--gold); }
+  .badge-regular { background: rgba(231,76,60,0.15); color: #ff6b6b; border: 1px solid var(--wrong); }
+  
+  @media (max-width: 480px) {
+    .logo h1 { font-size: 1.4em; }
+    .pregunta-texto { font-size: 1em; }
+    .opcion-btn { font-size: 0.9em; padding: 11px 13px; }
+  }
 </style>
 </head>
 <body>
-<div class="container">
 
-  <!-- INICIO -->
-  <div id="pantalla-inicio">
-    <span class="logo-emoji">🏥</span>
-    <div class="logo">TriviaEnfer</div>
-    <div class="profesor-badge">👨‍🏫 Lic. Francisco Molina</div><br>
-    <div class="inst-badge">CENT N°74 · ATSA · Carrera de Enfermero Profesional · 3° Año</div>
-    <p class="subtitulo">Repaso para el final de Enfermería en Alto Riesgo</p>
-    <div class="badge-materia">🏥 ENFERMERÍA EN ALTO RIESGO I y II</div>
-
-    <div class="temas-grid">
-      <div class="tema-chip"><span class="ic">🏨</span>T1: UCI</div>
-      <div class="tema-chip"><span class="ic">👩‍⚕️</span>T2: RRHH y Farmaco</div>
-      <div class="tema-chip"><span class="ic">🫁</span>T3: Insuf. Resp.</div>
-      <div class="tema-chip"><span class="ic">💨</span>T4: ARM</div>
-      <div class="tema-chip"><span class="ic">🩸</span>T5: TEP/EPOC</div>
-      <div class="tema-chip"><span class="ic">🫧</span>T6: SDRA</div>
-      <div class="tema-chip"><span class="ic">❤️</span>T7: Cardiopatías</div>
-      <div class="tema-chip"><span class="ic">💧</span>T8: Insuf. Cardíaca</div>
-      <div class="tema-chip"><span class="ic">⚡</span>T9: PCR/FV</div>
-      <div class="tema-chip"><span class="ic">🧠</span>T10: TEC/ACV</div>
-      <div class="tema-chip"><span class="ic">🔺</span>T11: HIC</div>
-      <div class="tema-chip"><span class="ic">⚗️</span>T12: Medio Interno</div>
-      <div class="tema-chip"><span class="ic">🫘</span>T13: Insuf. Renal</div>
-      <div class="tema-chip"><span class="ic">🩸</span>T14: Hemorr. Dig.</div>
-      <div class="tema-chip"><span class="ic">🔥</span>T15: Pancreatitis</div>
-      <div class="tema-chip"><span class="ic">⚠️</span>T16: Shock/Quemad.</div>
-    </div>
-
-    <div class="stats-inicio">
-      <div class="stat-item"><div class="stat-num">112</div><div class="stat-label">Preguntas</div></div>
-      <div class="stat-item"><div class="stat-num">16</div><div class="stat-label">Temas</div></div>
-      <div class="stat-item"><div class="stat-num">20s</div><div class="stat-label">Por pregunta</div></div>
-    </div>
-
-    <button class="btn-jugar" onclick="iniciarJuego()">¡EMPEZAR REPASO! 🚀</button>
-    <p class="firma">© Lic. Francisco Molina · CENT N°74 ATSA · Enfermería en Alto Riesgo 3° Año</p>
+<!-- MENU -->
+<div id="menuScreen">
+  <div class="logo">
+    <h1>🏥 ALTO RIESGO</h1>
+    <p>Trivia de Enfermería en Alto Riesgo I y II</p>
+    <p style="color:#666;font-size:0.8em;margin-top:4px;">CENT N°74 ATSA – 3er año</p>
   </div>
-
-  <!-- JUEGO -->
-  <div id="pantalla-juego">
-    <div class="header-juego">
-      <div class="progreso-texto">Pregunta <span id="num-pregunta">1</span> de 112</div>
-      <div class="puntaje-display">⭐ <span id="puntaje-actual">0</span> pts</div>
-    </div>
-    <div class="barra-progreso"><div class="barra-fill" id="barra" style="width:0%"></div></div>
-    <div class="timer-container"><div class="timer-circle" id="timer">20</div></div>
-    <div class="tema-header">
-      <span class="categoria-tag" id="categoria-tag">Tema</span>
-      <span class="enfermeria-tag" id="enf-tag" style="display:none">🩺 Cuidados Enf.</span>
-    </div>
-    <div class="pregunta-card"><p class="pregunta-texto" id="pregunta-texto">Cargando...</p></div>
-    <div class="opciones" id="opciones-container"></div>
-    <div class="feedback" id="feedback"></div>
-    <button class="btn-siguiente" id="btn-siguiente" onclick="siguientePregunta()">Siguiente pregunta →</button>
-    <p class="prof-mini">Lic. Francisco Molina · CENT N°74 ATSA · Alto Riesgo 3° Año</p>
-  </div>
-
-  <!-- RESULTADO -->
-  <div id="pantalla-resultado">
-    <div class="trofeo" id="trofeo">🏆</div>
-    <div class="resultado-titulo" id="res-titulo">¡Excelente!</div>
-    <div class="resultado-sub" id="res-sub">Completaste el repaso de Enfermería en Alto Riesgo</div>
-    <div class="puntaje-final" id="puntaje-final">0</div>
-    <div class="puntaje-de">puntos obtenidos</div>
-    <div class="stats-res">
-      <div class="stat-r"><div class="stat-r-num v" id="res-c">0</div><div class="stat-r-label">✅ Correctas</div></div>
-      <div class="stat-r"><div class="stat-r-num r" id="res-i">0</div><div class="stat-r-label">❌ Incorrectas</div></div>
-      <div class="stat-r"><div class="stat-r-num a" id="res-p">0%</div><div class="stat-r-label">📊 Precisión</div></div>
-    </div>
-    <div class="barra-res"><div class="barra-res-fill" id="barra-res" style="width:0%"></div></div>
-    <button class="btn-reiniciar" onclick="reiniciar()">🔄 Jugar de nuevo</button>
-    <p class="firma-res">Material preparado por el Lic. Francisco Molina · CENT N°74 ATSA · Enfermería en Alto Riesgo</p>
-  </div>
-
+  <div class="subtitulo">Seleccioná un tema para practicar</div>
+  <div class="grid-temas" id="gridTemas"></div>
+  <div style="height:30px"></div>
 </div>
+
+<!-- JUEGO -->
+<div id="gameScreen">
+  <div class="header-game">
+    <button class="btn-volver" onclick="volverMenu()">← Menú</button>
+    <div class="tema-titulo" id="tituloActual"></div>
+    <div class="progreso" id="progresoActual"></div>
+  </div>
+  <div class="game-body">
+    <div class="timer-wrap">
+      <div class="timer-bar-outer"><div class="timer-bar" id="timerBar"></div></div>
+      <div class="timer-num" id="timerNum">25s</div>
+    </div>
+    <div class="pregunta-card">
+      <div class="pregunta-num" id="preguntaNum"></div>
+      <div class="pregunta-texto" id="preguntaTexto"></div>
+    </div>
+    <div class="opciones" id="opcionesContainer"></div>
+    <div class="feedback" id="feedbackDiv"></div>
+    <button class="btn-siguiente" id="btnSiguiente" onclick="siguiente()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div id="resultScreen">
+  <div class="result-card">
+    <div class="result-titulo">🏁 Resultado Final</div>
+    <div class="result-tema" id="resultTema"></div>
+    <div class="result-puntaje" id="resultPuntaje"></div>
+    <div class="result-total" id="resultTotal"></div>
+    <div class="barra-result"><div class="barra-result-fill" id="barraFill" style="width:0%"></div></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div id="resultBadge"></div>
+    <div class="btns-result" style="margin-top:20px;">
+      <button class="btn-reintentar" onclick="reintentar()">🔄 Reintentar este tema</button>
+      <button class="btn-menu" onclick="volverMenu()">🏠 Volver al menú</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const preguntas = [
-  // ===== TEMA 1: UCI =====
-  {cat:"T1: Unidad de Cuidados Intensivos", enf:false, texto:"¿Quién creó el concepto de cuidados intensivos en 1854?", opciones:["Florence Nightingale","Peter Safar","Joseph Lister","Rudolf Virchow"], correcta:0},
-  {cat:"T1: Unidad de Cuidados Intensivos", enf:false, texto:"¿En qué ciudad se creó la primera UCI del mundo, en 1953?", opciones:["Copenhague","Londres","Nueva York","París"], correcta:0},
-  {cat:"T1: Unidad de Cuidados Intensivos", enf:false, texto:"¿Cuál es el valor de temperatura ambiente recomendado para una UCI?", opciones:["21°C a 24°C","18°C a 20°C","25°C a 27°C","16°C a 18°C"], correcta:0},
-  {cat:"T1: Unidad de Cuidados Intensivos", enf:false, texto:"Según SATI, ¿cuántas camas atiende un enfermero en Terapia Intensiva?", opciones:["1 enfermero cada 2 camas","1 enfermero cada 4 camas","1 enfermero cada 6 camas","1 enfermero cada 8 camas"], correcta:0},
-  {cat:"T1: Unidad de Cuidados Intensivos", enf:false, texto:"¿Cuál es el ancho mínimo recomendado para las puertas de acceso a la UCI?", opciones:["180 cm","120 cm","90 cm","150 cm"], correcta:0},
-  {cat:"T1: Unidad de Cuidados Intensivos", enf:true, texto:"¿Cuál de los siguientes NO es un criterio válido para internar a un paciente en la UCI?", opciones:["Paciente con enfermedad crónica en fase terminal sin posibilidad de mejoría","Paciente con sepsis y fallo respiratorio","Paciente post-quirúrgico con inestabilidad hemodinámica","Paciente con infarto agudo de miocardio en evolución"], correcta:0},
-  {cat:"T1: Unidad de Cuidados Intensivos", enf:true, texto:"¿Qué característica debe tener la circulación interna dentro de la UCI según la norma?", opciones:["Unidireccional","Bidireccional","Libre sin restricciones","Circular"], correcta:0},
+const TEMAS = [{"id":1,"titulo":"T1: Unidad de Cuidados Intensivos","preguntas":[{"p":"¿Quién creó el concepto de cuidados intensivos?","o":["Florence Nightingale","Peter Safar","Joseph Lister","Louis Pasteur"],"c":0},{"p":"¿En qué año y país se creó la primera UCI?","o":["1953, Dinamarca","1950, EE.UU.","1960, Francia","1945, Reino Unido"],"c":0},{"p":"¿Qué es la Vigilancia Intensiva?","o":["Monitoreo de pacientes amenazados transitoriamente","Aplicar todas las terapias posibles","Sostener funciones vitales artificialmente","Diagnóstico rápido de urgencias"],"c":0},{"p":"¿Qué redujo Florence Nightingale con sus cuidados en Crimea?","o":["Mortalidad del 40% al 2%","Mortalidad del 80% al 10%","Infecciones del 50% al 5%","Amputaciones del 30% al 1%"],"c":0},{"p":"¿Cuál fue la causa que originó la primera UCI en Copenhague?","o":["Epidemia de poliomielitis","Guerra de Crimea","Brote de tuberculosis","Terremoto masivo"],"c":0},{"p":"¿Qué tipo de pacientes se benefician con internación en UCI?","o":["Con funciones vitales amenazadas o en falla recuperable","Solo postoperatorios graves","Solo pacientes con coma","Pacientes crónicos terminales"],"c":0},{"p":"¿Con qué servicios debe tener acceso 24hs la UCI?","o":["Laboratorio, quirófano, emergencia, farmacia","Solo laboratorio y guardia","Solo quirófano y hemoterapia","Radiología y odontología"],"c":0},{"p":"¿Qué es el Tratamiento Intensivo?","o":["Agotar todas las posibilidades terapéuticas para restablecer funciones","Solo el uso de ARM","Vigilancia sin intervención","Diagnóstico sin terapia"],"c":0},{"p":"¿Cuál es un parámetro NEGATIVO para ingreso a UTI?","o":["Paciente crónico en fase terminal sin posibilidad de mejora","Paciente con sepsis aguda","Paciente post-cirugía cardíaca","Paciente con insuficiencia respiratoria"],"c":0},{"p":"¿Qué es la Unidad de Reanimación (UR)?","o":["Área para riesgo inminente de muerte hasta traslado a UTI","Sinónimo de UTI","Unidad para crónicos","Área de diagnóstico intensivo"],"c":0},{"p":"¿Dónde debe ubicarse la UCI dentro del hospital?","o":["Área protegida del flujo habitual de circulación","En la entrada principal","Junto a la guardia de emergencia","En el piso más alto"],"c":0},{"p":"¿Qué significa UCI?","o":["Unidad de Cuidados Intensivos","Unidad de Control Interno","Unidad Coronaria Integrada","Unidad de Cirugía Intensiva"],"c":0},{"p":"¿Qué es la Terapéutica Intensiva?","o":["Aplicación sistémica de terapias en situaciones de peligro vital","Solo ventilación mecánica","Monitoreo continuo sin intervención","Tratamiento ambulatorio complejo"],"c":0},{"p":"¿Quién desarrolló el área de cuidados intensivos con pacientes sedados y ventilados en 1950?","o":["Peter Safar","Florence Nightingale","William Harvey","René Laennec"],"c":0},{"p":"¿Qué es la Unidad de Terapia Intermedia?","o":["Internación para cuidados constantes que no requieren UTI","Sinónimo de UTI","Área de recuperación postquirúrgica","Servicio de emergencias"],"c":0}]},{"id":2,"titulo":"T2: Recursos Humanos y Farmacología UCI","preguntas":[{"p":"¿Qué característica es fundamental en el enfermero de UCI?","o":["Capacitación continua y actuación rápida ante emergencias","Solo conocer farmacología","Solo manejar equipos","Realizar diagnósticos médicos"],"c":0},{"p":"¿Para qué sirve la Dopamina en UCI?","o":["Soporte vasopresor e inotrópico en shock","Anticoagulante","Antibiótico de amplio espectro","Sedante potente"],"c":0},{"p":"¿Qué es la Noradrenalina (Norepinefrina)?","o":["Vasopresor de primera línea en shock séptico","Diurético de asa","Broncodilatador","Anticonvulsivante"],"c":0},{"p":"¿Cuál es la función del Midazolam en UCI?","o":["Sedación y ansiolítico de corta duración","Vasopresor","Antibiótico","Anticoagulante"],"c":0},{"p":"¿Para qué se usa el Furosemide en UCI?","o":["Diurético en sobrecarga de volumen e insuficiencia cardíaca","Sedante","Vasopresor","Broncodilatador"],"c":0},{"p":"¿Qué es la Heparina sódica en UCI?","o":["Anticoagulante para prevenir trombosis","Antibiótico","Vasopresor","Sedante"],"c":0},{"p":"¿Para qué se usa el Amiodarona?","o":["Antiarrítmico para fibrilación y taquicardia ventricular","Diurético","Sedante","Antibiótico"],"c":0},{"p":"¿Qué registros específicos debe llevar el enfermero de UCI?","o":["Balance hidroelectrolítico, signos vitales, medicación administrada","Solo temperatura y presión","Solo medicación","Solo diuresis"],"c":0},{"p":"¿Qué es la Adrenalina en el contexto de UCI?","o":["Fármaco de primera elección en paro cardíaco","Diurético de asa","Sedante","Antiinflamatorio"],"c":0},{"p":"¿Qué debe incluir la preparación del paciente para UCI?","o":["Preparación psicofísica del paciente y su familia","Solo preparación del equipo médico","Solo colocación de vías","Solo datos personales"],"c":0},{"p":"¿Qué es el Propofol en UCI?","o":["Anestésico-sedante de acción ultra corta","Vasopresor","Antibiótico","Anticoagulante"],"c":0},{"p":"¿Para qué se usa el Bicarbonato de sodio en UCI?","o":["Corrección de acidosis metabólica grave","Vasopresor","Sedación","Broncodilatación"],"c":0},{"p":"¿Cuál es el objetivo principal del monitoreo en UCI?","o":["Detección precoz de cambios en el estado del paciente","Solo registrar datos","Solo controlar la medicación","Solo vigilar la vía aérea"],"c":0},{"p":"¿Qué es el Fentanilo en UCI?","o":["Analgésico opiáceo potente de corta duración","Antibiótico","Diurético","Vasodilatador"],"c":0},{"p":"¿Para qué sirve el Vecuronio en UCI?","o":["Bloqueante neuromuscular para facilitar ARM","Antiarrítmico","Analgésico","Antibiótico"],"c":0}]},{"id":3,"titulo":"T3: Insuficiencia Respiratoria","preguntas":[{"p":"¿Cómo se define la Insuficiencia Respiratoria (IR)?","o":["Incapacidad del sistema respiratorio de mantener adecuado intercambio gaseoso","Exceso de oxígeno en sangre","Aumento de la frecuencia respiratoria","Infección pulmonar grave"],"c":0},{"p":"¿Cuál es el valor de PaO2 que define hipoxemia?","o":["Menos de 60 mmHg","Menos de 80 mmHg","Menos de 100 mmHg","Menos de 40 mmHg"],"c":0},{"p":"¿Qué tipo de IR se llama hipercápnica?","o":["Tipo II, con aumento de CO2 (PaCO2 > 45 mmHg)","Tipo I, con solo hipoxemia","Tipo III, postoperatoria","Tipo IV, por shock"],"c":0},{"p":"¿Qué es la cianosis en IR?","o":["Coloración azulada por falta de oxígeno en tejidos","Coloración rojiza por exceso de O2","Palidez por vasoconstricción","Ictericia por falla hepática"],"c":0},{"p":"¿Cuál es el principal objetivo del tratamiento de la IR?","o":["Corregir la hipoxemia y mantener PaO2 > 60 mmHg","Aumentar la frecuencia cardíaca","Reducir la presión arterial","Administrar antibióticos siempre"],"c":0},{"p":"¿Qué es la gasometría arterial en IR?","o":["Análisis de gases en sangre arterial (PaO2, PaCO2, pH)","Radiografía de tórax","Medición de presión venosa","Análisis de orina"],"c":0},{"p":"¿Cuál es la causa más frecuente de IR Tipo I?","o":["Neumonía, SDRA, edema pulmonar","Depresión del centro respiratorio","Debilidad muscular","Obstrucción de vía aérea superior"],"c":0},{"p":"¿Qué signo clínico indica uso de músculos accesorios?","o":["Tiraje intercostal y supraclavicular","Bradicardia","Hipertensión arterial","Poliuria"],"c":0},{"p":"¿Qué posición favorece la ventilación en IR?","o":["Semi-Fowler (30-45°)","Trendelenburg","Decúbito prono siempre","Decúbito lateral izquierdo"],"c":0},{"p":"¿Qué es la oximetría de pulso en IR?","o":["Medición no invasiva de la saturación de O2 (SpO2)","Gasometría arterial","Radiografía de tórax","Espirometría"],"c":0},{"p":"¿Cuál es la causa de IR Tipo II (hipercápnica)?","o":["Depresión del centro respiratorio, EPOC, enfermedades neuromusculares","Solo neumonía","Solo edema pulmonar","Solo embolia pulmonar"],"c":0},{"p":"¿Qué valor de SpO2 es aceptable en IR tratada?","o":["Mayor o igual a 90%","Mayor a 99%","Entre 70-80%","Entre 60-70%"],"c":0},{"p":"¿Qué cuidado de enfermería es prioritario en IR?","o":["Mantener vía aérea permeable y administrar O2 indicado","Solo tomar tensión arterial","Solo registrar temperatura","Solo administrar antibióticos"],"c":0},{"p":"¿Qué es la taquipnea?","o":["Frecuencia respiratoria mayor a 20 respiraciones por minuto","Frecuencia respiratoria menor a 12","Respiración superficial","Pausa respiratoria"],"c":0},{"p":"¿Qué es la apnea?","o":["Cese completo de la respiración","Respiración rápida","Respiración profunda","Respiración irregular"],"c":0}]},{"id":4,"titulo":"T4: ARM - Asistencia Respiratoria Mecánica","preguntas":[{"p":"¿Qué es la ARM?","o":["Soporte mecánico que reemplaza o asiste la ventilación pulmonar","Solo administración de O2 por máscara","Técnica de fisioterapia respiratoria","Drenaje torácico"],"c":0},{"p":"¿Cuál es la principal indicación de ARM?","o":["Insuficiencia respiratoria grave con hipoxemia o hipercapnia refractaria","Tos crónica","Broncoespasmo leve","Fiebre alta"],"c":0},{"p":"¿Qué es la ventilación invasiva?","o":["ARM con tubo orotraqueal o traqueostomía","ARM con máscara facial","ARM con cánula nasal","Ventilación manual con bolsa"],"c":0},{"p":"¿Qué es la VMNI (Ventilación No Invasiva)?","o":["ARM con interfaz nasal o facial sin intubación","ARM con tubo orotraqueal","Respiración asistida manual","Traqueostomía"],"c":0},{"p":"¿Qué complicación grave puede ocurrir al intubar?","o":["Intubación esofágica inadvertida","Solo sangrado nasal","Solo broncoespasmo leve","Solo hipertensión transitoria"],"c":0},{"p":"¿Qué modo ventilatorio controla completamente la respiración?","o":["Modo controlado (CMV o AC)","Modo CPAP","Modo SIMV","Modo Presión Soporte"],"c":0},{"p":"¿Qué es el PEEP en ARM?","o":["Presión positiva al final de la espiración para mantener alvéolos abiertos","Presión al inicio de la inspiración","Volumen tidal ajustado","Frecuencia respiratoria programada"],"c":0},{"p":"¿Qué cuidado es fundamental en el tubo orotraqueal?","o":["Verificar posición, fijar correctamente y aspirar secreciones","Solo cambiar el tubo diariamente","Solo administrar oxígeno","Solo registrar la fecha de colocación"],"c":0},{"p":"¿Qué es el Volumen Tidal (Vt)?","o":["Volumen de aire en cada ciclo respiratorio (aprox. 6-8 ml/kg)","Presión máxima en la vía aérea","Frecuencia respiratoria programada","Concentración de O2 inspirado"],"c":0},{"p":"¿Para qué sirve la humidificación en ARM?","o":["Prevenir lesión de mucosa y tapones de moco","Aumentar la presión inspiratoria","Reducir la frecuencia respiratoria","Mejorar la hemodinamia"],"c":0},{"p":"¿Qué es el Weaning (destete) en ARM?","o":["Proceso gradual de retiro de la ventilación mecánica","Inicio de la ARM","Ajuste del PEEP","Cambio de modo ventilatorio"],"c":0},{"p":"¿Qué es la FiO2 en ARM?","o":["Fracción inspirada de oxígeno (porcentaje de O2 en el aire administrado)","Flujo de aire total","Frecuencia respiratoria","Volumen minuto"],"c":0},{"p":"¿Qué es el barotrauma en ARM?","o":["Lesión pulmonar por exceso de presión (neumotórax, enfisema)","Infección por el tubo orotraqueal","Hemorragia pulmonar","Broncoespasmo severo"],"c":0},{"p":"¿Cuál es la posición recomendada para prevenir neumonía asociada a ARM?","o":["Cabecera a 30-45°","Trendelenburg a 20°","Decúbito supino plano","Decúbito prono siempre"],"c":0},{"p":"¿Qué es la SIMV en ARM?","o":["Ventilación mandatoria sincronizada intermitente","Solo ventilación controlada","Ventilación exclusivamente espontánea","Presión positiva continua"],"c":0}]},{"id":5,"titulo":"T5: TEP, EPOC y Patologías Neuromusculares","preguntas":[{"p":"¿Qué es el Tromboembolismo Pulmonar (TEP)?","o":["Obstrucción arterial pulmonar por trombo o émbolo","Infección bacteriana del pulmón","Colapso pulmonar por derrame","Inflamación crónica bronquial"],"c":0},{"p":"¿Cuál es la tríada de Virchow para TEP?","o":["Estasis venosa, hipercoagulabilidad, lesión vascular","Fiebre, tos, disnea","Hipoxia, hipercapnia, acidosis","Taquicardia, hipotensión, cianosis"],"c":0},{"p":"¿Cuál es el síntoma más frecuente del TEP?","o":["Disnea de inicio súbito","Fiebre alta","Tos productiva","Dolor abdominal"],"c":0},{"p":"¿Cuál es el tratamiento anticoagulante de elección en TEP?","o":["Heparina sódica EV seguida de anticoagulantes orales","Solo aspirina","Solo antibióticos","Solo reposo absoluto"],"c":0},{"p":"¿Qué es la EPOC?","o":["Enfermedad inflamatoria crónica con obstrucción al flujo aéreo no totalmente reversible","Infección aguda de bronquios","Edema pulmonar agudo","Fibrosis pulmonar reversible"],"c":0},{"p":"¿Cuál es la principal causa de EPOC?","o":["Tabaquismo crónico","Infecciones virales repetidas","Déficit de vitamina D","Exposición al frío"],"c":0},{"p":"¿Qué caracteriza al enfisema en EPOC?","o":["Destrucción de paredes alveolares con hiperinsuflación","Hipersecreción mucosa crónica","Espasmo bronquial agudo","Fibrosis intersticial progresiva"],"c":0},{"p":"¿Qué es la Miastenia Gravis?","o":["Enfermedad autoinmune que afecta la unión neuromuscular causando debilidad muscular","Infección muscular viral","Tumor muscular benigno","Distrofia muscular hereditaria"],"c":0},{"p":"¿Qué es el Síndrome de Guillain-Barré?","o":["Polineuropatía aguda autoinmune con debilidad ascendente","Infección muscular bacteriana","Tumor del nervio periférico","Miopatía crónica hereditaria"],"c":0},{"p":"¿Qué riesgo respiratorio tienen las patologías neuromusculares?","o":["Debilidad de músculos respiratorios que puede requerir ARM","Solo afectan extremidades","No afectan la función pulmonar","Solo producen dolor muscular"],"c":0},{"p":"¿Qué cuidado de enfermería es clave en TEP?","o":["Monitoreo hemodinámico, O2 y anticoagulación según indicación","Solo control de temperatura","Solo administrar antibióticos","Solo movilización precoz"],"c":0},{"p":"¿Qué estudio confirma el diagnóstico de TEP?","o":["Angiotomografía (Angio-TAC) pulmonar","Solo electrocardiograma","Solo radiografía de tórax","Solo gasometría arterial"],"c":0},{"p":"¿Qué signo en el ECG puede aparecer en TEP masivo?","o":["Patrón S1Q3T3 y taquicardia sinusal","Elevación del ST en cara anterior","Bradicardia sinusal","Bloqueo AV completo"],"c":0},{"p":"¿Qué es el cor pulmonale en EPOC?","o":["Fallo ventricular derecho por hipertensión pulmonar crónica","Infarto de miocardio","Pericarditis aguda","Miocardiopatía dilatada"],"c":0},{"p":"¿Cuál es el objetivo de O2 en EPOC agudizado?","o":["SpO2 entre 88-92% para evitar depresión del centro respiratorio","SpO2 mayor a 98%","SpO2 entre 70-80%","No administrar O2 nunca"],"c":0}]},{"id":6,"titulo":"T6: SDRA","preguntas":[{"p":"¿Qué es el SDRA?","o":["Síndrome de inflamación pulmonar aguda con hipoxemia grave y edema no cardiogénico","Insuficiencia cardíaca izquierda aguda","Neumonia bacteriana grave","Edema pulmonar por sobrecarga de volumen"],"c":0},{"p":"¿Cuál es la causa más frecuente de SDRA?","o":["Sepsis, neumonía grave y trauma","Solo trauma torácico","Solo sobredosis de drogas","Solo pancreatitis aguda"],"c":0},{"p":"¿Cuál es el criterio diagnóstico de hipoxemia en SDRA?","o":["Relación PaO2/FiO2 menor a 200 mmHg","PaO2 menor a 80 mmHg","SpO2 menor a 95%","PaCO2 mayor a 50 mmHg"],"c":0},{"p":"¿Qué imagen radiológica caracteriza al SDRA?","o":["Infiltrados bilaterales difusos (pulmón blanco)","Neumotórax unilateral","Derrame pleural localizado","Consolidación lobar única"],"c":0},{"p":"¿Qué estrategia ventilatoria se usa en SDRA?","o":["Ventilación protectora con bajo volumen tidal (4-6 ml/kg) y PEEP alto","Ventilación con alto volumen y bajo PEEP","Solo O2 por máscara de alto flujo","Solo VMNI sin intubación"],"c":0},{"p":"¿Qué es el edema pulmonar no cardiogénico en SDRA?","o":["Acumulación de líquido por daño capilar, no por falla cardíaca","Edema por insuficiencia cardíaca izquierda","Edema por insuficiencia renal","Edema por hipoalbuminemia"],"c":0},{"p":"¿Cuál es la mortalidad aproximada del SDRA severo?","o":["40-50%","5-10%","80-90%","Menos del 2%"],"c":0},{"p":"¿Qué posición puede mejorar la oxigenación en SDRA grave?","o":["Decúbito prono (boca abajo)","Trendelenburg","Semi-Fowler baja","Decúbito lateral derecho"],"c":0},{"p":"¿Por qué se usa PEEP elevado en SDRA?","o":["Para mantener alvéolos abiertos y mejorar oxigenación","Para aumentar el volumen corriente","Para disminuir la frecuencia respiratoria","Para reducir la FiO2 al 21%"],"c":0},{"p":"¿Qué fase inicial describe al SDRA?","o":["Fase exudativa con daño alveolar difuso en las primeras 72 hs","Fase proliferativa desde el inicio","Fase fibrótica desde el día 1","Fase resolutiva inmediata"],"c":0},{"p":"¿Qué es el reclutamiento alveolar en SDRA?","o":["Maniobra para abrir alvéolos colapsados usando presiones elevadas transitoriamente","Retiro de la ARM","Cambio de modo ventilatorio","Administración de surfactante"],"c":0},{"p":"¿Cuál es el cuidado de enfermería prioritario en SDRA?","o":["Monitoreo continuo de oxigenación y manejo de la ARM","Solo administrar antibióticos","Solo controlar la diuresis","Solo posicionar al paciente"],"c":0},{"p":"¿Qué diferencia el SDRA del edema cardiogénico?","o":["En SDRA la presión de oclusión pulmonar es normal o baja","En SDRA hay signos claros de falla cardíaca","El SDRA siempre tiene cardiomegalia en la Rx","El SDRA mejora solo con diuréticos"],"c":0},{"p":"¿Cuántas fases tiene la evolución del SDRA?","o":["Tres: exudativa, proliferativa y fibrótica","Dos: aguda y crónica","Cinco: inflamatoria, exudativa, proliferativa, fibrótica y resolutiva","Solo una fase continua"],"c":0},{"p":"¿Qué es el barotrauma en el contexto del SDRA?","o":["Lesión pulmonar por presiones ventilatorias excesivas","Infección del parénquima pulmonar","Hemorragia alveolar","Atelectasia masiva"],"c":0}]},{"id":7,"titulo":"T7: Cardiopatías Isquémicas","preguntas":[{"p":"¿Qué es la cardiopatía isquémica?","o":["Reducción del flujo sanguíneo coronario que causa isquemia miocárdica","Inflamación del pericardio","Alteración del ritmo cardíaco","Fallo de las válvulas cardíacas"],"c":0},{"p":"¿Cuál es la causa principal de la angina de pecho?","o":["Obstrucción parcial de coronaria con isquemia sin necrosis","Oclusión total coronaria con necrosis","Espasmo de coronaria sin placa","Embolia pulmonar masiva"],"c":0},{"p":"¿Cuál es el síntoma típico del infarto agudo de miocardio?","o":["Dolor torácico opresivo irradiado a brazo izquierdo o mandíbula","Dolor abdominal difuso","Cefalea intensa","Disnea sin dolor"],"c":0},{"p":"¿Qué signo ECG es típico del IAM con elevación del ST?","o":["Elevación del segmento ST mayor a 1 mm en 2 derivaciones contiguas","Depresión del ST en todas las derivaciones","QT prolongado","Solo inversión de onda T"],"c":0},{"p":"¿Qué enzima cardíaca es el marcador más específico de IAM?","o":["Troponina I o T","CPK total","LDH","Transaminasas"],"c":0},{"p":"¿Cuál es el tratamiento de reperfusión más eficaz en IAM?","o":["Angioplastia coronaria primaria (ATC)","Solo trombolisis siempre","Solo aspirina","Solo nitratos"],"c":0},{"p":"¿Para qué se usa la Aspirina en IAM?","o":["Antiagregante plaquetario para prevenir extensión del trombo","Analgésico exclusivo","Antihipertensivo","Anticoagulante oral"],"c":0},{"p":"¿Qué es la angina inestable?","o":["Angina en reposo, de nuevo inicio o en aumento sin necrosis","Angina solo al esfuerzo con patrón estable","Angina con elevación del ST","IAM sin onda Q"],"c":0},{"p":"¿Cuál es la complicación más temida a corto plazo del IAM?","o":["Fibrilación ventricular y muerte súbita","Solo hipotensión transitoria","Solo pericarditis","Solo reinfarctación tardía"],"c":0},{"p":"¿Qué cuidado de enfermería es inmediato ante sospecha de IAM?","o":["ECG urgente, O2, acceso venoso, monitoreo y llamar al médico","Solo administrar analgésico","Solo hacer ECG y esperar","Solo monitorear la tensión arterial"],"c":0},{"p":"¿Qué es la aterosclerosis coronaria?","o":["Acumulación de placas lipídicas en la pared arterial coronaria","Inflamación del miocardio","Espasmo coronario reversible","Válvula cardíaca calcificada"],"c":0},{"p":"¿Qué posición se recomienda en IAM sin complicaciones?","o":["Semi-Fowler con reposo absoluto en las primeras horas","Trendelenburg","Decúbito prono","Deambulación inmediata"],"c":0},{"p":"¿Para qué sirven los betabloqueantes en IAM?","o":["Reducir frecuencia cardíaca, consumo de O2 y riesgo de arritmias","Solo disminuir el dolor","Solo bajar la presión arterial","Solo como anticoagulantes"],"c":0},{"p":"¿Qué es el IAM sin elevación del ST (NSTEMI)?","o":["IAM con necrosis pero sin elevación del ST en ECG","IAM con elevación del ST en todas las derivaciones","Angina de pecho estable","Pericarditis aguda"],"c":0},{"p":"¿Cuánto tiempo máximo debería tardar una angioplastia en IAM (tiempo puerta-balón)?","o":["Menos de 90 minutos","Menos de 6 horas","Menos de 24 horas","Menos de 48 horas"],"c":0}]},{"id":8,"titulo":"T8: Insuficiencia Cardíaca y EAP","preguntas":[{"p":"¿Qué es la Insuficiencia Cardíaca Descompensada (ICD)?","o":["El corazón no puede mantener el gasto cardíaco adecuado a las demandas","Exceso de gasto cardíaco","Inflamación del pericardio","Bloqueo de rama derecho"],"c":0},{"p":"¿Cuál es el síntoma más frecuente de IC izquierda descompensada?","o":["Disnea progresiva y ortopnea","Edema en miembros inferiores solo","Dolor torácico intenso","Síncope frecuente"],"c":0},{"p":"¿Qué es el Edema Agudo de Pulmón (EAP)?","o":["Acumulación súbita de líquido en alvéolos por falla ventricular izquierda","Infección pulmonar aguda","Neumotórax bilateral","Embolia pulmonar masiva"],"c":0},{"p":"¿Cuál es el signo clásico del EAP?","o":["Disnea intensa, ortopnea, esputo rosado y estertores bilaterales","Solo taquicardia leve","Solo tos seca","Solo edema periférico"],"c":0},{"p":"¿Qué posición se indica de inmediato en EAP?","o":["Sentado con piernas colgando (reduce precarga)","Trendelenburg","Decúbito supino plano","Decúbito lateral izquierdo"],"c":0},{"p":"¿Qué fármaco es de primera línea en EAP agudo?","o":["Furosemida EV para diuresis rápida","Dopamina en dosis alta","Adrenalina subcutánea","Atropina EV"],"c":0},{"p":"¿Para qué se usan los nitratos en EAP?","o":["Vasodilatación que reduce precarga y poscarga","Aumentar la frecuencia cardíaca","Administrar líquidos rápido","Corregir acidosis"],"c":0},{"p":"¿Qué es la fracción de eyección (FE) y cuándo es anormal?","o":["% de sangre eyectada por el ventrículo; anormal si < 40%","Volumen diastólico final; anormal si > 200 ml","Presión ventricular; anormal si > 120 mmHg","Frecuencia cardíaca; anormal si > 100 lpm"],"c":0},{"p":"¿Cuál es el hallazgo radiológico en EAP?","o":["Infiltrado alveolar bilateral en alas de mariposa y cardiomegalia","Hiperinsuflación bilateral","Neumotórax unilateral","Derrame pleural unilateral solo"],"c":0},{"p":"¿Qué es el péptido natriurético (BNP o NT-proBNP) en IC?","o":["Marcador sérico elevado que confirma el diagnóstico de IC","Marcador de infarto miocárdico","Indicador de función renal","Parámetro de función hepática"],"c":0},{"p":"¿Cuál es el cuidado de enfermería prioritario en IC descompensada?","o":["Balance hídrico estricto, peso diario y monitoreo hemodinámico","Solo administrar diuréticos","Solo control de temperatura","Solo hacer ECG diario"],"c":0},{"p":"¿Qué es la IC con FE preservada?","o":["IC donde el ventrículo tiene buena contracción pero mala relajación","IC con FE menor al 40%","IC solo por valvulopatías","IC en pacientes jóvenes exclusivamente"],"c":0},{"p":"¿Qué es la VMNI en el tratamiento del EAP?","o":["Ventilación con CPAP o BiPAP que mejora oxigenación sin intubar","Intubación orotraqueal de urgencia","Administración de O2 solo por cánula nasal","Traqueostomía de emergencia"],"c":0},{"p":"¿Cuál es la causa más frecuente de IC descompensada?","o":["Cardiopatía isquémica e hipertensión arterial","Solo miocarditis viral","Solo enfermedad valvular","Solo enfermedades congénitas"],"c":0},{"p":"¿Qué signo indica IC derecha?","o":["Edema en miembros inferiores, hepatomegalia y distensión venosa yugular","Solo disnea de esfuerzo","Solo tos nocturna","Solo ortopnea"],"c":0}]},{"id":9,"titulo":"T9: PCR y Fibrilación Ventricular","preguntas":[{"p":"¿Cómo se define el Paro Cardiorrespiratorio (PCR)?","o":["Cese súbito de la actividad cardíaca y respiratoria efectiva","Frecuencia cardíaca menor a 40 lpm","Hipotensión arterial grave","Apnea sin pérdida de pulso"],"c":0},{"p":"¿Cuáles son los signos de PCR?","o":["Pérdida de conciencia, apnea y ausencia de pulso carotídeo","Solo ausencia de pulso periférico","Solo pérdida de conciencia","Solo apnea con conservación de pulso"],"c":0},{"p":"¿Cuál es el ritmo más frecuente en PCR súbito extrahospitalario?","o":["Fibrilación Ventricular (FV)","Asistolia","Actividad eléctrica sin pulso","Taquicardia sinusal"],"c":0},{"p":"¿Cuál es el único tratamiento efectivo para la FV?","o":["Desfibrilación eléctrica inmediata","Solo adrenalina EV","Solo masaje cardíaco","Solo ventilación con bolsa"],"c":0},{"p":"¿Cuántas compresiones por minuto indica el protocolo RCP?","o":["100-120 compresiones por minuto","60-80 compresiones por minuto","150-180 compresiones por minuto","50-60 compresiones por minuto"],"c":0},{"p":"¿Cuál es la relación compresiones/ventilaciones en RCP básico para adultos?","o":["30 compresiones : 2 ventilaciones","15 compresiones : 2 ventilaciones","5 compresiones : 1 ventilación","20 compresiones : 2 ventilaciones"],"c":0},{"p":"¿Cuál es el fármaco de primera línea en PCR?","o":["Adrenalina 1 mg EV cada 3-5 minutos","Atropina 1 mg EV","Amiodarona 600 mg EV","Bicarbonato 100 mEq EV"],"c":0},{"p":"¿Qué es la Asistolia?","o":["Ausencia total de actividad eléctrica cardíaca en el ECG","FV de baja amplitud","Actividad eléctrica organizada sin pulso","Taquicardia ventricular sin pulso"],"c":0},{"p":"¿Cuándo se usa Amiodarona en el PCR?","o":["FV o TVSP refractaria a 3 desfibrilaciones","En asistolia de entrada","En toda actividad eléctrica sin pulso","Como primera droga en cualquier PCR"],"c":0},{"p":"¿Qué es la AESP (Actividad Eléctrica Sin Pulso)?","o":["Ritmo organizado en ECG sin pulso palpable","Ausencia de actividad eléctrica","Fibrilación ventricular","Taquicardia sinusal sin hipotensión"],"c":0},{"p":"¿Cuál es la profundidad adecuada de las compresiones en adultos?","o":["Al menos 5 cm (máximo 6 cm)","Al menos 2 cm","Al menos 8 cm","Al menos 1 cm"],"c":0},{"p":"¿Qué es el cuidado post-resucitación?","o":["Cuidados intensivos para minimizar daño cerebral y orgánico tras PCR","Solo monitoreo del ritmo","Solo administrar O2","Solo hidratación EV"],"c":0},{"p":"¿Cuántos Joules se usan en la primera descarga con desfibrilador bifásico?","o":["120-200 J según el fabricante","360 J siempre","50 J siempre","Solo 100 J en adultos"],"c":0},{"p":"¿Para qué sirve el masaje cardíaco externo?","o":["Mantener flujo sanguíneo cerebral y coronario hasta la desfibrilación","Solo para diagnosticar el ritmo","Solo para administrar fármacos","Solo en niños"],"c":0},{"p":"¿Qué significa RCP?","o":["Reanimación Cardiopulmonar","Registro Cardiovascular Pulmonar","Respuesta Clínica Primaria","Reperfusión Coronaria Precoz"],"c":0}]},{"id":10,"titulo":"T10: TEC, Coma y ACV","preguntas":[{"p":"¿Qué es el Accidente Cerebrovascular (ACV)?","o":["Interrupción súbita del flujo sanguíneo cerebral con déficit neurológico","Inflamación crónica del cerebro","Tumor cerebral agudo","Epilepsia generalizada"],"c":0},{"p":"¿Cuáles son los dos tipos de ACV?","o":["Isquémico (80%) y hemorrágico (20%)","Trombótico y embólico solo","Arterial y venoso","Leve y grave"],"c":0},{"p":"¿Cuál es la ventana terapéutica para trombolisis en ACV isquémico?","o":["Hasta 4,5 horas desde el inicio de síntomas","Hasta 24 horas","Hasta 12 horas","Hasta 48 horas"],"c":0},{"p":"¿Qué mide la Escala de Glasgow?","o":["Nivel de conciencia: apertura ocular, respuesta verbal y motora","Solo respuesta motora","Solo apertura ocular","Grado de dolor"],"c":0},{"p":"¿Cuál es el puntaje máximo y mínimo de la Escala de Glasgow?","o":["Máximo 15, mínimo 3","Máximo 10, mínimo 0","Máximo 20, mínimo 5","Máximo 12, mínimo 1"],"c":0},{"p":"¿Qué puntaje de Glasgow indica coma?","o":["8 o menos","Menos de 12","Menos de 5","Igual a 3 solo"],"c":0},{"p":"¿Cuál es la sigla para recordar síntomas de ACV?","o":["FAST: Face, Arm, Speech, Time","ABCDE: Airway, Breathing, Circulation, Disability, Exposure","SIRS: Systemic Inflammatory Response Syndrome","PCR: Pérdida, Conciencia, Respiración"],"c":0},{"p":"¿Qué es el TEC (Traumatismo Encéfalocraneano)?","o":["Lesión cerebral por impacto mecánico sobre el cráneo","Infarto cerebral espontáneo","Tumor cerebral post-traumático","Meningitis post-trauma"],"c":0},{"p":"¿Cómo se clasifica el TEC según el Glasgow?","o":["Leve (13-15), moderado (9-12), grave (3-8)","Leve (10-15), moderado (5-9), grave (1-4)","Leve (12-15), moderado (8-11), grave (3-7)","Solo leve y grave"],"c":0},{"p":"¿Qué cuidado es prioritario en coma neurológico?","o":["Mantener vía aérea, posición con cabecera a 30° y monitoreo neurológico","Solo administrar corticoides","Solo control de temperatura","Solo monitoreo de TA"],"c":0},{"p":"¿Cuál es el principal riesgo del ACV hemorrágico?","o":["Hipertensión endocraneana y herniación cerebral","Solo convulsiones","Solo hipertermia","Solo hipoglucemia"],"c":0},{"p":"¿Qué es la afasia en ACV?","o":["Alteración del lenguaje por lesión de áreas cerebrales del habla","Pérdida del movimiento de extremidades","Pérdida de visión","Pérdida del equilibrio"],"c":0},{"p":"¿Qué estudio de imagen es esencial ante sospecha de ACV?","o":["TAC de cráneo sin contraste urgente","Solo RMN con contraste","Solo electroencefalograma","Solo punción lumbar"],"c":0},{"p":"¿Cuál es la hemiplegia en ACV?","o":["Parálisis de un hemicuerpo por lesión en el hemisferio cerebral contralateral","Parálisis de las cuatro extremidades","Parálisis facial bilateral","Parálisis de los dos miembros inferiores"],"c":0},{"p":"¿Qué es la pupila de Hutchinson en TEC grave?","o":["Midriasis unilateral fija por herniación uncal","Miosis bilateral por opioides","Pupilas isocóricas normales","Pupila en forma de gota"],"c":0}]},{"id":11,"titulo":"T11: Hipertensión Endocraneana","preguntas":[{"p":"¿Qué es la Hipertensión Endocraneana (HEC)?","o":["Aumento de la presión intracraneal por encima de 20 mmHg","Hipertensión arterial sistémica","Aumento de la presión del LCR solo","Espasmo de los vasos cerebrales"],"c":0},{"p":"¿Cuál es la tríada de Cushing en HEC?","o":["Hipertensión, bradicardia y bradipnea","Fiebre, convulsiones y cefalea","Taquicardia, hipotensión y taquipnea","Midriasis, miosis y nistagmo"],"c":0},{"p":"¿Cuáles son los componentes del compartimiento intracraneal?","o":["Parénquima cerebral (80%), sangre (10%) y LCR (10%)","Solo cerebro y LCR","Solo sangre y LCR","Cerebro (50%), sangre (30%) y LCR (20%)"],"c":0},{"p":"¿Cuál es la posición de cabecera para reducir la PIC?","o":["30° elevada sin flexión cervical","Trendelenburg a 20°","Plana en decúbito supino","Decúbito lateral derecho"],"c":0},{"p":"¿Para qué se usa el Manitol en HEC?","o":["Agente osmótico que reduce el edema cerebral y la PIC","Antibiótico cerebral","Corticoide potente","Anticonvulsivante"],"c":0},{"p":"¿Qué es la herniación cerebral en HEC?","o":["Desplazamiento del tejido cerebral a través de estructuras rígidas por aumento de PIC","Inflamación de las meninges","Hemorragia subaracnoidea","Hidrocefalia aguda"],"c":0},{"p":"¿Qué es la Presión de Perfusión Cerebral (PPC)?","o":["PPC = PAM - PIC; debe mantenerse entre 60-70 mmHg","PPC = PIC - PAM","PPC = PAM + PIC","PPC = FC x PAM"],"c":0},{"p":"¿Qué consecuencia tiene la HEC sobre la perfusión cerebral?","o":["Reduce el flujo sanguíneo cerebral causando isquemia","Aumenta el flujo cerebral","No afecta la perfusión","Solo produce cefalea"],"c":0},{"p":"¿Qué es el edema cerebral vasogénico?","o":["Acumulación de líquido extracelular por ruptura de la barrera hematoencefálica","Edema intracelular por hipoxia","Edema por hiponatremia","Edema por deshidratación"],"c":0},{"p":"¿Cuál es el cuidado de enfermería en HEC para evitar aumento de PIC?","o":["Evitar maniobras de Valsalva, aspiración cuidadosa, ambiente tranquilo","Solo administrar manitol","Solo elevar la cabecera","Solo monitorear temperatura"],"c":0},{"p":"¿Qué es el signo de papiledema en HEC?","o":["Edema del nervio óptico visible en el fondo de ojo por HEC crónica","Dilatación de pupila por trauma","Visión doble por parálisis del VI par","Pérdida de la visión periférica"],"c":0},{"p":"¿Cuándo se indica hiperventilación en HEC?","o":["Solo en herniación inminente para bajar PaCO2 transitoriamente","Como tratamiento rutinario siempre","Para aumentar la PaO2","Para bajar la presión arterial"],"c":0},{"p":"¿Qué síntoma clásico describe la HEC?","o":["Cefalea intensa matutina, náuseas y vómitos en proyectil","Solo cefalea leve vespertina","Solo convulsiones","Solo visión doble sin cefalea"],"c":0},{"p":"¿Qué temperatura se recomienda mantener en HEC grave?","o":["Normotermia o hipotermia leve (36-37°C)","Hipertermia controlada (38-39°C)","Solo temperatura ambiente","No importa la temperatura"],"c":0},{"p":"¿Qué es la ventriculostomía en HEC?","o":["Drenaje de LCR por catéter intraventricular para reducir la PIC","Cirugía de derivación arteriovenosa","Reparación de aneurisma cerebral","Biopsia cerebral estereotáctica"],"c":0}]},{"id":12,"titulo":"T12: Desequilibrios del Medio Interno","preguntas":[{"p":"¿Cuáles son los compartimientos donde se distribuye el agua corporal?","o":["Intracelular (2/3) y extracelular (1/3: intravascular + intersticial)","Solo intravascular e intersticial","Solo intracelular y extracelular","Intracelular (1/3) y extracelular (2/3)"],"c":0},{"p":"¿Qué es la hiponatremia?","o":["Sodio sérico menor a 135 mEq/L","Sodio mayor a 145 mEq/L","Potasio menor a 3,5 mEq/L","Cloro mayor a 110 mEq/L"],"c":0},{"p":"¿Qué es la hiperkalemia y cuál es su riesgo principal?","o":["Potasio mayor a 5,5 mEq/L; riesgo de arritmias graves","Potasio menor a 3,5 mEq/L; riesgo de debilidad muscular","Sodio alto con riesgo de convulsiones","Calcio alto con riesgo de tetania"],"c":0},{"p":"¿Qué es la acidosis metabólica?","o":["pH menor a 7,35 con bicarbonato bajo","pH mayor a 7,45 con bicarbonato alto","pH menor a 7,35 con pCO2 alta","pH mayor a 7,45 con pCO2 baja"],"c":0},{"p":"¿Cuál es el pH normal de la sangre arterial?","o":["7,35 - 7,45","7,20 - 7,30","7,50 - 7,60","7,00 - 7,20"],"c":0},{"p":"¿Qué es la alcalosis metabólica?","o":["pH mayor a 7,45 con bicarbonato elevado","pH menor a 7,35 con bicarbonato bajo","pH mayor a 7,45 con pCO2 alta","pH menor a 7,35 con pCO2 baja"],"c":0},{"p":"¿Cuál es el principal signo de hipokalemia?","o":["Debilidad muscular, arritmias y parálisis en casos severos","Hipertensión arterial","Convulsiones","Edema cerebral"],"c":0},{"p":"¿Para qué sirve el Bicarbonato de sodio?","o":["Corregir acidosis metabólica grave (pH < 7,10)","Solo para hidratación de mantenimiento","Para corregir hipernatremia","Para tratar hipercalemia"],"c":0},{"p":"¿Qué es la osmolaridad plasmática normal?","o":["275-295 mOsm/kg","150-200 mOsm/kg","320-360 mOsm/kg","100-150 mOsm/kg"],"c":0},{"p":"¿Qué es la deshidratación hipertónica?","o":["Pérdida de agua libre con aumento de sodio sérico","Pérdida de agua y sodio en igual proporción","Exceso de agua con sodio bajo","Exceso de sodio sin cambios de agua"],"c":0},{"p":"¿Qué signo indica sobrecarga de volumen?","o":["Edema, aumento de peso, ingurgitación yugular y crepitantes","Sed intensa y mucosas secas","Hipotensión ortostática","Taquicardia e hipotermia"],"c":0},{"p":"¿Cuál es la causa más frecuente de hipocalcemia en UCI?","o":["Hipoalbuminemia, sepsis e insuficiencia renal","Solo hipovitaminosis D","Solo hipotiroidismo","Solo insuficiencia hepática"],"c":0},{"p":"¿Qué es la acidosis respiratoria?","o":["pH menor a 7,35 con PaCO2 mayor a 45 mmHg por hipoventilación","pH menor a 7,35 con bicarbonato bajo","pH mayor a 7,45 con PaCO2 baja","pH normal con PaCO2 alta"],"c":0},{"p":"¿Qué cuidado de enfermería es esencial en desequilibrios del medio interno?","o":["Balance hídrico estricto, control de ionograma y monitoreo ECG","Solo administrar suero fisiológico","Solo tomar temperatura cada 4 hs","Solo controlar diuresis"],"c":0},{"p":"¿Cuál es el volumen de agua corporal total en un adulto promedio?","o":["60% del peso corporal","40% del peso corporal","80% del peso corporal","20% del peso corporal"],"c":0}]},{"id":13,"titulo":"T13: Insuficiencia Renal","preguntas":[{"p":"¿Qué es la Insuficiencia Renal Aguda (IRA)?","o":["Deterioro brusco de la función renal con aumento de creatinina y oliguria","Deterioro crónico y progresivo de la función renal","Infección bacteriana del riñón","Cálculo renal con obstrucción"],"c":0},{"p":"¿Cuáles son las tres causas principales de IRA?","o":["Pre-renal (hipoperfusión), renal (daño intrínseco) y post-renal (obstrucción)","Solo nefritis aguda","Solo necrosis tubular","Solo obstrucción ureteral"],"c":0},{"p":"¿Qué es la oliguria?","o":["Diuresis menor a 400 ml en 24 horas o menos de 0,5 ml/kg/h","Diuresis mayor a 3 litros en 24 h","Ausencia total de orina","Orina con proteínas"],"c":0},{"p":"¿Cuál es el marcador más sensible de función renal?","o":["Creatinina sérica y clearance de creatinina","Solo uremia (BUN)","Solo densidad urinaria","Solo proteinuria"],"c":0},{"p":"¿Cuál es la complicación más grave de la IRA?","o":["Hiperkalemia con riesgo de arritmias fatales","Solo edema periférico","Solo acidosis leve","Solo hiponatremia"],"c":0},{"p":"¿Para qué se usa la diálisis en IRA/IRC?","o":["Reemplazar la función renal depurando toxinas, agua y electrolitos","Solo para administrar medicamentos","Solo para hidratar al paciente","Solo para controlar la presión arterial"],"c":0},{"p":"¿Qué es la hemodiálisis?","o":["Técnica extracorpórea que filtra la sangre a través de una membrana semipermeable","Diálisis con solución en peritoneo","Eliminación de toxinas por la piel","Filtración de orina en el riñón artificial"],"c":0},{"p":"¿Qué es la diálisis peritoneal?","o":["Uso del peritoneo como membrana de filtración introduciendo dializado en abdomen","Hemodiálisis con catéter central","Diálisis a través de la piel","Filtración extracorpórea de sangre"],"c":0},{"p":"¿Qué es la IRC (Insuficiencia Renal Crónica)?","o":["Pérdida progresiva e irreversible de la función renal durante más de 3 meses","Deterioro brusco de la función renal","Infección renal crónica","Cálculo renal recurrente"],"c":0},{"p":"¿Cuál es la causa más frecuente de IRC?","o":["Diabetes mellitus e hipertensión arterial crónica","Solo glomerulonefritis","Solo lupus eritematoso sistémico","Solo infecciones urinarias repetidas"],"c":0},{"p":"¿Qué cuidado de enfermería es clave en IRA?","o":["Control estricto de diuresis, balance hídrico y monitoreo del ionograma","Solo administrar diuréticos","Solo control de temperatura","Solo tomar tensión arterial"],"c":0},{"p":"¿Qué es la anuria?","o":["Diuresis menor a 100 ml en 24 horas","Diuresis menor a 400 ml en 24 h","Diuresis mayor a 3 litros en 24 h","Orina con sangre"],"c":0},{"p":"¿Qué es la uremia en IRC avanzada?","o":["Acumulación de productos nitrogenados tóxicos en sangre por falla renal","Solo elevación de creatinina sin síntomas","Solo anemia por déficit de hierro","Solo edema por hipoalbuminemia"],"c":0},{"p":"¿Qué es la necrosis tubular aguda (NTA)?","o":["Lesión isquémica o tóxica de los túbulos renales que produce IRA intrínseca","Obstrucción del uréter por cálculo","Inflamación glomerular aguda","Pielonefritis bilateral"],"c":0},{"p":"¿Cuál es la restricción dietaria más importante en IRC?","o":["Restricción de potasio, fósforo, sodio y proteínas","Solo restricción de azúcar","Solo restricción de grasas","Solo restricción de calcio"],"c":0}]},{"id":14,"titulo":"T14: Hemorragia Digestiva","preguntas":[{"p":"¿Qué es la hemorragia digestiva alta (HDA)?","o":["Sangrado proximal al ángulo de Treitz (esófago, estómago, duodeno)","Sangrado del colon y recto","Sangrado del intestino delgado distal","Sangrado del ciego y apéndice"],"c":0},{"p":"¿Cuál es la causa más frecuente de HDA?","o":["Úlcera péptica gastroduodenal","Várices esofágicas","Cáncer gástrico","Gastritis erosiva"],"c":0},{"p":"¿Qué es la hematemesis?","o":["Vómito de sangre roja o en borra de café","Sangre en materia fecal","Sangrado rectal fresco","Sangrado por la nariz"],"c":0},{"p":"¿Qué es la melena?","o":["Materia fecal negra y alquitranada por sangre digerida","Materia fecal con sangre roja fresca","Vómito negro","Orina oscura"],"c":0},{"p":"¿Qué es la hematoquecia?","o":["Sangre roja fresca por ano, generalmente de hemorragia baja","Sangre digerida en materia fecal","Vómito de sangre roja","Sangrado oculto en materia fecal"],"c":0},{"p":"¿Cuál es la primera medida ante HDA masiva?","o":["Acceso venoso, reposición de volumen y monitoreo hemodinámico urgente","Solo transfusión de sangre","Solo endoscopía inmediata","Solo administrar omeprazol"],"c":0},{"p":"¿Qué estudio confirma el diagnóstico y permite tratar la HDA?","o":["Endoscopía digestiva alta urgente","Solo TAC de abdomen","Solo radiografía de abdomen","Solo ecografía abdominal"],"c":0},{"p":"¿Cuáles son los signos de sangrado activo en HDA?","o":["Taquicardia, hipotensión, palidez y síncope","Solo taquicardia aislada","Solo náuseas sin vómito","Solo dolor abdominal leve"],"c":0},{"p":"¿Cuál es la causa de HDA en cirróticos?","o":["Várices esofagogástricas por hipertensión portal","Úlcera péptica exclusivamente","Cáncer de esófago","Reflujo gastroesofágico"],"c":0},{"p":"¿Para qué sirve el Omeprazol EV en HDA por úlcera?","o":["Reduce acidez gástrica favoreciendo la coagulación y cicatrización","Vasoconstrictor para detener el sangrado","Antibiótico contra H. pylori","Hemostático directo sobre la úlcera"],"c":0},{"p":"¿Qué cuidado de enfermería es esencial en HDA activa?","o":["Monitoreo hemodinámico, control de signos vitales y preparar para endoscopía","Solo administrar líquidos orales","Solo observar el color de la materia fecal","Solo controlar la glucemia"],"c":0},{"p":"¿Cuándo se indica transfusión de glóbulos rojos en HDA?","o":["Hemoglobina menor a 7-8 g/dL o inestabilidad hemodinámica","Solo si la hemoglobina es menor a 5 g/dL","Solo en pacientes mayores de 70 años","Solo en HDA por várices"],"c":0},{"p":"¿Qué es la HDA por Síndrome de Mallory-Weiss?","o":["Desgarro de la mucosa gastroesofágica por vómitos intensos","Úlcera duodenal perforada","Rotura de várices esofágicas","Cáncer gástrico ulcerado"],"c":0},{"p":"¿Qué sonda puede usarse para descomprimir el estómago en HDA?","o":["Sonda nasogástrica (SNG)","Sonda vesical","Sonda de Foley","Catéter venoso central"],"c":0},{"p":"¿Cuál es la causa infecciosa más frecuente de úlcera péptica?","o":["Helicobacter pylori","Clostridium difficile","Candida albicans","Rotavirus"],"c":0}]},{"id":15,"titulo":"T15: Pancreatitis y Disfunción Hepática","preguntas":[{"p":"¿Qué es la Pancreatitis Aguda (PA)?","o":["Inflamación aguda del páncreas por autodigestión enzimática","Infección bacteriana del páncreas","Tumor maligno del páncreas","Litiasis pancreática crónica"],"c":0},{"p":"¿Cuáles son las dos causas más frecuentes de PA?","o":["Colelitiasis (litiasis biliar) y alcohol","Infección viral y traumatismo","Hipertensión y diabetes","Autoinmunidad y radiación"],"c":0},{"p":"¿Cuál es el síntoma clásico de la PA?","o":["Dolor epigástrico intenso en barra irradiado a la espalda","Dolor en hipocondrio derecho con fiebre","Dolor cólico periumbilical","Dolor en fosa ilíaca derecha"],"c":0},{"p":"¿Qué enzima pancreática aumenta en sangre en la PA?","o":["Amilasa y lipasa séricas","Solo transaminasas","Solo bilirrubina","Solo fosfatasa alcalina"],"c":0},{"p":"¿Cómo se clasifica la PA según gravedad?","o":["Leve (edematosa), moderada y grave (necrotizante)","Solo leve y grave","Solo edematosa y necrótica","Cuatro grados: I, II, III, IV"],"c":0},{"p":"¿Cuál es el tratamiento inicial de la PA?","o":["Ayuno, hidratación EV agresiva, analgesia y monitoreo","Solo antibióticos de amplio espectro","Solo cirugía de urgencia","Solo dieta líquida oral"],"c":0},{"p":"¿Qué es la necrosis pancreática infectada?","o":["Complicación grave con tejido pancreático necrótico sobreinfectado","PA leve con elevación enzimática","Pseudoquiste pancreático estéril","Absceso hepático"],"c":0},{"p":"¿Qué es la cirrosis hepática?","o":["Fibrosis irreversible del hígado con alteración de su arquitectura","Inflamación aguda del hígado","Tumor maligno del hígado","Hepatitis viral aguda"],"c":0},{"p":"¿Cuál es la complicación más frecuente de la cirrosis?","o":["Hipertensión portal con várices esofagogástricas","Solo ictericia crónica","Solo anemia leve","Solo hipoglucemia"],"c":0},{"p":"¿Qué es la encefalopatía hepática?","o":["Disfunción neurológica reversible por acumulación de amonio en falla hepática","Tumor cerebral secundario al hígado","Accidente cerebrovascular por cirrosis","Meningitis por bacterias entéricas"],"c":0},{"p":"¿Qué es el síndrome de respuesta inflamatoria sistémica (SIRS)?","o":["Respuesta inflamatoria generalizada (fiebre, taquicardia, leucocitosis)","Solo sepsis bacteriana","Solo inflamación local","Solo reacción alérgica severa"],"c":0},{"p":"¿Cuál es el cuidado de enfermería prioritario en PA grave?","o":["Monitoreo de signos vitales, balance hídrico, dolor y vigilar complicaciones","Solo administrar analgésicos","Solo vigilar temperatura","Solo control de glucemia"],"c":0},{"p":"¿Qué es el signo de Grey-Turner en PA?","o":["Equimosis en flancos por hemorragia retroperitoneal","Dolor a la descompresión abdominal","Ictericia con coluria","Distensión abdominal por íleo"],"c":0},{"p":"¿Qué es el signo de Cullen en PA?","o":["Equimosis periumbilical por hemorragia retroperitoneal","Dolor en epigastrio a la palpación","Masa palpable en flanco derecho","Ictericia escleral"],"c":0},{"p":"¿Qué es la insuficiencia hepática fulminante?","o":["Falla hepática aguda grave con encefalopatía en paciente sin hepatopatía previa","Cirrosis hepática terminal","Hepatitis crónica compensada","Colestasis intrahepática crónica"],"c":0}]},{"id":16,"titulo":"T16: Shock Séptico y Quemaduras","preguntas":[{"p":"¿Qué es el Shock Séptico?","o":["Fallo circulatorio agudo por sepsis refractario a reposición de volumen con hipotensión persistente","Infección leve con bacteriemia","Fiebre alta con taquicardia","Reacción alérgica grave"],"c":0},{"p":"¿Cuáles son los criterios de Sepsis-3 para el diagnóstico?","o":["Disfunción orgánica por respuesta desregulada del huésped a infección","Solo fiebre > 38°C con leucocitosis","Solo hipotensión con foco infeccioso","Solo taquicardia con sospecha de infección"],"c":0},{"p":"¿Cuál es el tratamiento inicial del Shock Séptico?","o":["Antibióticos precoces, reposición con cristaloides 30 ml/kg y vasopresores","Solo antibióticos orales","Solo suero fisiológico lento","Solo corticoides EV"],"c":0},{"p":"¿Qué vasopresor es de primera línea en shock séptico?","o":["Noradrenalina (Norepinefrina)","Dopamina en dosis alta","Adrenalina siempre","Vasopresina sola"],"c":0},{"p":"¿Cuál es la meta de TAM en el shock séptico?","o":["TAM mayor o igual a 65 mmHg","TAM mayor a 100 mmHg","TAM entre 50-60 mmHg","TAM mayor a 80 mmHg siempre"],"c":0},{"p":"¿Cómo se clasifican las quemaduras según profundidad?","o":["1° grado (epidermis), 2° grado (dermis superficial/profunda), 3° grado (full-thickness)","Solo superficial y profunda","Solo grado A, B y C","Solo térmica y química"],"c":0},{"p":"¿Qué es la Regla de los 9 de Wallace en quemaduras?","o":["Método para calcular el % de superficie corporal quemada (SCQ)","Clasificación de profundidad de quemaduras","Escala de dolor en quemaduras","Guía de reposición hídrica fija"],"c":0},{"p":"¿Cuál es la fórmula de Parkland para reposición hídrica en quemaduras?","o":["4 ml x kg x % SCQ de Ringer lactato en 24 hs","2 ml x kg x % SCQ de suero fisiológico","500 ml/hora fijos de Ringer lactato","1 litro cada 4 horas de glucosado"],"c":0},{"p":"¿Cuál es el riesgo principal de las quemaduras del 3° grado?","o":["Necrosis de todo el espesor cutáneo, infección grave y pérdida de función","Solo dolor intenso","Solo cicatrización leve","Solo pérdida de melanina"],"c":0},{"p":"¿Qué es el síndrome de inhalación en quemaduras?","o":["Lesión de la vía aérea por gases calientes o tóxicos con riesgo de IR","Quemadura química de la piel","Intoxicación por monóxido de carbono solo","Broncoespasmo por alergia"],"c":0},{"p":"¿Cuál es el cuidado de enfermería prioritario en quemaduras graves?","o":["Reposición hídrica según Parkland, analgesia, cuidado de heridas y control de infección","Solo curar las heridas","Solo analgesia oral","Solo control de temperatura"],"c":0},{"p":"¿Qué es el lactato sérico en el shock séptico?","o":["Marcador de hipoperfusión tisular; mayor a 2 mmol/L indica hipoperfusión","Marcador de función renal","Indicador de hidratación","Marcador de inflamación local"],"c":0},{"p":"¿Cuándo se indican corticoides en shock séptico?","o":["Shock séptico refractario a vasopresores (hidrocortisona 200 mg/día)","Siempre en todo shock séptico","Solo en shock anafiláctico","Solo en sepsis por hongos"],"c":0},{"p":"¿Cuál es el tiempo máximo para iniciar antibióticos en sepsis?","o":["Dentro de la primera hora del diagnóstico","Dentro de las 6 horas","Dentro de las 24 horas","Después de obtener hemocultivos, sin límite de tiempo"],"c":0},{"p":"¿Qué es la quemadura química?","o":["Lesión tisular por contacto con ácidos, álcalis u otras sustancias corrosivas","Quemadura por llamas solamente","Quemadura eléctrica de bajo voltaje","Quemadura solar superficial"],"c":0}]}];
+const TIEMPO = 25;
+const letras = ['A','B','C','D'];
 
-  // ===== TEMA 2: RRHH y FARMACOLOGÍA =====
-  {cat:"T2: Recursos Humanos y Farmacología", enf:false, texto:"¿Cuántas horas diarias mínimas debe dedicar el médico jefe de la UCI según la norma?", opciones:["6 horas diarias","4 horas diarias","8 horas diarias","12 horas diarias"], correcta:0},
-  {cat:"T2: Recursos Humanos y Farmacología", enf:false, texto:"¿Cuál es el mecanismo de acción de la Furosemida?", opciones:["Bloquea el transporte Na+K+Cl- en el asa de Henle","Inhibe la aldosterona","Bloquea el transporte Na+Cl- en el túbulo distal","Antagoniza la ADH"], correcta:0},
-  {cat:"T2: Recursos Humanos y Farmacología", enf:false, texto:"¿Qué antibiótico requiere dilución en 200 cc de Dextrosa 5% y pasar en 2 horas por ser el más irritativo?", opciones:["Claritromicina EV","Vancomicina","Anfotericina","Ciprofloxacina"], correcta:0},
-  {cat:"T2: Recursos Humanos y Farmacología", enf:false, texto:"¿En qué solución se diluye el Vecuronio y cada cuántas horas se cambia la infusión?", opciones:["Dext. 5% o S. Fisiológica, cada 24 horas","Solo Dext. 5%, cada 8 horas","Solo S. Fisiológica, cada 12 horas","Dext. 5%, cada 6 horas"], correcta:0},
-  {cat:"T2: Recursos Humanos y Farmacología", enf:false, texto:"¿Cuál es la función principal de la Espironolactona?", opciones:["Diurético ahorrador de potasio, antagonista de aldosterona","Diurético del asa que elimina potasio","Diurético osmótico","Beta bloqueante"], correcta:0},
-  {cat:"T2: Recursos Humanos y Farmacología", enf:true, texto:"¿Qué cuidado debe tener enfermería al administrar Vancomicina para evitar el Síndrome del Hombre Rojo?", opciones:["Diluir en 100cc de Dext. 5% y pasar en más de 1 hora","Administrar en bolo rápido en 3 minutos","Diluir en S. Fisiológica y pasar en 30 minutos","Administrar puro sin diluir"], correcta:0},
-  {cat:"T2: Recursos Humanos y Farmacología", enf:true, texto:"¿Cuál es la regla fundamental al preparar medicamentos para infusión en UCI?", opciones:["Nunca mezclar 2 o más medicamentos en la misma jeringa","Se pueden mezclar hasta 3 medicamentos compatibles","Solo no mezclar antibióticos con sedantes","Todos los medicamentos pueden mezclarse con S. Fisiológica"], correcta:0},
+let temaActual = null;
+let preguntasOrden = [];
+let preguntaIdx = 0;
+let opcionesShuffled = [];
+let correctaIdx = 0;
+let puntaje = 0;
+let timerInterval = null;
+let tiempoRestante = 0;
+let respondido = false;
+let completados = JSON.parse(localStorage.getItem('arCompletados') || '{}');
 
-  // ===== TEMA 3: INSUFICIENCIA RESPIRATORIA =====
-  {cat:"T3: Insuficiencia Respiratoria", enf:false, texto:"Según Campbell, ¿a partir de qué valor de PaO2 se diagnostica insuficiencia respiratoria?", opciones:["PaO2 menor a 60 mmHg","PaO2 menor a 80 mmHg","PaO2 menor a 40 mmHg","PaO2 menor a 50 mmHg"], correcta:0},
-  {cat:"T3: Insuficiencia Respiratoria", enf:false, texto:"¿Qué tipo de insuficiencia respiratoria se define por PaCO2 mayor a 50 mmHg?", opciones:["Hipercápnica","Hipoxémica","Mixta","Aguda pura"], correcta:0},
-  {cat:"T3: Insuficiencia Respiratoria", enf:false, texto:"¿Qué porcentaje de oxígeno contiene el aire atmosférico?", opciones:["21%","17%","25%","30%"], correcta:0},
-  {cat:"T3: Insuficiencia Respiratoria", enf:false, texto:"¿Cuál es el volumen de aire que entra y sale en cada respiración normal (volumen corriente)?", opciones:["500 ml","350 ml","1200 ml","3100 ml"], correcta:0},
-  {cat:"T3: Insuficiencia Respiratoria", enf:false, texto:"¿Qué estructura produce el surfactante pulmonar que previene el colapso alveolar?", opciones:["Neumocitos tipo II","Neumocitos tipo I","Células endoteliales","Macrófagos alveolares"], correcta:0},
-  {cat:"T3: Insuficiencia Respiratoria", enf:true, texto:"En un paciente con traumatismo craneal, ¿qué valor de presión sistólica indica hipoxemia cerebral por hipoperfusión?", opciones:["Menos de 90 mmHg","Menos de 120 mmHg","Menos de 100 mmHg","Menos de 110 mmHg"], correcta:0},
-  {cat:"T3: Insuficiencia Respiratoria", enf:true, texto:"¿Cuál es el antídoto específico para la intoxicación por organofosforados?", opciones:["Atropina y pralidoxima","Naloxona y flumazenil","N-acetilcisteína","Fisostigmina"], correcta:0},
-
-  // ===== TEMA 4: ARM =====
-  {cat:"T4: Asistencia Respiratoria Mecánica", enf:false, texto:"¿Qué significa la sigla PEEP en ARM?", opciones:["Presión Positiva al Final de la Espiración","Presión Espiratoria Elevada Programada","Presión de Entrada y Egreso Pulmonar","Porcentaje de Expansión Espiratoria Programada"], correcta:0},
-  {cat:"T4: Asistencia Respiratoria Mecánica", enf:false, texto:"¿Cuál es el volumen corriente recomendado en ventilación protectora para pacientes con SDRA?", opciones:["6 ml/kg de peso ideal","10-12 ml/kg de peso ideal","15 ml/kg de peso ideal","3 ml/kg de peso ideal"], correcta:0},
-  {cat:"T4: Asistencia Respiratoria Mecánica", enf:false, texto:"¿Qué complicación puede causar el PEEP elevado sobre el sistema cardiovascular?", opciones:["Disminución del retorno venoso y del gasto cardíaco","Aumento del gasto cardíaco","Hipertensión arterial sistémica","Taquicardia refleja"], correcta:0},
-  {cat:"T4: Asistencia Respiratoria Mecánica", enf:false, texto:"¿En qué posición debe estar la cabecera de la cama de un paciente en ARM para prevenir neumonía asociada?", opciones:["30-45 grados","Plana (0 grados)","90 grados","15 grados"], correcta:0},
-  {cat:"T4: Asistencia Respiratoria Mecánica", enf:false, texto:"¿Qué indica una radiografía de tórax 'nevada' en un paciente en ARM?", opciones:["Edema pulmonar","Neumotórax","Atelectasia lobar","Derrame pleural"], correcta:0},
-  {cat:"T4: Asistencia Respiratoria Mecánica", enf:true, texto:"¿Qué debe tener siempre a mano enfermería junto a un paciente conectado al respirador?", opciones:["Ambú conectado a fuente de O2 listo para usar","Desfibrilador encendido","Jeringa con adrenalina preparada","Marcapasos externo"], correcta:0},
-  {cat:"T4: Asistencia Respiratoria Mecánica", enf:true, texto:"¿Con qué frecuencia deben realizarse los cambios de decúbito en un paciente en ARM para prevenir neumonía hipostática?", opciones:["Cada 30 minutos a 1 hora","Cada 4 horas","Cada 6 horas","Cada 2 horas"], correcta:0},
-
-  // ===== TEMA 5: TEP / EPOC =====
-  {cat:"T5: TEP / EPOC / Patologías Neuromusculares", enf:false, texto:"¿Cuál es la tríada clásica del Tromboembolismo Pulmonar (TEP)?", opciones:["Disnea, dolor torácico y hemoptisis","Fiebre, tos y expectoración","Dolor abdominal, náuseas y disnea","Cianosis, bradicardia e hipotensión"], correcta:0},
-  {cat:"T5: TEP / EPOC / Patologías Neuromusculares", enf:false, texto:"¿Qué valor de FEV1/FVC confirma obstrucción al flujo aéreo en la EPOC?", opciones:["Menor a 0,70 (70%)","Mayor a 0,80","Menor a 0,50","Igual a 1,0"], correcta:0},
-  {cat:"T5: TEP / EPOC / Patologías Neuromusculares", enf:false, texto:"¿Qué enfermedad neuromuscular se caracteriza por debilidad ascendente progresiva post-infecciosa?", opciones:["Síndrome de Guillain-Barré","Miastenia Gravis","Esclerosis Lateral Amiotrófica","Distrofia Muscular de Duchenne"], correcta:0},
-  {cat:"T5: TEP / EPOC / Patologías Neuromusculares", enf:false, texto:"La Miastenia Gravis produce fallo respiratorio por afectación de:", opciones:["La unión neuromuscular por autoanticuerpos contra receptores de acetilcolina","Destrucción de motoneuronas superiores","Desmielinización del nervio frénico","Espasmo del diafragma"], correcta:0},
-  {cat:"T5: TEP / EPOC / Patologías Neuromusculares", enf:false, texto:"¿Qué método diagnóstico es el estudio de imagen de elección para confirmar TEP?", opciones:["Angiotomografía helicoidal de tórax","Radiografía de tórax simple","Ecografía pulmonar","Resonancia magnética"], correcta:0},
-  {cat:"T5: TEP / EPOC / Patologías Neuromusculares", enf:true, texto:"¿Qué anticoagulante se utiliza en el tratamiento del TEP y cómo se administra inicialmente?", opciones:["Heparina sódica EV con control de KPTT","Warfarina oral de inicio","Aspirina en dosis alta","Clopidogrel sublingual"], correcta:0},
-  {cat:"T5: TEP / EPOC / Patologías Neuromusculares", enf:true, texto:"¿En qué posición corporal se mejora la oxigenación de un paciente colocando el pulmón menos afectado hacia abajo?", opciones:["Decúbito lateral con pulmón sano hacia abajo","Trendelemburg","Decúbito prono","Semi-Fowler"], correcta:0},
-
-  // ===== TEMA 6: SDRA =====
-  {cat:"T6: Síndrome de Distres Respiratorio del Adulto", enf:false, texto:"¿Cuál es el mecanismo principal del edema pulmonar en el SDRA?", opciones:["Aumento de la permeabilidad capilar","Aumento de la presión hidrostática","Disminución de la presión oncótica","Obstrucción linfática"], correcta:0},
-  {cat:"T6: Síndrome de Distres Respiratorio del Adulto", enf:false, texto:"¿Cuál es la presión de enclavamiento normal medida por catéter de Swan-Ganz?", opciones:["10 a 12 mmHg","20 a 25 mmHg","5 a 8 mmHg","15 a 18 mmHg"], correcta:0},
-  {cat:"T6: Síndrome de Distres Respiratorio del Adulto", enf:false, texto:"¿Qué criterio radiológico es característico del SDRA?", opciones:["Infiltrados bilaterales difusos (imagen nevada)","Consolidación lobar unilateral","Derrame pleural masivo","Hiperinsuflación pulmonar"], correcta:0},
-  {cat:"T6: Síndrome de Distres Respiratorio del Adulto", enf:false, texto:"¿Qué técnica de soporte extracorpóreo permite el reposo pulmonar en el SDRA grave?", opciones:["ECMO (Oxigenación por Membrana Extracorpórea)","Hemodiálisis","Plasmaféresis","Hemofiltración"], correcta:0},
-  {cat:"T6: Síndrome de Distres Respiratorio del Adulto", enf:false, texto:"¿Por qué se prefiere el Ringer Lactato sobre la Solución Fisiológica 0,9% en el SDRA?", opciones:["Para evitar acidosis hiperclorémica","Por su mayor contenido en potasio","Porque es hipotónica","Por su efecto vasodilatador"], correcta:0},
-  {cat:"T6: Síndrome de Distres Respiratorio del Adulto", enf:true, texto:"¿Cuál es el criterio de diuresis horaria que indica una perfusión tisular inadecuada en el SDRA?", opciones:["Menos de 0,5 ml/kg/hora","Menos de 1 ml/kg/hora","Menos de 2 ml/kg/hora","Menos de 0,2 ml/kg/hora"], correcta:0},
-  {cat:"T6: Síndrome de Distres Respiratorio del Adulto", enf:true, texto:"¿Cuál es el primer cuidado de enfermería al ingresar un paciente con SDRA?", opciones:["Canalización de vía venosa y oxigenoterapia","Administrar corticoides de inmediato","Colocar al paciente en Trendelemburg","Realizar fisioterapia respiratoria"], correcta:0},
-
-  // ===== TEMA 7: CARDIOPATÍAS ISQUÉMICAS =====
-  {cat:"T7: Cardiopatías Isquémicas – Angina e IAM", enf:false, texto:"¿Cómo se define la Angina Inestable en cuanto a su duración?", opciones:["Menos de 2 meses de evolución","Más de 2 meses de evolución","Exactamente 2 meses","Más de 6 meses"], correcta:0},
-  {cat:"T7: Cardiopatías Isquémicas – Angina e IAM", enf:false, texto:"¿Qué tipo de angina se produce por espasmo arterial coronario y suele aparecer en reposo?", opciones:["Angina variante o de Prinzmetal","Angina estable","Angina inestable","Isquemia silente Tipo I"], correcta:0},
-  {cat:"T7: Cardiopatías Isquémicas – Angina e IAM", enf:false, texto:"¿Qué enzima cardíaca es la más específica para el diagnóstico de IAM y cuándo alcanza su pico?", opciones:["CPK-MB, pico a las 24 horas","GOT, pico a las 36 horas","LDH, pico a las 72 horas","Troponina I, pico a las 6 horas"], correcta:0},
-  {cat:"T7: Cardiopatías Isquémicas – Angina e IAM", enf:false, texto:"¿Qué cambio en el ECG indica necrosis miocárdica?", opciones:["Onda Q patológica","Elevación del segmento ST","Inversión de la onda T","Depresión del segmento PR"], correcta:0},
-  {cat:"T7: Cardiopatías Isquémicas – Angina e IAM", enf:false, texto:"¿Cuánto tiempo dura el dolor del IAM y qué característica lo diferencia de la angina?", opciones:["Más de 30 minutos y no se alivia con nitritos ni reposo","Menos de 10 minutos y cede con nitroglicerina","Exactamente 20 minutos y cede con reposo","Menos de 5 minutos y cede espontáneamente"], correcta:0},
-  {cat:"T7: Cardiopatías Isquémicas – Angina e IAM", enf:true, texto:"¿Cuál es el analgésico de elección para la angina pre-infarto y qué efecto adverso debe monitorizarse?", opciones:["Sulfato de morfina, monitorizar hipotensión y depresión respiratoria","Ibuprofeno EV, monitorizar flebitis","Ketorolac, monitorizar sangrado","Dipirona, monitorizar hipotensión"], correcta:0},
-  {cat:"T7: Cardiopatías Isquémicas – Angina e IAM", enf:true, texto:"¿En qué escala se evalúa la intensidad del dolor torácico en el paciente con angina?", opciones:["Escala numérica del 1 al 10","Escala de Glasgow","Escala de Ramsay","Escala de Borg"], correcta:0},
-
-  // ===== TEMA 8: INSUFICIENCIA CARDÍACA / EAP =====
-  {cat:"T8: Insuficiencia Cardíaca – Edema Agudo de Pulmón", enf:false, texto:"¿Cuál es la diferencia entre el edema pulmonar del SDRA y el del Edema Agudo de Pulmón cardiogénico?", opciones:["EAP es por aumento de presión hidrostática; SDRA por aumento de permeabilidad capilar","Ambos tienen el mismo mecanismo fisiopatológico","SDRA es siempre cardiogénico; EAP no","EAP es solo por hipoalbuminemia"], correcta:0},
-  {cat:"T8: Insuficiencia Cardíaca – Edema Agudo de Pulmón", enf:false, texto:"¿Qué tipo de IC se caracteriza por FE preservada (mayor al 50%) con disfunción diastólica?", opciones:["Insuficiencia cardíaca con fracción de eyección preservada (ICFEp)","Insuficiencia cardíaca sistólica","Miocardiopatía dilatada","Taponamiento cardíaco"], correcta:0},
-  {cat:"T8: Insuficiencia Cardíaca – Edema Agudo de Pulmón", enf:false, texto:"¿Qué hallazgo radiológico es característico del EAP?", opciones:["Imagen en 'alas de mariposa' con opacidades perihiliares","Infiltrado lobar unilateral","Cavitación pulmonar","Derrame pleural bilateral masivo"], correcta:0},
-  {cat:"T8: Insuficiencia Cardíaca – Edema Agudo de Pulmón", enf:false, texto:"¿Cuál es la dosis inicial de Furosemida EV para el Edema Pulmonar Agudo?", opciones:["40 mg IV lenta; si no responde en 1 hora, 80 mg","20 mg IV directa","100 mg IV rápida","10 mg sublingual"], correcta:0},
-  {cat:"T8: Insuficiencia Cardíaca – Edema Agudo de Pulmón", enf:false, texto:"¿Qué clasificación funcional de la IC establece la NYHA basándose en síntomas con el ejercicio?", opciones:["4 clases: I sin síntomas a IV con síntomas en reposo","2 clases: compensada y descompensada","3 clases según FE","5 clases según gravedad"], correcta:0},
-  {cat:"T8: Insuficiencia Cardíaca – Edema Agudo de Pulmón", enf:true, texto:"¿En qué posición debe colocarse al paciente con Edema Agudo de Pulmón para disminuir la precarga?", opciones:["Sentado con piernas colgando (posición de Fowler alta)","Trendelemburg","Decúbito lateral izquierdo","Decúbito prono"], correcta:0},
-  {cat:"T8: Insuficiencia Cardíaca – Edema Agudo de Pulmón", enf:true, texto:"¿Qué parámetro mide el catéter de Swan-Ganz que indica el estado de la precarga del ventrículo izquierdo?", opciones:["Presión de enclavamiento pulmonar (PCP)","Presión venosa central (PVC)","Gasto cardíaco directo","Saturación de O2 venoso mixto"], correcta:0},
-
-  // ===== TEMA 9: PCR / FV =====
-  {cat:"T9: PCR – Fibrilación Ventricular", enf:false, texto:"¿Cuál es la relación compresiones/ventilaciones en la RCP básica del adulto según las guías actuales?", opciones:["30 compresiones por 2 ventilaciones","15 compresiones por 2 ventilaciones","5 compresiones por 1 ventilación","10 compresiones por 1 ventilación"], correcta:0},
-  {cat:"T9: PCR – Fibrilación Ventricular", enf:false, texto:"¿Qué ritmo cardíaco es tratable con desfibrilación en el PCR?", opciones:["Fibrilación Ventricular y Taquicardia Ventricular sin pulso","Asistolia","Actividad Eléctrica sin Pulso (AESP)","Bloqueo AV completo"], correcta:0},
-  {cat:"T9: PCR – Fibrilación Ventricular", enf:false, texto:"¿Cuál es el fármaco de primera línea en el PCR/FV?", opciones:["Adrenalina (epinefrina)","Atropina","Amiodarona","Lidocaína"], correcta:0},
-  {cat:"T9: PCR – Fibrilación Ventricular", enf:false, texto:"¿Con qué frecuencia se administra adrenalina durante el PCR?", opciones:["Cada 3-5 minutos","Cada 1 minuto","Cada 10 minutos","Una sola dosis"], correcta:0},
-  {cat:"T9: PCR – Fibrilación Ventricular", enf:false, texto:"¿Cuánto tiempo puede sobrevivir el cerebro sin daño irreversible durante un PCR sin RCP?", opciones:["4 a 6 minutos","10 a 15 minutos","1 a 2 minutos","15 a 20 minutos"], correcta:0},
-  {cat:"T9: PCR – Fibrilación Ventricular", enf:true, texto:"Ante un PCR, ¿dónde debe atenderse primero al paciente antes de trasladarlo a la UCI?", opciones:["En el lugar donde ocurre el evento","En la guardia del hospital","En la UCI directamente","En el quirófano"], correcta:0},
-  {cat:"T9: PCR – Fibrilación Ventricular", enf:true, texto:"¿Qué debe verificar enfermería en la cama UCI antes de recibir a un paciente post-resucitación?", opciones:["Carro de paro preparado, monitor, desfibrilador y vía venosa permeable","Solo el monitor cardíaco funcionando","Únicamente la medicación prescripta","El catéter de Swan-Ganz instalado"], correcta:0},
-
-  // ===== TEMA 10: TEC / ACV =====
-  {cat:"T10: TEC – Coma – ACV", enf:false, texto:"¿Cuál es el puntaje normal de la Escala de Glasgow?", opciones:["15 puntos","12 puntos","10 puntos","8 puntos"], correcta:0},
-  {cat:"T10: TEC – Coma – ACV", enf:false, texto:"¿Qué evalúa la Escala de Cincinnati para el diagnóstico de ACV extrahospitalario?", opciones:["Debilidad facial, caída del brazo y trastorno del lenguaje","Presión arterial, frecuencia cardíaca y saturación","Nivel de conciencia, pupilas y motor","Temperatura, glucemia y saturación"], correcta:0},
-  {cat:"T10: TEC – Coma – ACV", enf:false, texto:"¿Por qué NO se administran hipotensores en la fase aguda del ACV?", opciones:["La hipertensión es un mecanismo de defensa para mantener perfusión cerebral","Para evitar bradicardia refleja","Por riesgo de fibrilación auricular","Porque potencian el efecto del rtPA"], correcta:0},
-  {cat:"T10: TEC – Coma – ACV", enf:false, texto:"¿Cuántas neuronas mueren por minuto sin oxígeno durante un ACV?", opciones:["2 millones de neuronas","500.000 neuronas","10 millones de neuronas","100.000 neuronas"], correcta:0},
-  {cat:"T10: TEC – Coma – ACV", enf:false, texto:"¿Cuánto tiempo de evolución tiene el ACV para activar el mecanismo de Stroke y acceder a tratamiento de reperfusión?", opciones:["Menos de 6 horas","Menos de 12 horas","Menos de 24 horas","Menos de 3 horas"], correcta:0},
-  {cat:"T10: TEC – Coma – ACV", enf:true, texto:"¿En qué brazo se coloca el plan de hidratación parenteral con Solución Fisiológica 0,9% en el paciente con ACV?", opciones:["En el brazo NO parético","En el brazo parético","Indistintamente en cualquier brazo","En vena central"], correcta:0},
-  {cat:"T10: TEC – Coma – ACV", enf:true, texto:"¿Qué posición debe adoptar el paciente con ACV y cuántos litros/min de O2 recibe si su SpO2 es inferior al 92%?", opciones:["Semi-Fowler (30°), O2 por cánula nasal a 2 lts/min o según indicación","Decúbito prono, O2 por máscara de alto flujo","Trendelemburg, O2 a 10 lts/min","Decúbito lateral, O2 a 5 lts/min"], correcta:0},
-
-  // ===== TEMA 11: HIC =====
-  {cat:"T11: Hipertensión Endocraneana", enf:false, texto:"¿Cuál es el valor normal de la Presión Intracraneal (PIC) en el adulto?", opciones:["7 a 15 mmHg","20 a 25 mmHg","1 a 5 mmHg","30 a 40 mmHg"], correcta:0},
-  {cat:"T11: Hipertensión Endocraneana", enf:false, texto:"¿Cómo se calcula la Presión de Perfusión Cerebral (PPC)?", opciones:["PPC = PAM – PIC","PPC = PIC + PAM","PPC = PAM / PIC","PPC = PIC x 2"], correcta:0},
-  {cat:"T11: Hipertensión Endocraneana", enf:false, texto:"¿Cuál es la tríada clásica de inicio de la Hipertensión Endocraneana?", opciones:["Cefalea, vómitos y edema de papila","Fiebre, rigidez de nuca y fotofobia","Bradicardia, HTA y alteraciones respiratorias","Confusión, midriasis y hemiparesia"], correcta:0},
-  {cat:"T11: Hipertensión Endocraneana", enf:false, texto:"¿Qué reflejo indica que la HIC ha llegado a una fase crítica con riesgo de muerte?", opciones:["Reflejo de Cushing (bradicardia, hipertensión y alteraciones respiratorias)","Reflejo de Babinski","Reflejo corneal ausente","Reflejo de Hering-Breuer"], correcta:0},
-  {cat:"T11: Hipertensión Endocraneana", enf:false, texto:"¿Cuál es el único tipo de edema cerebral donde están indicados los corticoides (dexametasona)?", opciones:["Edema citotóxico tumoral","Edema vasogénico por TEC","Edema por hiponatremia","Edema isquémico"], correcta:0},
-  {cat:"T11: Hipertensión Endocraneana", enf:true, texto:"¿En qué ángulo se eleva la cabecera de la cama del paciente con HIC y qué posición debe evitarse?", opciones:["30 grados, evitar rotación de cabeza y flexión de cadera","45 grados, evitar decúbito lateral","15 grados, evitar Fowler","60 grados, evitar decúbito supino"], correcta:0},
-  {cat:"T11: Hipertensión Endocraneana", enf:true, texto:"¿Por qué se administran reblandecedores de heces al paciente con HIC?", opciones:["Para evitar la maniobra de Valsalva al defecar que aumenta la PIC","Para mejorar el tránsito intestinal lento","Por efecto secundario de los sedantes","Para prevenir infección intestinal"], correcta:0},
-
-  // ===== TEMA 12: MEDIO INTERNO =====
-  {cat:"T12: Desequilibrios del Medio Interno", enf:false, texto:"¿Cuál es el principal catión del espacio extracelular?", opciones:["Sodio (Na+)","Potasio (K+)","Calcio (Ca++)","Magnesio (Mg++)"], correcta:0},
-  {cat:"T12: Desequilibrios del Medio Interno", enf:false, texto:"¿Cuál es el valor normal del Anión Gap (brecha aniónica)?", opciones:["10 ± 2 mEq/L","20 ± 5 mEq/L","5 ± 1 mEq/L","15 ± 3 mEq/L"], correcta:0},
-  {cat:"T12: Desequilibrios del Medio Interno", enf:false, texto:"¿Qué hormona secretada por la hipófisis posterior retiene agua en los túbulos renales?", opciones:["ADH (vasopresina)","Aldosterona","Renina","Angiotensina II"], correcta:0},
-  {cat:"T12: Desequilibrios del Medio Interno", enf:false, texto:"¿Cuántos litros aproximadamente constituye el compartimento intracelular en un adulto de 70 kg?", opciones:["28 litros","4 litros","10,5 litros","40 litros"], correcta:0},
-  {cat:"T12: Desequilibrios del Medio Interno", enf:false, texto:"¿Qué indica un Anión Gap elevado en un paciente?", opciones:["Acidosis metabólica (cetoacidosis, acidosis láctica)","Alcalosis respiratoria","Alcalosis metabólica","Acidosis respiratoria aguda"], correcta:0},
-  {cat:"T12: Desequilibrios del Medio Interno", enf:true, texto:"¿Qué tipo de solución se administra en una hipotonicidad severa del plasma para retener agua?", opciones:["Solución hipertónica de cloruro de sodio al 3%, 5% o 7%","Solución hipotónica de glucosa","Dextrosa al 5% simple","Agua destilada EV"], correcta:0},
-  {cat:"T12: Desequilibrios del Medio Interno", enf:true, texto:"¿Cómo se reconoce clínicamente el signo de la fóvea en el edema?", opciones:["Al aplicar presión con un dedo queda una depresión que permanece un tiempo","Coloración violácea de la piel","Temperatura aumentada localizada","Piel brillante y tensa sin depresión"], correcta:0},
-
-  // ===== TEMA 13: INSUFICIENCIA RENAL =====
-  {cat:"T13: Insuficiencia Renal Aguda y Crónica", enf:false, texto:"¿Cómo se clasifica etiológicamente la Insuficiencia Renal Aguda?", opciones:["Pre-renal, renal intrínseca y post-renal","Aguda y crónica solamente","Glomerular y tubular","Obstructiva e inflamatoria"], correcta:0},
-  {cat:"T13: Insuficiencia Renal Aguda y Crónica", enf:false, texto:"¿Qué valores de creatinina y urea en sangre indican deterioro de la función renal?", opciones:["Creatinina > 1,2 mg/dl y urea > 40 mg/dl","Creatinina > 0,5 mg/dl y urea > 20 mg/dl","Creatinina > 3 mg/dl y urea > 100 mg/dl","Creatinina > 5 mg/dl únicamente"], correcta:0},
-  {cat:"T13: Insuficiencia Renal Aguda y Crónica", enf:false, texto:"¿Qué tipo de diálisis se utiliza en la IRA en pacientes hemodinámicamente inestables?", opciones:["Hemodiálisis continua (HDFVVC)","Hemodiálisis intermitente estándar","Diálisis peritoneal estándar","Plasmaféresis"], correcta:0},
-  {cat:"T13: Insuficiencia Renal Aguda y Crónica", enf:false, texto:"¿Cuál es la principal causa de IRA pre-renal?", opciones:["Hipovolemia y disminución del flujo renal","Obstrucción ureteral bilateral","Glomerulonefritis aguda","Necrosis tubular tóxica"], correcta:0},
-  {cat:"T13: Insuficiencia Renal Aguda y Crónica", enf:false, texto:"¿Qué electrolito se eleva peligrosamente en la IRA pudiendo causar arritmias mortales?", opciones:["Potasio (hiperpotasemia)","Sodio (hipernatremia)","Calcio (hipercalcemia)","Magnesio (hipermagnesemia)"], correcta:0},
-  {cat:"T13: Insuficiencia Renal Aguda y Crónica", enf:true, texto:"¿Cuál es el parámetro de diuresis horaria que debe mantener enfermería para considerar adecuada la función renal?", opciones:["Mayor a 0,5 ml/kg/hora","Mayor a 2 ml/kg/hora","Mayor a 0,1 ml/kg/hora","Mayor a 5 ml/kg/hora"], correcta:0},
-  {cat:"T13: Insuficiencia Renal Aguda y Crónica", enf:true, texto:"¿Qué cuidado de enfermería es fundamental en el paciente en diálisis para detectar complicaciones?", opciones:["Control estricto del balance hídrico, peso diario y signos vitales","Solo control de la temperatura","Únicamente el registro de la diuresis","Administrar diuréticos antes de cada sesión"], correcta:0},
-
-  // ===== TEMA 14: HEMORRAGIA DIGESTIVA =====
-  {cat:"T14: Hemorragia Digestiva", enf:false, texto:"¿Qué término describe la presencia de sangre roja en las heces por hemorragia digestiva baja?", opciones:["Hematoquecia","Melena","Hematemesis","Hemoptisis"], correcta:0},
-  {cat:"T14: Hemorragia Digestiva", enf:false, texto:"¿Cuál es la principal causa de hemorragia digestiva alta en pacientes críticos?", opciones:["Úlcera péptica gastroduodenal","Cáncer de colon","Hemorroides","Fisura anal"], correcta:0},
-  {cat:"T14: Hemorragia Digestiva", enf:false, texto:"¿Qué estudio endoscópico permite diagnóstico y tratamiento simultáneo de la hemorragia digestiva alta?", opciones:["Videoendoscopía digestiva alta (VEDA)","Colonoscopía","Cápsula endoscópica","Arteriografía"], correcta:0},
-  {cat:"T14: Hemorragia Digestiva", enf:false, texto:"¿Qué valor de hemoglobina indica anemia severa que requiere transfusión urgente?", opciones:["Menos de 7 g/dl","Menos de 10 g/dl","Menos de 12 g/dl","Menos de 9 g/dl"], correcta:0},
-  {cat:"T14: Hemorragia Digestiva", enf:false, texto:"¿Qué bacteria es la principal causa de úlcera péptica gastroduodenal?", opciones:["Helicobacter pylori","Staphylococcus aureus","Clostridium difficile","Escherichia coli"], correcta:0},
-  {cat:"T14: Hemorragia Digestiva", enf:true, texto:"¿Cuál es la prioridad de enfermería ante una hemorragia digestiva alta masiva con inestabilidad hemodinámica?", opciones:["Canalizar 2 vías venosas periféricas de gran calibre y reponer volumen","Administrar omeprazol EV de inmediato","Colocar sonda nasogástrica como primera acción","Preparar al paciente para cirugía de urgencia"], correcta:0},
-  {cat:"T14: Hemorragia Digestiva", enf:true, texto:"¿Qué posición se indica a un paciente con hematemesis activa para prevenir aspiración?", opciones:["Decúbito lateral con cabecera elevada","Trendelemburg estricto","Decúbito supino plano","Fowler a 90°"], correcta:0},
-
-  // ===== TEMA 15: PANCREATITIS =====
-  {cat:"T15: Pancreatitis Aguda", enf:false, texto:"¿Cuáles son las dos causas más frecuentes de Pancreatitis Aguda?", opciones:["Litiasis biliar y alcohol","Trauma abdominal y virus","Fármacos y hipercalcemia","Hipertrigliceridemia y tabaco"], correcta:0},
-  {cat:"T15: Pancreatitis Aguda", enf:false, texto:"¿Cuál es el marcador enzimático más utilizado para el diagnóstico de Pancreatitis Aguda?", opciones:["Amilasa y lipasa sérica elevadas más de 3 veces","CPK-MB elevada","GOT y GPT elevadas","Fosfatasa alcalina"], correcta:0},
-  {cat:"T15: Pancreatitis Aguda", enf:false, texto:"¿Qué signo físico indica extravasación de sangre retroperitoneal hacia el flanco en la pancreatitis grave?", opciones:["Signo de Grey Turner (equimosis en flanco)","Signo de Murphy","Signo de Blumberg","Signo de Cullen"], correcta:0},
-  {cat:"T15: Pancreatitis Aguda", enf:false, texto:"¿Cuál es el mecanismo de daño principal en la pancreatitis aguda?", opciones:["Autodigestión pancreática por activación prematura de enzimas proteolíticas","Infección bacteriana directa del páncreas","Isquemia por trombosis de la arteria pancreática","Reacción autoinmune contra las células acinares"], correcta:0},
-  {cat:"T15: Pancreatitis Aguda", enf:false, texto:"¿Cuál es la complicación más grave de la pancreatitis que puede llevar a la muerte?", opciones:["Necrosis pancreática infectada con shock séptico","Pseudoquiste pancreático","Íleo paralítico","Derrame pleural izquierdo"], correcta:0},
-  {cat:"T15: Pancreatitis Aguda", enf:true, texto:"¿Cuándo se inicia la nutrición enteral en un paciente con pancreatitis grave en UCI?", opciones:["Tan pronto como sea posible (dentro de las 24-48 horas), por sonda nasoyeyunal","Solo cuando la amilasa se normalice","Nunca antes de la primera semana","Solo nutrición parenteral total siempre"], correcta:0},
-  {cat:"T15: Pancreatitis Aguda", enf:true, texto:"¿Cuál es el cuidado de enfermería específico para el manejo del dolor en la pancreatitis aguda severa?", opciones:["Administrar analgesia según escala de dolor, evaluar respuesta y evitar morfina que puede causar espasmo del Oddi","Administrar solo AINES sin opioides","Nunca administrar analgesia por riesgo de enmascarar síntomas","Únicamente aplicar frío local"], correcta:0},
-
-  // ===== TEMA 16: SHOCK SÉPTICO Y QUEMADURAS =====
-  {cat:"T16: Shock Séptico – Quemaduras", enf:false, texto:"¿Cómo se clasifica una quemadura de espesor total o de 3er grado?", opciones:["Destrucción de epidermis, dermis y tejido subcutáneo, indolora por destrucción de nervios","Eritema sin ampollas, dolorosa","Epidermis y dermis superficial con ampollas","Solo epidermis afectada"], correcta:0},
-  {cat:"T16: Shock Séptico – Quemaduras", enf:false, texto:"¿Qué regla se usa para calcular la superficie corporal quemada en adultos?", opciones:["Regla de los 9 de Wallace","Regla de Parkland","Tabla de Lund-Browder","Índice de Baux"], correcta:0},
-  {cat:"T16: Shock Séptico – Quemaduras", enf:false, texto:"¿Cuáles son los criterios diagnósticos del Shock Séptico según Sepsis-3?", opciones:["Sepsis + hipotensión refractaria a fluidos + lactato > 2 mmol/L","Solo fiebre mayor a 38°C y taquicardia","Hemocultivo positivo e hipotensión","SIRS + foco infeccioso confirmado"], correcta:0},
-  {cat:"T16: Shock Séptico – Quemaduras", enf:false, texto:"¿Cuál es el vasopresor de primera línea en el shock séptico con hipotensión refractaria a fluidos?", opciones:["Noradrenalina (norepinefrina)","Adrenalina","Dopamina en dosis altas","Vasopresina"], correcta:0},
-  {cat:"T16: Shock Séptico – Quemaduras", enf:false, texto:"¿Cuántos mililitros de Ringer Lactato por kg de peso se administran en las primeras 24 horas para un quemado grave (Fórmula de Parkland)?", opciones:["4 ml/kg/% superficie quemada","2 ml/kg/% superficie quemada","1 ml/kg/% superficie quemada","6 ml/kg/% superficie quemada"], correcta:0},
-  {cat:"T16: Shock Séptico – Quemaduras", enf:true, texto:"¿Cuál es el objetivo de presión arterial media (PAM) a mantener en el shock séptico con vasopresores?", opciones:["PAM mayor o igual a 65 mmHg","PAM mayor o igual a 90 mmHg","PAM mayor o igual a 50 mmHg","PAM mayor o igual a 80 mmHg"], correcta:0},
-  {cat:"T16: Shock Séptico – Quemaduras", enf:true, texto:"En el paciente quemado, ¿qué cuidado de enfermería es prioritario para prevenir la infección?", opciones:["Técnica aséptica estricta en curaciones, aislamiento y control de temperatura","Solo administrar antibióticos profilácticos","Cubrir las quemaduras con vendajes compresivos sin limpiar","Exponer las quemaduras al aire para favorecer la cicatrización"], correcta:0},
-];
-
-let indice = 0, puntaje = 0, correctas = 0, incorrectas = 0;
-let timerInterval = null, tiempoRestante = 20, respondida = false;
-let opcionesMezcladas = [], indiceCorrecto = 0;
-let preguntasMezcladas = [];
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function renderMenu() {
+  const grid = document.getElementById('gridTemas');
+  grid.innerHTML = '';
+  TEMAS.forEach(t => {
+    const c = completados[t.id];
+    const div = document.createElement('div');
+    div.className = 'tema-btn' + (c ? ' completado' : '');
+    div.innerHTML = `
+      <div class="num">TEMA ${t.id}</div>
+      <div class="nombre">${t.titulo.replace('T'+t.id+': ','')}</div>
+      <div class="info">${t.preguntas.length} preguntas · 25 seg c/u${c ? ' · ✓ Jugado: '+c+'/'+t.preguntas.length : ''}</div>
+    `;
+    div.onclick = () => iniciarTema(t.id);
+    grid.appendChild(div);
+  });
 }
 
-function iniciarJuego() {
-  document.getElementById('pantalla-inicio').style.display = 'none';
-  document.getElementById('pantalla-juego').style.display = 'block';
-  indice = 0; puntaje = 0; correctas = 0; incorrectas = 0;
-  preguntasMezcladas = shuffle(preguntas);
+function iniciarTema(id) {
+  temaActual = TEMAS.find(t => t.id === id);
+  preguntasOrden = shuffleArr([...temaActual.preguntas]);
+  preguntaIdx = 0;
+  puntaje = 0;
+  document.getElementById('menuScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'flex';
+  document.getElementById('tituloActual').textContent = temaActual.titulo;
   mostrarPregunta();
 }
 
 function mostrarPregunta() {
-  respondida = false;
-  const p = preguntasMezcladas[indice];
-  const respuestaCorrecta = p.opciones[p.correcta];
-  const idx = shuffle([0,1,2,3]);
-  opcionesMezcladas = idx.map(i => p.opciones[i]);
-  indiceCorrecto = opcionesMezcladas.indexOf(respuestaCorrecta);
-
-  document.getElementById('num-pregunta').textContent = indice + 1;
-  document.getElementById('puntaje-actual').textContent = puntaje;
-  document.getElementById('barra').style.width = ((indice / 112) * 100) + '%';
-  document.getElementById('categoria-tag').textContent = p.cat;
-  const enfTag = document.getElementById('enf-tag');
-  enfTag.style.display = p.enf ? 'inline-block' : 'none';
-  document.getElementById('pregunta-texto').textContent = p.texto;
-
-  const letras = ['A','B','C','D'];
-  const container = document.getElementById('opciones-container');
-  container.innerHTML = '';
-  opcionesMezcladas.forEach((op, i) => {
+  respondido = false;
+  clearInterval(timerInterval);
+  
+  const q = preguntasOrden[preguntaIdx];
+  document.getElementById('preguntaNum').textContent = 'Pregunta ' + (preguntaIdx+1) + ' de ' + preguntasOrden.length;
+  document.getElementById('preguntaTexto').textContent = q.p;
+  document.getElementById('progresoActual').textContent = (preguntaIdx+1) + '/' + preguntasOrden.length;
+  
+  // Shuffle options keeping track of correct
+  const opcs = q.o.map((text, i) => ({text, correct: i === q.c}));
+  opcionesShuffled = shuffleArr(opcs);
+  correctaIdx = opcionesShuffled.findIndex(o => o.correct);
+  
+  const cont = document.getElementById('opcionesContainer');
+  cont.innerHTML = '';
+  opcionesShuffled.forEach((op, i) => {
     const btn = document.createElement('button');
     btn.className = 'opcion-btn';
-    btn.innerHTML = `<span class="letra-opcion">${letras[i]}</span>${op}`;
-    btn.onclick = () => seleccionar(i, btn);
-    container.appendChild(btn);
+    btn.innerHTML = `<span class="letra">${letras[i]}</span><span>${op.text}</span>`;
+    btn.onclick = () => responder(i);
+    cont.appendChild(btn);
   });
-
-  document.getElementById('feedback').style.display = 'none';
-  document.getElementById('btn-siguiente').style.display = 'none';
+  
+  document.getElementById('feedbackDiv').style.display = 'none';
+  document.getElementById('btnSiguiente').style.display = 'none';
+  
   iniciarTimer();
 }
 
 function iniciarTimer() {
-  clearInterval(timerInterval);
-  tiempoRestante = 20;
-  const el = document.getElementById('timer');
-  el.textContent = tiempoRestante;
-  el.classList.remove('urgente');
+  tiempoRestante = TIEMPO;
+  actualizarTimer();
   timerInterval = setInterval(() => {
     tiempoRestante--;
-    el.textContent = tiempoRestante;
-    if (tiempoRestante <= 5) el.classList.add('urgente');
-    if (tiempoRestante <= 0) { clearInterval(timerInterval); if (!respondida) tiempoAgotado(); }
+    actualizarTimer();
+    if (tiempoRestante <= 0) {
+      clearInterval(timerInterval);
+      tiempoAgotado();
+    }
   }, 1000);
 }
 
+function actualizarTimer() {
+  const pct = (tiempoRestante / TIEMPO) * 100;
+  const bar = document.getElementById('timerBar');
+  bar.style.width = pct + '%';
+  if (tiempoRestante > 15) bar.style.background = 'var(--timer-ok)';
+  else if (tiempoRestante > 8) bar.style.background = 'var(--timer-warn)';
+  else bar.style.background = 'var(--timer-danger)';
+  document.getElementById('timerNum').textContent = tiempoRestante + 's';
+}
+
 function tiempoAgotado() {
-  respondida = true; incorrectas++;
-  const btns = document.querySelectorAll('.opcion-btn');
-  btns.forEach(b => b.disabled = true);
-  btns[indiceCorrecto].classList.add('resaltar');
-  mostrarFeedback(false, '⏰ ¡Tiempo agotado! La respuesta correcta está resaltada.');
-  document.getElementById('btn-siguiente').style.display = 'block';
-}
-
-function seleccionar(i, btn) {
-  if (respondida) return;
-  respondida = true;
-  clearInterval(timerInterval);
-  const btns = document.querySelectorAll('.opcion-btn');
-  btns.forEach(b => b.disabled = true);
-  if (i === indiceCorrecto) {
-    btn.classList.add('correcta');
-    const pts = Math.max(50, tiempoRestante * 5);
-    puntaje += pts; correctas++;
-    mostrarFeedback(true, `✅ ¡Correcto! +${pts} puntos`);
-  } else {
-    btn.classList.add('incorrecta');
-    btns[indiceCorrecto].classList.add('resaltar');
-    incorrectas++;
-    mostrarFeedback(false, `❌ Incorrecto. La correcta era: "${opcionesMezcladas[indiceCorrecto]}"`);
-  }
-  document.getElementById('puntaje-actual').textContent = puntaje;
-  document.getElementById('btn-siguiente').style.display = 'block';
-}
-
-function mostrarFeedback(ok, msg) {
-  const fb = document.getElementById('feedback');
-  fb.textContent = msg;
-  fb.className = 'feedback ' + (ok ? 'correcto' : 'incorrecto');
+  if (respondido) return;
+  respondido = true;
+  deshabilitarOpciones();
+  marcarCorrecta();
+  const fb = document.getElementById('feedbackDiv');
+  fb.className = 'feedback tiempo';
+  fb.textContent = '⏱ Tiempo agotado. La respuesta correcta era: ' + opcionesShuffled[correctaIdx].text;
   fb.style.display = 'block';
+  document.getElementById('btnSiguiente').style.display = 'block';
 }
 
-function siguientePregunta() {
-  indice++;
-  if (indice >= preguntasMezcladas.length) mostrarResultado();
-  else mostrarPregunta();
+function responder(idx) {
+  if (respondido) return;
+  respondido = true;
+  clearInterval(timerInterval);
+  
+  const btns = document.querySelectorAll('.opcion-btn');
+  btns.forEach(b => b.disabled = true);
+  
+  const fb = document.getElementById('feedbackDiv');
+  if (idx === correctaIdx) {
+    puntaje++;
+    btns[idx].classList.add('correcto');
+    fb.className = 'feedback correcto';
+    fb.textContent = '✅ ¡Correcto!';
+  } else {
+    btns[idx].classList.add('incorrecto');
+    marcarCorrecta();
+    fb.className = 'feedback incorrecto';
+    fb.textContent = '❌ Incorrecto. La respuesta es: ' + opcionesShuffled[correctaIdx].text;
+  }
+  fb.style.display = 'block';
+  document.getElementById('btnSiguiente').style.display = 'block';
+}
+
+function marcarCorrecta() {
+  const btns = document.querySelectorAll('.opcion-btn');
+  btns[correctaIdx].classList.add('correcto');
+}
+
+function deshabilitarOpciones() {
+  document.querySelectorAll('.opcion-btn').forEach(b => b.disabled = true);
+}
+
+function siguiente() {
+  preguntaIdx++;
+  if (preguntaIdx >= preguntasOrden.length) {
+    mostrarResultado();
+  } else {
+    mostrarPregunta();
+  }
 }
 
 function mostrarResultado() {
   clearInterval(timerInterval);
-  document.getElementById('pantalla-juego').style.display = 'none';
-  document.getElementById('pantalla-resultado').style.display = 'block';
-  const pct = Math.round((correctas / 112) * 100);
-  document.getElementById('puntaje-final').textContent = puntaje;
-  document.getElementById('res-c').textContent = correctas;
-  document.getElementById('res-i').textContent = incorrectas;
-  document.getElementById('res-p').textContent = pct + '%';
-  let trofeo, titulo, sub;
-  if (pct >= 90) { trofeo='🏆'; titulo='¡Sobresaliente!'; sub='¡Estás más que listo/a para el final! Excelente manejo de los contenidos.'; }
-  else if (pct >= 70) { trofeo='🥇'; titulo='¡Muy bien!'; sub='Buen dominio de los temas. Repasá los que fallaste y vas a estar perfecto/a.'; }
-  else if (pct >= 50) { trofeo='🥈'; titulo='¡Buen intento!'; sub='Hay algunos temas para reforzar. Consultá el módulo del Lic. Molina y volvé a intentarlo.'; }
-  else { trofeo='📚'; titulo='¡A estudiar más!'; sub='Revisá el módulo completo y no dudes en consultar al Lic. Molina.'; }
-  document.getElementById('trofeo').textContent = trofeo;
-  document.getElementById('res-titulo').textContent = titulo;
-  document.getElementById('res-sub').textContent = sub;
-  setTimeout(() => { document.getElementById('barra-res').style.width = pct + '%'; }, 100);
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'flex';
+  
+  const total = preguntasOrden.length;
+  const pct = Math.round((puntaje / total) * 100);
+  
+  completados[temaActual.id] = puntaje;
+  localStorage.setItem('arCompletados', JSON.stringify(completados));
+  
+  document.getElementById('resultTema').textContent = temaActual.titulo;
+  document.getElementById('resultPuntaje').textContent = puntaje;
+  document.getElementById('resultTotal').textContent = 'de ' + total + ' preguntas correctas (' + pct + '%)';
+  
+  setTimeout(() => {
+    document.getElementById('barraFill').style.width = pct + '%';
+    document.getElementById('barraFill').style.background = pct >= 70 ? 'var(--correct)' : pct >= 50 ? 'var(--gold)' : 'var(--wrong)';
+  }, 200);
+  
+  let msg, badge;
+  if (pct >= 90) { msg = '🏆 ¡Excelente! Dominás el tema.'; badge = '<span class="badge badge-excelente">EXCELENTE</span>'; }
+  else if (pct >= 70) { msg = '👍 ¡Muy bien! Seguí repasando.'; badge = '<span class="badge badge-bien">MUY BIEN</span>'; }
+  else if (pct >= 50) { msg = '📚 Bien, pero conviene repasar.'; badge = '<span class="badge badge-bien">REGULAR</span>'; }
+  else { msg = '💪 Necesitás repasar este tema.'; badge = '<span class="badge badge-regular">A REPASAR</span>'; }
+  
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('resultBadge').innerHTML = badge;
 }
 
-function reiniciar() {
-  document.getElementById('pantalla-resultado').style.display = 'none';
-  document.getElementById('pantalla-inicio').style.display = 'block';
+function reintentar() {
+  document.getElementById('resultScreen').style.display = 'none';
+  iniciarTema(temaActual.id);
 }
+
+function volverMenu() {
+  clearInterval(timerInterval);
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('menuScreen').style.display = 'flex';
+  renderMenu();
+}
+
+function shuffleArr(arr) {
+  return arr.map(v => [Math.random(), v]).sort((a,b) => a[0]-b[0]).map(v => v[1]);
+}
+
+// Init
+renderMenu();
 </script>
 </body>
 </html>
