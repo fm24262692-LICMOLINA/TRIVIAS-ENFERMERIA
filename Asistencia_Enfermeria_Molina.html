@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Asistencia – Enfermería ATSA</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f4f8;font-size:15px}
+header{background:#1a5fa8;color:#fff;padding:12px 16px}
+header h1{font-size:17px;font-weight:700}
+header p{font-size:12px;opacity:0.85;margin-top:2px}
+.toolbar{background:#fff;border-bottom:1px solid #ddd;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar select,.toolbar input{padding:7px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;background:#fff;color:#222}
+.toolbar select{flex:1;min-width:140px}
+.toolbar input{flex:1;min-width:140px}
+.btn{padding:8px 14px;border-radius:6px;border:none;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn-blue{background:#1a5fa8;color:#fff}
+.btn-green{background:#2e7d32;color:#fff}
+.btn-orange{background:#e65100;color:#fff}
+.btn-gray{background:#546e7a;color:#fff}
+.btn-red{background:#c62828;color:#fff}
+.btn:active{opacity:0.8}
+.date-row{background:#fff;border-bottom:1px solid #eee;padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.date-row label{font-size:13px;color:#555;font-weight:700}
+.date-row input[type=date]{padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px}
+.stats-bar{background:#e3f2fd;padding:8px 14px;font-size:13px;color:#1a5fa8;font-weight:700;display:flex;gap:16px;flex-wrap:wrap;border-bottom:1px solid #bbdefb}
+.table-wrap{overflow-x:auto;padding:8px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+th{background:#1a5fa8;color:#fff;padding:10px 8px;font-size:12px;text-align:center;font-weight:700;white-space:nowrap}
+th.th-nombre{text-align:left;min-width:150px}
+td{border-bottom:1px solid #eee;padding:0}
+td.td-nombre{padding:10px 10px;font-size:14px;font-weight:500;color:#222;min-width:150px;cursor:pointer}
+td.td-nombre:active{background:#f5f5f5}
+.cell-asist{width:44px;height:44px;text-align:center;cursor:pointer;font-size:18px;user-select:none;-webkit-user-select:none}
+.cell-asist:active{opacity:0.6}
+.cell-asist.presente{background:#c8e6c9;color:#2e7d32;font-weight:700}
+.cell-asist.ausente{background:#fff;color:#ccc}
+.cell-asist.justif{background:#fff9c4;color:#f57f17;font-weight:700}
+tr:nth-child(even) td{background:#fafafa}
+tr:nth-child(even) td.cell-asist.presente{background:#b9deba}
+tr.alumno-row:hover td{background:#e8f4fd}
+tr.alumno-row:hover td.cell-asist.presente{background:#a5d6a7}
+.legend{padding:8px 14px;font-size:12px;color:#666;display:flex;gap:12px;flex-wrap:wrap;border-top:1px solid #eee;background:#fff}
+.leg-item{display:flex;align-items:center;gap:4px}
+.leg-box{width:20px;height:20px;border-radius:3px;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:12px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;width:90%;max-width:360px}
+.modal h3{font-size:16px;margin-bottom:14px;color:#1a5fa8}
+.modal input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:15px;margin-bottom:12px}
+.modal-btns{display:flex;gap:8px}
+.modal-btns .btn{flex:1;text-align:center}
+.resumen-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.resumen-table th{background:#1a5fa8;color:#fff;padding:8px 6px;text-align:center}
+.resumen-table td{padding:8px 6px;border-bottom:1px solid #eee;text-align:center}
+.resumen-table td:first-child{text-align:left;font-weight:500}
+.badge-pct{display:inline-block;padding:2px 8px;border-radius:10px;font-weight:700;font-size:12px}
+.ok{background:#c8e6c9;color:#1b5e20}
+.warn{background:#fff9c4;color:#e65100}
+.danger{background:#ffcdd2;color:#b71c1c}
+.section-btn{width:100%;padding:10px;text-align:left;font-size:13px;font-weight:700;background:#fff;border:none;border-bottom:1px solid #eee;cursor:pointer;color:#1a5fa8}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 Asistencia – Enf. Profesional ATSA</h1>
+  <p id="header-sub">Lic. Francisco Molina – CENT N°74</p>
+</header>
+
+<div class="toolbar">
+  <select id="sel-curso" onchange="cargarCurso()">
+    <option value="">-- Seleccionar curso --</option>
+  </select>
+  <button class="btn btn-blue" onclick="abrirModalCurso()">+ Curso</button>
+  <button class="btn btn-green" onclick="abrirModalAlumno()">+ Alumno</button>
+  <button class="btn btn-gray" onclick="mostrarResumen()">Resumen</button>
+</div>
+
+<div class="date-row">
+  <label>Fecha de clase:</label>
+  <input type="date" id="fecha-hoy" />
+  <button class="btn btn-blue" onclick="agregarFecha()">Agregar</button>
+</div>
+
+<div class="stats-bar" id="stats-bar">Seleccione un curso para comenzar</div>
+
+<div class="table-wrap">
+  <table id="tabla">
+    <thead><tr id="thead-row"><th class="th-nombre">Alumno</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-box" style="background:#c8e6c9;color:#2e7d32">✓</div> Presente</div>
+  <div class="leg-item"><div class="leg-box"></div> Ausente</div>
+  <div class="leg-item"><div class="leg-box" style="background:#fff9c4;color:#f57f17">J</div> Justificada</div>
+  <div class="leg-item" style="color:#1a5fa8;font-weight:700">Toque = marcar presente · Mantenga = justificada</div>
+</div>
+
+<div style="padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap;background:#fff;border-top:1px solid #eee">
+  <button class="btn btn-green" onclick="descargarExcel()">⬇ Descargar Excel</button>
+  <button class="btn btn-orange" onclick="marcarTodosPresentes()">✓ Todos presentes</button>
+  <button class="btn btn-red" onclick="confirmarEliminarCurso()">🗑 Eliminar curso</button>
+</div>
+
+<!-- Modal nuevo curso -->
+<div class="modal-bg" id="modal-curso">
+  <div class="modal">
+    <h3>Nuevo curso</h3>
+    <select id="nc-filial" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;margin-bottom:10px">
+      <option value="Famaillá">Famaillá</option>
+      <option value="Monteros">Monteros</option>
+      <option value="Concepción">Concepción</option>
+    </select>
+    <select id="nc-anio" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;margin-bottom:10px">
+      <option>1° Año</option><option>2° Año</option><option>3° Año</option>
+    </select>
+    <select id="nc-materia" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;margin-bottom:10px">
+      <option>Anatomofisiología</option>
+      <option>Salud Pública</option>
+      <option>Farmacología General y Especial</option>
+      <option>Enfermería en Alto Riesgo I y II</option>
+      <option>Enfermería Psiquiátrica y Salud Mental</option>
+      <option>Biofísica Química</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn btn-blue" onclick="guardarCurso()">Guardar</button>
+      <button class="btn btn-gray" onclick="cerrarModal('modal-curso')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal agregar alumno -->
+<div class="modal-bg" id="modal-alumno">
+  <div class="modal">
+    <h3>Agregar alumno</h3>
+    <input type="text" id="inp-alumno" placeholder="Apellido, Nombre" />
+    <div class="modal-btns">
+      <button class="btn btn-green" onclick="guardarAlumno()">Agregar</button>
+      <button class="btn btn-gray" onclick="cerrarModal('modal-alumno')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal resumen -->
+<div class="modal-bg" id="modal-resumen">
+  <div class="modal" style="max-height:85vh;overflow-y:auto;max-width:420px">
+    <h3>Resumen de asistencia</h3>
+    <div id="resumen-contenido"></div>
+    <br>
+    <button class="btn btn-gray" style="width:100%" onclick="cerrarModal('modal-resumen')">Cerrar</button>
+  </div>
+</div>
+
+<!-- Modal nombre alumno (click en nombre) -->
+<div class="modal-bg" id="modal-nombre">
+  <div class="modal">
+    <h3 id="modal-nombre-titulo">Opciones</h3>
+    <button class="btn btn-red" style="width:100%;margin-bottom:8px" onclick="eliminarAlumnoSeleccionado()">🗑 Eliminar este alumno</button>
+    <button class="btn btn-gray" style="width:100%" onclick="cerrarModal('modal-nombre')">Cancelar</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const STORE = 'asist_v3';
+let db = JSON.parse(localStorage.getItem(STORE)||'null') || {cursos:{}};
+let cursoActual = null;
+let alumnoSelIdx = null;
+
+function save(){localStorage.setItem(STORE,JSON.stringify(db))}
+
+// ── Inicializar ──────────────────────────────────────────────────────────────
+window.onload = function(){
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('fecha-hoy').value = hoy;
+  refrescarSelectCursos();
+  // Demo si no hay datos
+  if(!Object.keys(db.cursos).length){
+    const id = 'Famaillá_1°_Anatomofisiología';
+    db.cursos[id] = {
+      nombre:'Anatomofisiología – 1° Año – Famaillá',
+      filial:'Famaillá', anio:'1° Año', materia:'Anatomofisiología',
+      alumnos:['Álvarez, Lucía','Gómez, Martín','López, Carla','Fernández, Ana','Rodríguez, Juan'],
+      fechas:['2026-03-20','2026-03-27','2026-04-10'],
+      datos:{
+        'Álvarez, Lucía':{'2026-03-20':'P','2026-03-27':'P','2026-04-10':'P'},
+        'Gómez, Martín':{'2026-03-20':'P','2026-03-27':'A','2026-04-10':'A'},
+        'López, Carla':{'2026-03-20':'P','2026-03-27':'P','2026-04-10':'J'},
+        'Fernández, Ana':{'2026-03-20':'A','2026-03-27':'P','2026-04-10':'P'},
+        'Rodríguez, Juan':{'2026-03-20':'P','2026-03-27':'P','2026-04-10':'P'},
+      }
+    };
+    save();
+    refrescarSelectCursos();
+    document.getElementById('sel-curso').value = id;
+    cargarCurso();
+  }
+};
+
+function refrescarSelectCursos(){
+  const sel = document.getElementById('sel-curso');
+  const val = sel.value;
+  sel.innerHTML = '<option value="">-- Seleccionar curso --</option>';
+  Object.entries(db.cursos).forEach(([id,c])=>{
+    const opt = document.createElement('option');
+    opt.value = id; opt.textContent = c.nombre;
+    sel.appendChild(opt);
+  });
+  if(val) sel.value = val;
+}
+
+function cargarCurso(){
+  const id = document.getElementById('sel-curso').value;
+  if(!id){cursoActual=null; renderTabla(); return;}
+  cursoActual = id;
+  document.getElementById('header-sub').textContent = db.cursos[id].nombre;
+  renderTabla();
+}
+
+// ── Render tabla ──────────────────────────────────────────────────────────────
+function renderTabla(){
+  const thead = document.getElementById('thead-row');
+  const tbody = document.getElementById('tbody');
+  if(!cursoActual){
+    thead.innerHTML='<th class="th-nombre">Alumno</th>';
+    tbody.innerHTML='<tr><td colspan="99" style="padding:20px;text-align:center;color:#888">Seleccione un curso</td></tr>';
+    document.getElementById('stats-bar').textContent='Seleccione un curso para comenzar';
+    return;
+  }
+  const c = db.cursos[cursoActual];
+  const fechas = c.fechas||[];
+  const alumnos = c.alumnos||[];
+
+  // Encabezado
+  let thHTML = '<th class="th-nombre">Alumno</th>';
+  fechas.forEach(f=>{
+    const d = new Date(f+'T00:00:00');
+    const dia = d.getDate();
+    const mes = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][d.getMonth()];
+    thHTML += `<th>${dia}<br>${mes}</th>`;
+  });
+  thHTML += '<th>%</th>';
+  thead.innerHTML = thHTML;
+
+  // Filas
+  let tbHTML = '';
+  let totalPresentes = 0, totalCeldas = 0;
+  alumnos.forEach((al,idx)=>{
+    const datos = (c.datos&&c.datos[al])||{};
+    let presentes = 0;
+    let celdas = '';
+    fechas.forEach(f=>{
+      const v = datos[f]||'';
+      let cls='ausente', txt='';
+      if(v==='P'){cls='presente';txt='✓';presentes++;}
+      else if(v==='J'){cls='justif';txt='J';}
+      celdas += `<td class="cell-asist ${cls}" 
+        ontouchstart="startHold(event,'${cursoActual}','${al}','${f}')"
+        ontouchend="endHold(event,'${cursoActual}','${al}','${f}')"
+        onclick="togglePresente('${cursoActual}','${al}','${f}',this)">${txt}</td>`;
+    });
+    totalPresentes += presentes;
+    totalCeldas += fechas.length;
+    const pct = fechas.length ? Math.round((presentes/fechas.length)*100) : 0;
+    const pctCls = pct>=75?'ok':(pct>=50?'warn':'danger');
+    tbHTML += `<tr class="alumno-row">
+      <td class="td-nombre" onclick="abrirModalNombre(${idx},'${al.replace(/'/g,"&#39;")}')">${al}</td>
+      ${celdas}
+      <td style="text-align:center;padding:4px"><span class="badge-pct ${pctCls}">${pct}%</span></td>
+    </tr>`;
+  });
+  tbody.innerHTML = tbHTML || '<tr><td colspan="99" style="padding:20px;text-align:center;color:#888">Sin alumnos. Use + Alumno para agregar.</td></tr>';
+
+  // Stats
+  const pctTotal = totalCeldas ? Math.round((totalPresentes/totalCeldas)*100) : 0;
+  document.getElementById('stats-bar').innerHTML =
+    `<span>👥 ${alumnos.length} alumnos</span> <span>📅 ${fechas.length} clases</span> <span>✓ Asistencia promedio: ${pctTotal}%</span>`;
+}
+
+// ── Toggle presente ────────────────────────────────────────────────────────────
+let holdTimer = null;
+function startHold(e, cid, al, fecha){
+  holdTimer = setTimeout(()=>{
+    holdTimer = null;
+    setEstado(cid,al,fecha,'J');
+    e.target.classList.remove('presente','ausente','justif');
+    e.target.classList.add('justif');
+    e.target.textContent='J';
+  }, 600);
+}
+function endHold(e,cid,al,fecha){
+  if(holdTimer){clearTimeout(holdTimer);holdTimer=null;}
+}
+function togglePresente(cid,al,fecha,td){
+  if(holdTimer===null) return; // fue hold
+  const c = db.cursos[cid];
+  if(!c.datos) c.datos={};
+  if(!c.datos[al]) c.datos[al]={};
+  const actual = c.datos[al][fecha]||'';
+  if(actual==='P'){
+    c.datos[al][fecha]='A';
+    td.className='cell-asist ausente'; td.textContent='';
+  } else {
+    c.datos[al][fecha]='P';
+    td.className='cell-asist presente'; td.textContent='✓';
+  }
+  save();
+  actualizarPctFila(al);
+}
+function setEstado(cid,al,fecha,val){
+  const c = db.cursos[cid];
+  if(!c.datos) c.datos={};
+  if(!c.datos[al]) c.datos[al]={};
+  c.datos[al][fecha]=val;
+  save();
+  actualizarPctFila(al);
+}
+function actualizarPctFila(al){
+  const c = db.cursos[cursoActual];
+  const fechas = c.fechas||[];
+  const datos = (c.datos&&c.datos[al])||{};
+  const pres = fechas.filter(f=>datos[f]==='P').length;
+  const pct = fechas.length ? Math.round((pres/fechas.length)*100) : 0;
+  const pctCls = pct>=75?'ok':(pct>=50?'warn':'danger');
+  // Find and update the % cell for this alumno
+  const rows = document.querySelectorAll('#tbody tr');
+  rows.forEach(row=>{
+    if(row.querySelector('.td-nombre')&&row.querySelector('.td-nombre').textContent===al){
+      const last = row.querySelector('.badge-pct');
+      if(last){last.className='badge-pct '+pctCls; last.textContent=pct+'%';}
+    }
+  });
+}
+
+// ── Agregar fecha ─────────────────────────────────────────────────────────────
+function agregarFecha(){
+  if(!cursoActual){alert('Primero seleccione un curso');return;}
+  const f = document.getElementById('fecha-hoy').value;
+  if(!f){alert('Ingrese una fecha');return;}
+  const c = db.cursos[cursoActual];
+  if(!c.fechas) c.fechas=[];
+  if(c.fechas.includes(f)){alert('Esa fecha ya existe');return;}
+  c.fechas.push(f);
+  c.fechas.sort();
+  save(); renderTabla();
+}
+
+// ── Todos presentes ────────────────────────────────────────────────────────────
+function marcarTodosPresentes(){
+  if(!cursoActual){alert('Seleccione un curso');return;}
+  const f = document.getElementById('fecha-hoy').value;
+  if(!f){alert('Ingrese la fecha de clase');return;}
+  const c = db.cursos[cursoActual];
+  if(!c.fechas) c.fechas=[];
+  if(!c.fechas.includes(f)){c.fechas.push(f);c.fechas.sort();}
+  if(!c.datos) c.datos={};
+  (c.alumnos||[]).forEach(al=>{
+    if(!c.datos[al]) c.datos[al]={};
+    c.datos[al][f]='P';
+  });
+  save(); renderTabla();
+}
+
+// ── Cursos ─────────────────────────────────────────────────────────────────────
+function abrirModalCurso(){document.getElementById('modal-curso').classList.add('open')}
+function guardarCurso(){
+  const filial = document.getElementById('nc-filial').value;
+  const anio = document.getElementById('nc-anio').value;
+  const materia = document.getElementById('nc-materia').value;
+  const id = `${filial}_${anio}_${materia}`.replace(/\s/g,'_');
+  db.cursos[id]={nombre:`${materia} – ${anio} – ${filial}`,filial,anio,materia,alumnos:[],fechas:[],datos:{}};
+  save(); refrescarSelectCursos();
+  document.getElementById('sel-curso').value=id;
+  cargarCurso();
+  cerrarModal('modal-curso');
+}
+function confirmarEliminarCurso(){
+  if(!cursoActual){alert('Seleccione un curso');return;}
+  if(confirm('¿Eliminar este curso y todos sus datos?')){
+    delete db.cursos[cursoActual];
+    cursoActual=null; save(); refrescarSelectCursos(); renderTabla();
+  }
+}
+
+// ── Alumnos ────────────────────────────────────────────────────────────────────
+function abrirModalAlumno(){
+  if(!cursoActual){alert('Primero seleccione un curso');return;}
+  document.getElementById('inp-alumno').value='';
+  document.getElementById('modal-alumno').classList.add('open');
+  setTimeout(()=>document.getElementById('inp-alumno').focus(),100);
+}
+function guardarAlumno(){
+  const nombre = document.getElementById('inp-alumno').value.trim();
+  if(!nombre){alert('Ingrese el nombre');return;}
+  const c = db.cursos[cursoActual];
+  if(!c.alumnos) c.alumnos=[];
+  if(c.alumnos.includes(nombre)){alert('Ya existe ese alumno');return;}
+  c.alumnos.push(nombre);
+  save(); cerrarModal('modal-alumno'); renderTabla();
+}
+function abrirModalNombre(idx, nombre){
+  alumnoSelIdx=idx;
+  document.getElementById('modal-nombre-titulo').textContent=nombre;
+  document.getElementById('modal-nombre').classList.add('open');
+}
+function eliminarAlumnoSeleccionado(){
+  if(!cursoActual||alumnoSelIdx===null)return;
+  const c=db.cursos[cursoActual];
+  const nombre=c.alumnos[alumnoSelIdx];
+  if(confirm(`¿Eliminar a ${nombre}?`)){
+    c.alumnos.splice(alumnoSelIdx,1);
+    if(c.datos&&c.datos[nombre]) delete c.datos[nombre];
+    save(); cerrarModal('modal-nombre'); renderTabla();
+  }
+}
+
+// ── Resumen ────────────────────────────────────────────────────────────────────
+function mostrarResumen(){
+  if(!cursoActual){alert('Seleccione un curso');return;}
+  const c=db.cursos[cursoActual];
+  const fechas=c.fechas||[];
+  const alumnos=c.alumnos||[];
+  let html=`<p style="font-size:13px;color:#555;margin-bottom:10px">${c.nombre}</p>
+  <table class="resumen-table"><thead><tr><th>Alumno</th><th>Pres.</th><th>Ause.</th><th>Just.</th><th>%</th></tr></thead><tbody>`;
+  alumnos.forEach(al=>{
+    const datos=(c.datos&&c.datos[al])||{};
+    let p=0,a=0,j=0;
+    fechas.forEach(f=>{
+      const v=datos[f]||'A';
+      if(v==='P')p++;else if(v==='J')j++;else a++;
+    });
+    const pct=fechas.length?Math.round((p/fechas.length)*100):0;
+    const cls=pct>=75?'ok':(pct>=50?'warn':'danger');
+    html+=`<tr><td>${al}</td><td>${p}</td><td>${a}</td><td>${j}</td><td><span class="badge-pct ${cls}">${pct}%</span></td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('resumen-contenido').innerHTML=html;
+  document.getElementById('modal-resumen').classList.add('open');
+}
+
+// ── Cerrar modales ─────────────────────────────────────────────────────────────
+function cerrarModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-bg').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')});
+});
+
+// ── Descargar Excel ────────────────────────────────────────────────────────────
+function descargarExcel(){
+  if(!cursoActual){alert('Seleccione un curso');return;}
+  const c=db.cursos[cursoActual];
+  const fechas=c.fechas||[];
+  const alumnos=c.alumnos||[];
+
+  const encabezado=['Alumno',...fechas.map(f=>{
+    const d=new Date(f+'T00:00:00');
+    return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+  }),'% Asistencia'];
+
+  const filas=alumnos.map(al=>{
+    const datos=(c.datos&&c.datos[al])||{};
+    const celdas=fechas.map(f=>datos[f]==='P'?'P':(datos[f]==='J'?'J':''));
+    const pres=celdas.filter(v=>v==='P').length;
+    const pct=fechas.length?Math.round((pres/fechas.length)*100)+'%':'';
+    return [al,...celdas,pct];
+  });
+
+  const ws=XLSX.utils.aoa_to_sheet([encabezado,...filas]);
+  // Ancho de columnas
+  ws['!cols']=[{wch:25},...fechas.map(()=>({wch:10})),{wch:12}];
+
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Asistencia');
+  const nombre=c.nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g,'').trim();
+  XLSX.writeFile(wb,`Asistencia_${nombre}.xlsx`);
+}
+
+// ── Enter en input alumno ──────────────────────────────────────────────────────
+document.getElementById('inp-alumno').addEventListener('keydown',e=>{if(e.key==='Enter')guardarAlumno()});
+</script>
+</body>
+</html>
