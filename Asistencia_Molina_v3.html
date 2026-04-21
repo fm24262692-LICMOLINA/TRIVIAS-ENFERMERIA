@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Asistencia – Lic. Molina</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f4f8;font-size:15px}
+header{background:#1a5fa8;color:#fff;padding:12px 16px}
+header h1{font-size:17px;font-weight:700}
+header p{font-size:12px;opacity:0.85;margin-top:2px}
+.toolbar{background:#fff;border-bottom:1px solid #ddd;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar select{flex:1;min-width:200px;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:14px;background:#fff;color:#222}
+.btn{padding:8px 14px;border-radius:6px;border:none;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:inline-block}
+.btn-blue{background:#1a5fa8;color:#fff}
+.btn-green{background:#2e7d32;color:#fff}
+.btn-orange{background:#e65100;color:#fff}
+.btn-gray{background:#546e7a;color:#fff}
+.btn-red{background:#c62828;color:#fff}
+.btn-purple{background:#6a1b9a;color:#fff}
+.btn:active{opacity:0.75;transform:scale(0.97)}
+.date-row{background:#fff;border-bottom:1px solid #eee;padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.date-row label{font-size:13px;color:#555;font-weight:700}
+.date-row input[type=date]{padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px}
+.stats-bar{background:#e3f2fd;padding:8px 14px;font-size:13px;color:#1a5fa8;font-weight:700;display:flex;gap:16px;flex-wrap:wrap;border-bottom:1px solid #bbdefb}
+.table-wrap{overflow-x:auto;padding:8px 4px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.12)}
+th{background:#1a5fa8;color:#fff;padding:9px 6px;font-size:12px;text-align:center;font-weight:700;white-space:nowrap}
+th.th-nombre{text-align:left;min-width:140px;padding-left:10px}
+th.th-dni{text-align:left;min-width:80px}
+td{border-bottom:1px solid #eee;padding:0;vertical-align:middle}
+td.td-nombre{padding:8px 10px;font-size:13px;font-weight:500;color:#222;min-width:140px;cursor:pointer}
+td.td-nombre:active{background:#f5f5f5}
+td.td-dni{padding:6px 8px;font-size:12px;color:#888;min-width:80px}
+.cell{width:44px;height:44px;text-align:center;cursor:pointer;font-size:14px;font-weight:700;user-select:none;-webkit-user-select:none;transition:background 0.12s}
+.cell.ausente{background:#ffebee;color:#c62828}
+.cell.presente{background:#e8f5e9;color:#2e7d32}
+.cell:active{opacity:0.6}
+tr:nth-child(even) td{background:#fafafa}
+tr:nth-child(even) .cell.ausente{background:#fce4e4}
+tr:nth-child(even) .cell.presente{background:#dcedc8}
+.badge-pct{display:inline-block;padding:3px 8px;border-radius:10px;font-weight:700;font-size:12px}
+.ok{background:#c8e6c9;color:#1b5e20}
+.warn{background:#fff9c4;color:#e65100}
+.danger{background:#ffcdd2;color:#b71c1c}
+.legend{padding:8px 14px;font-size:12px;color:#666;display:flex;gap:16px;flex-wrap:wrap;border-top:1px solid #eee;background:#fff;align-items:center}
+.leg-box{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:4px;font-weight:700;font-size:13px}
+.action-bar{padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap;background:#fff;border-top:1px solid #eee}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 10px}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;width:100%;max-width:400px;margin:auto}
+.modal h3{font-size:16px;margin-bottom:14px;color:#1a5fa8;font-weight:700}
+.modal input,.modal select,.modal textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;margin-bottom:10px;color:#222}
+.modal textarea{min-height:140px;resize:vertical;font-family:Arial,sans-serif;font-size:13px}
+.modal-btns{display:flex;gap:8px;margin-top:4px}
+.modal-btns .btn{flex:1;text-align:center;padding:10px}
+.lbl{font-size:12px;font-weight:700;color:#555;margin-bottom:4px;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;display:block}
+.resumen-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.resumen-table th{background:#1a5fa8;color:#fff;padding:7px 5px;text-align:center}
+.resumen-table td{padding:7px 5px;border-bottom:1px solid #eee;text-align:center}
+.resumen-table td:first-child{text-align:left;font-weight:500}
+.import-info{background:#e3f2fd;border-radius:6px;padding:10px;font-size:13px;color:#1a5fa8;margin-bottom:10px;line-height:1.7}
+.tab-btns{display:flex;margin-bottom:14px;border-radius:6px;overflow:hidden;border:1px solid #1a5fa8}
+.tab-btn{flex:1;padding:8px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:#fff;color:#1a5fa8}
+.tab-btn.active{background:#1a5fa8;color:#fff}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+.drop-zone{border:2px dashed #1a5fa8;border-radius:8px;padding:20px;text-align:center;color:#1a5fa8;font-size:13px;cursor:pointer;margin-bottom:10px;background:#f0f7ff}
+.empty-msg{padding:24px;text-align:center;color:#888;font-size:14px}
+.preview-txt{font-size:12px;color:#2e7d32;margin:-4px 0 8px;font-weight:700}
+.fecha-chip{display:inline-flex;align-items:center;gap:4px;background:#e3f2fd;color:#1a5fa8;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;margin:2px}
+.fecha-chip button{background:none;border:none;color:#c62828;font-size:14px;cursor:pointer;padding:0 2px;line-height:1}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 Asistencia – Lic. Molina</h1>
+  <p id="header-sub">CENT N°74 – A.T.S.A.</p>
+</header>
+
+<div class="toolbar">
+  <select id="sel-curso" onchange="cargarCurso()">
+    <option value="">-- Seleccionar curso --</option>
+  </select>
+  <button class="btn btn-blue" onclick="abrirModalCurso()">+ Curso</button>
+</div>
+
+<div class="date-row">
+  <label>Fecha:</label>
+  <input type="date" id="fecha-input"/>
+  <button class="btn btn-blue" onclick="agregarFecha()">+ Clase</button>
+  <button class="btn btn-orange" onclick="todosPresentes()">✓ Todos P</button>
+</div>
+
+<div class="stats-bar" id="stats-bar">Seleccione un curso para comenzar</div>
+
+<div class="table-wrap">
+  <table id="tabla">
+    <thead><tr id="thead-row">
+      <th class="th-nombre">Alumno</th>
+      <th class="th-dni">DNI</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <span><span class="leg-box" style="background:#e8f5e9;color:#2e7d32">P</span> Presente</span>
+  <span><span class="leg-box" style="background:#ffebee;color:#c62828">A</span> Ausente</span>
+  <span style="color:#1a5fa8;font-weight:700;font-size:11px">Toque la casilla para cambiar · Toque el nombre para opciones</span>
+</div>
+
+<div class="action-bar">
+  <button class="btn btn-purple" onclick="abrirImport()">⬆ Importar alumnos</button>
+  <button class="btn btn-green" onclick="abrirModalAlumno()">+ Alumno</button>
+  <button class="btn btn-green" onclick="descargarExcel()">⬇ Excel</button>
+  <button class="btn btn-gray" onclick="mostrarResumen()">📊 Resumen</button>
+  <button class="btn btn-red" onclick="confirmarEliminarCurso()">🗑 Curso</button>
+</div>
+
+<!-- Modal nuevo curso -->
+<div class="modal-bg" id="modal-curso">
+<div class="modal">
+  <h3>Nuevo curso</h3>
+  <span class="lbl">Año</span>
+  <select id="nc-anio" onchange="filtrarMaterias()">
+    <option value="1">1° Año</option>
+    <option value="2">2° Año</option>
+    <option value="3">3° Año</option>
+  </select>
+  <span class="lbl">Materia – Filial</span>
+  <select id="nc-materia"></select>
+  <div class="modal-btns">
+    <button class="btn btn-blue" onclick="guardarCurso()">Crear</button>
+    <button class="btn btn-gray" onclick="cerrarModal('modal-curso')">Cancelar</button>
+  </div>
+</div>
+</div>
+
+<!-- Modal importar -->
+<div class="modal-bg" id="modal-import">
+<div class="modal">
+  <h3>Importar lista de alumnos</h3>
+  <div class="tab-btns">
+    <button class="tab-btn active" onclick="switchTab('tp-texto',this)">Pegar texto</button>
+    <button class="tab-btn" onclick="switchTab('tp-excel',this)">Archivo Excel</button>
+  </div>
+
+  <div id="tp-texto" class="tab-pane active">
+    <div class="import-info">
+      Un alumno por línea. Formatos aceptados:<br>
+      <code>Apellido, Nombre</code><br>
+      <code>Apellido, Nombre, 40123456</code><br>
+      <code>40123456, Apellido, Nombre</code>
+    </div>
+    <span class="lbl">Pegue la lista aquí</span>
+    <textarea id="txt-import" placeholder="García, María José, 40123456&#10;López, Juan Pablo, 39876543&#10;Rodríguez, Ana"></textarea>
+    <div id="prev-texto" class="preview-txt"></div>
+    <div class="modal-btns">
+      <button class="btn btn-purple" onclick="importarTexto()">Importar</button>
+      <button class="btn btn-gray" onclick="cerrarModal('modal-import')">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="tp-excel" class="tab-pane">
+    <div class="import-info">
+      Suba el archivo .xlsx con los alumnos.<br>
+      Columnas esperadas: <strong>Nombre</strong> y opcionalmente <strong>DNI</strong>.<br>
+      O copie las celdas de Excel y péguelas abajo.
+    </div>
+    <div class="drop-zone" onclick="document.getElementById('file-inp').click()">
+      📂 Seleccionar archivo .xlsx / .xls / .csv
+    </div>
+    <input type="file" id="file-inp" accept=".xlsx,.xls,.csv" style="display:none" onchange="leerArchivo(this)"/>
+    <span class="lbl">O pegue celdas copiadas de Excel</span>
+    <textarea id="txt-excel-paste" placeholder="Pegue aquí las celdas copiadas de Excel"></textarea>
+    <div id="prev-excel" class="preview-txt"></div>
+    <div class="modal-btns">
+      <button class="btn btn-purple" onclick="importarExcelPaste()">Importar pegado</button>
+      <button class="btn btn-gray" onclick="cerrarModal('modal-import')">Cancelar</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Modal agregar alumno -->
+<div class="modal-bg" id="modal-alumno">
+<div class="modal">
+  <h3>Agregar alumno</h3>
+  <span class="lbl">Apellido y Nombre</span>
+  <input type="text" id="inp-nombre" placeholder="García, María José"/>
+  <span class="lbl">DNI (opcional)</span>
+  <input type="text" id="inp-dni" placeholder="40123456" inputmode="numeric"/>
+  <div class="modal-btns">
+    <button class="btn btn-green" onclick="guardarAlumno()">Agregar</button>
+    <button class="btn btn-gray" onclick="cerrarModal('modal-alumno')">Cancelar</button>
+  </div>
+</div>
+</div>
+
+<!-- Modal opciones alumno -->
+<div class="modal-bg" id="modal-ops">
+<div class="modal">
+  <h3 id="ops-titulo">Opciones</h3>
+  <span class="lbl">Editar DNI</span>
+  <input type="text" id="ops-dni" placeholder="DNI" inputmode="numeric"/>
+  <button class="btn btn-blue" style="width:100%;margin-bottom:10px;text-align:center" onclick="guardarDNI()">💾 Guardar DNI</button>
+  <button class="btn btn-red" style="width:100%;margin-bottom:8px;text-align:center" onclick="eliminarAlumnoSel()">🗑 Eliminar este alumno</button>
+  <button class="btn btn-gray" style="width:100%;text-align:center" onclick="cerrarModal('modal-ops')">Cancelar</button>
+</div>
+</div>
+
+<!-- Modal resumen -->
+<div class="modal-bg" id="modal-resumen">
+<div class="modal" style="max-height:85vh;overflow-y:auto;max-width:440px">
+  <h3>Resumen de asistencia</h3>
+  <div id="resumen-cont"></div>
+  <br>
+  <button class="btn btn-gray" style="width:100%;text-align:center" onclick="cerrarModal('modal-resumen')">Cerrar</button>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const KEY='asist_v5';
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{cursos:{}};
+let cid=null, alumnoSelIdx=null;
+
+const PRESET=[
+  {a:'1',lbl:'Biofísica Química – Monteros',id:'BQ_Monteros'},
+  {a:'1',lbl:'Anatomofisiología – Famaillá',id:'Anatomo_Famailla'},
+  {a:'2',lbl:'Salud Pública – Concepción',id:'SP_Concepcion'},
+  {a:'2',lbl:'Farmacología Gral. y Especial – Famaillá',id:'Farma_Famailla'},
+  {a:'3',lbl:'Enf. en Alto Riesgo I y II – Concepción',id:'AR_Concepcion'},
+  {a:'3',lbl:'Enf. Psiquiátrica y S. Mental – Concepción',id:'Psiq_Concepcion'},
+  {a:'3',lbl:'Enf. en Alto Riesgo I y II – Monteros',id:'AR_Monteros'},
+  {a:'3',lbl:'Enf. Psiquiátrica y S. Mental – Monteros',id:'Psiq_Monteros'},
+  {a:'3',lbl:'Enf. en Alto Riesgo I y II – Famaillá',id:'AR_Famailla'},
+  {a:'3',lbl:'Enf. Psiquiátrica y S. Mental – Famaillá',id:'Psiq_Famailla'},
+];
+
+function sv(){localStorage.setItem(KEY,JSON.stringify(db));}
+
+window.onload=function(){
+  const hoy=new Date().toISOString().split('T')[0];
+  document.getElementById('fecha-input').value=hoy;
+  filtrarMaterias();
+  refrescarSelect();
+};
+
+function filtrarMaterias(){
+  const a=document.getElementById('nc-anio').value;
+  document.getElementById('nc-materia').innerHTML=
+    PRESET.filter(p=>p.a===a).map(p=>`<option value="${p.id}">${p.lbl}</option>`).join('');
+}
+
+function refrescarSelect(){
+  const sel=document.getElementById('sel-curso');
+  const val=sel.value;
+  const grupos={'1':'1° Año','2':'2° Año','3':'3° Año'};
+  let html='<option value="">-- Seleccionar curso --</option>';
+  ['1','2','3'].forEach(a=>{
+    const lista=Object.entries(db.cursos).filter(([,c])=>c.anio===a);
+    if(!lista.length)return;
+    html+=`<optgroup label="${grupos[a]}">`;
+    lista.forEach(([id,c])=>html+=`<option value="${id}">${c.lbl}</option>`);
+    html+='</optgroup>';
+  });
+  sel.innerHTML=html;
+  if(val)sel.value=val;
+}
+
+function cargarCurso(){
+  const id=document.getElementById('sel-curso').value;
+  if(!id){cid=null;renderTabla();return;}
+  cid=id;
+  // Auto-agregar fecha de hoy si no existe
+  const c=db.cursos[cid];
+  const hoy=document.getElementById('fecha-input').value;
+  if(!c.fechas)c.fechas=[];
+  if(hoy&&!c.fechas.includes(hoy)){
+    c.fechas.push(hoy);c.fechas.sort();sv();
+  }
+  document.getElementById('header-sub').textContent=c.lbl;
+  renderTabla();
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+function renderTabla(){
+  const thead=document.getElementById('thead-row');
+  const tbody=document.getElementById('tbody');
+  if(!cid){
+    thead.innerHTML='<th class="th-nombre">Alumno</th><th class="th-dni">DNI</th>';
+    tbody.innerHTML='<tr><td colspan="99"><div class="empty-msg">Seleccione un curso para comenzar</div></td></tr>';
+    document.getElementById('stats-bar').textContent='Seleccione un curso para comenzar';
+    return;
+  }
+  const c=db.cursos[cid];
+  const fechas=c.fechas||[];
+  const alumnos=c.alumnos||[];
+
+  // Encabezado
+  let th='<th class="th-nombre">Alumno</th><th class="th-dni">DNI</th>';
+  fechas.forEach(f=>{
+    const d=new Date(f+'T00:00:00');
+    const m=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][d.getMonth()];
+    th+=`<th>${d.getDate()}<br>${m}</th>`;
+  });
+  th+='<th>%</th>';
+  thead.innerHTML=th;
+
+  // Filas
+  if(!alumnos.length){
+    tbody.innerHTML='<tr><td colspan="99"><div class="empty-msg">Sin alumnos. Use ⬆ Importar alumnos o + Alumno</div></td></tr>';
+    document.getElementById('stats-bar').innerHTML=`<span>👥 0 alumnos</span><span>📅 ${fechas.length} clases</span>`;
+    return;
+  }
+
+  let tbHTML='', totP=0, totC=alumnos.length*fechas.length;
+  alumnos.forEach((al,idx)=>{
+    const datos=(c.datos&&c.datos[al.id])||{};
+    let pres=0, celdas='';
+    fechas.forEach(f=>{
+      // Por defecto AUSENTE — solo P si está explícitamente marcado
+      const v=datos[f]==='P'?'P':'A';
+      if(v==='P')pres++;
+      celdas+=`<td class="cell ${v==='P'?'presente':'ausente'}" id="cl_${idx}_${f.replace(/-/g,'')}"
+        onclick="toggleCell(this,'${al.id}','${f}',${idx})">${v}</td>`;
+    });
+    totP+=pres;
+    const pct=fechas.length?Math.round((pres/fechas.length)*100):0;
+    const pcls=pct>=75?'ok':(pct>=50?'warn':'danger');
+    tbHTML+=`<tr id="row_${idx}">
+      <td class="td-nombre" onclick="abrirOps(${idx})">${al.nombre}</td>
+      <td class="td-dni">${al.dni||'—'}</td>
+      ${celdas}
+      <td style="text-align:center;padding:4px"><span class="badge-pct ${pcls}" id="pct_${idx}">${pct}%</span></td>
+    </tr>`;
+  });
+  tbody.innerHTML=tbHTML;
+  const pctTot=totC?Math.round((totP/totC)*100):0;
+  document.getElementById('stats-bar').innerHTML=
+    `<span>👥 ${alumnos.length} alumnos</span><span>📅 ${fechas.length} clases</span><span>✓ Promedio: ${pctTot}%</span>`;
+}
+
+// ── Toggle celda ──────────────────────────────────────────────────────────────
+function toggleCell(td,aid,fecha,rowIdx){
+  const c=db.cursos[cid];
+  if(!c.datos)c.datos={};
+  if(!c.datos[aid])c.datos[aid]={};
+  const esPresente=td.classList.contains('presente');
+  if(esPresente){
+    // Vuelve a ausente
+    delete c.datos[aid][fecha];
+    td.className='cell ausente';
+    td.textContent='A';
+  } else {
+    // Marca presente
+    c.datos[aid][fecha]='P';
+    td.className='cell presente';
+    td.textContent='P';
+  }
+  sv();
+  recalcPct(aid,rowIdx);
+}
+
+function recalcPct(aid,rowIdx){
+  const c=db.cursos[cid];
+  const fechas=c.fechas||[];
+  const datos=(c.datos&&c.datos[aid])||{};
+  const pres=fechas.filter(f=>datos[f]==='P').length;
+  const pct=fechas.length?Math.round((pres/fechas.length)*100):0;
+  const pcls=pct>=75?'ok':(pct>=50?'warn':'danger');
+  const el=document.getElementById(`pct_${rowIdx}`);
+  if(el){el.className='badge-pct '+pcls;el.textContent=pct+'%';}
+}
+
+// ── Agregar fecha ─────────────────────────────────────────────────────────────
+function agregarFecha(){
+  if(!cid){alert('Seleccione un curso primero');return;}
+  const f=document.getElementById('fecha-input').value;
+  if(!f){alert('Ingrese una fecha');return;}
+  const c=db.cursos[cid];
+  if(!c.fechas)c.fechas=[];
+  if(c.fechas.includes(f)){alert('Esa fecha ya está cargada');return;}
+  c.fechas.push(f);c.fechas.sort();sv();renderTabla();
+}
+
+function todosPresentes(){
+  if(!cid){alert('Seleccione un curso');return;}
+  const f=document.getElementById('fecha-input').value;
+  if(!f){alert('Ingrese la fecha');return;}
+  const c=db.cursos[cid];
+  if(!c.fechas)c.fechas=[];
+  if(!c.fechas.includes(f)){c.fechas.push(f);c.fechas.sort();}
+  if(!c.datos)c.datos={};
+  (c.alumnos||[]).forEach(al=>{
+    if(!c.datos[al.id])c.datos[al.id]={};
+    c.datos[al.id][f]='P';
+  });
+  sv();renderTabla();
+}
+
+// ── Cursos ────────────────────────────────────────────────────────────────────
+function abrirModalCurso(){filtrarMaterias();document.getElementById('modal-curso').classList.add('open');}
+function guardarCurso(){
+  const id=document.getElementById('nc-materia').value;
+  const anio=document.getElementById('nc-anio').value;
+  const preset=PRESET.find(p=>p.id===id);
+  if(!preset)return;
+  if(db.cursos[id]&&!confirm('Este curso ya existe. ¿Sobreescribir? (se borrarán los datos actuales)'))return;
+  db.cursos[id]={lbl:preset.lbl,anio,alumnos:[],fechas:[],datos:{}};
+  sv();refrescarSelect();
+  document.getElementById('sel-curso').value=id;
+  cargarCurso();
+  cerrarModal('modal-curso');
+}
+function confirmarEliminarCurso(){
+  if(!cid){alert('Seleccione un curso');return;}
+  if(confirm('¿Eliminar este curso y todos sus datos?\nEsta acción no se puede deshacer.')){
+    delete db.cursos[cid];cid=null;sv();refrescarSelect();renderTabla();
+  }
+}
+
+// ── Alumnos manual ────────────────────────────────────────────────────────────
+function abrirModalAlumno(){
+  if(!cid){alert('Primero seleccione un curso');return;}
+  document.getElementById('inp-nombre').value='';
+  document.getElementById('inp-dni').value='';
+  document.getElementById('modal-alumno').classList.add('open');
+  setTimeout(()=>document.getElementById('inp-nombre').focus(),120);
+}
+function guardarAlumno(){
+  const nombre=document.getElementById('inp-nombre').value.trim();
+  if(!nombre){alert('Ingrese el nombre');return;}
+  const dni=document.getElementById('inp-dni').value.trim();
+  pushAlumno(nombre,dni);
+  cerrarModal('modal-alumno');renderTabla();
+}
+function pushAlumno(nombre,dni){
+  const c=db.cursos[cid];
+  if(!c.alumnos)c.alumnos=[];
+  c.alumnos.push({id:'al_'+Date.now()+'_'+Math.random().toString(36).substr(2,4),nombre,dni:dni||''});
+  sv();
+}
+
+// ── Opciones alumno ───────────────────────────────────────────────────────────
+function abrirOps(idx){
+  alumnoSelIdx=idx;
+  const al=db.cursos[cid].alumnos[idx];
+  document.getElementById('ops-titulo').textContent=al.nombre;
+  document.getElementById('ops-dni').value=al.dni||'';
+  document.getElementById('modal-ops').classList.add('open');
+}
+function guardarDNI(){
+  db.cursos[cid].alumnos[alumnoSelIdx].dni=document.getElementById('ops-dni').value.trim();
+  sv();cerrarModal('modal-ops');renderTabla();
+}
+function eliminarAlumnoSel(){
+  const c=db.cursos[cid];
+  const al=c.alumnos[alumnoSelIdx];
+  if(!confirm('¿Eliminar a '+al.nombre+'?'))return;
+  if(c.datos&&c.datos[al.id])delete c.datos[al.id];
+  c.alumnos.splice(alumnoSelIdx,1);
+  sv();cerrarModal('modal-ops');renderTabla();
+}
+
+// ── Importar ──────────────────────────────────────────────────────────────────
+function abrirImport(){
+  if(!cid){alert('Primero seleccione un curso');return;}
+  document.getElementById('txt-import').value='';
+  document.getElementById('txt-excel-paste').value='';
+  document.getElementById('prev-texto').textContent='';
+  document.getElementById('prev-excel').textContent='';
+  document.getElementById('modal-import').classList.add('open');
+}
+
+function parsearLinea(l){
+  l=l.trim();if(!l)return null;
+  const sep=l.includes('\t')?'\t':',';
+  const p=l.split(sep).map(x=>x.trim()).filter(x=>x);
+  if(!p.length)return null;
+  let nombre='',dni='';
+  const di=p.findIndex(x=>/^\d{7,9}$/.test(x));
+  if(di>=0){dni=p[di];nombre=p.filter((_,i)=>i!==di).join(', ');}
+  else{nombre=p.join(', ');}
+  return nombre?{nombre,dni}:null;
+}
+
+function importarTexto(){
+  const lineas=document.getElementById('txt-import').value.split('\n');
+  let n=0;
+  lineas.forEach(l=>{const al=parsearLinea(l);if(al){pushAlumno(al.nombre,al.dni);n++;}});
+  cerrarModal('modal-import');renderTabla();
+  if(n)alert(`✅ ${n} alumno${n>1?'s':''} importado${n>1?'s':''} correctamente.`);
+  else alert('No se detectaron alumnos. Revise el formato.');
+}
+
+function importarExcelPaste(){
+  const txt=document.getElementById('txt-excel-paste').value;
+  if(!txt.trim()){alert('Pegue las celdas de Excel primero');return;}
+  const lineas=txt.split('\n');
+  let n=0;
+  lineas.forEach(l=>{const al=parsearLinea(l);if(al){pushAlumno(al.nombre,al.dni);n++;}});
+  cerrarModal('modal-import');renderTabla();
+  if(n)alert(`✅ ${n} alumno${n>1?'s':''} importado${n>1?'s':''}.`);
+  else alert('No se detectaron alumnos. Revise el formato.');
+}
+
+function leerArchivo(inp){
+  const file=inp.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const data=new Uint8Array(e.target.result);
+    const wb=XLSX.read(data,{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    let n=0;
+    rows.forEach(row=>{
+      if(!row||!row.length)return;
+      const linea=row.map(x=>String(x).trim()).filter(x=>x).join(',');
+      const al=parsearLinea(linea);
+      if(al){pushAlumno(al.nombre,al.dni);n++;}
+    });
+    cerrarModal('modal-import');renderTabla();
+    alert(`✅ ${n} alumno${n>1?'s':''} importado${n>1?'s':''} desde el archivo.`);
+  };
+  reader.readAsArrayBuffer(file);
+  inp.value='';
+}
+
+// Contador en tiempo real
+['txt-import','txt-excel-paste'].forEach((id,i)=>{
+  document.getElementById(id).addEventListener('input',function(){
+    const n=this.value.split('\n').filter(l=>parsearLinea(l)).length;
+    document.getElementById(i===0?'prev-texto':'prev-excel').textContent=n?n+' alumno'+(n>1?'s':'')+' detectado'+(n>1?'s':''):'';
+  });
+});
+
+// ── Resumen ────────────────────────────────────────────────────────────────────
+function mostrarResumen(){
+  if(!cid){alert('Seleccione un curso');return;}
+  const c=db.cursos[cid];
+  const fechas=c.fechas||[];
+  const alumnos=c.alumnos||[];
+  let html=`<p style="font-size:13px;color:#555;font-weight:700;margin-bottom:10px">${c.lbl}</p>`;
+  html+=`<table class="resumen-table"><thead><tr><th>Alumno</th><th>DNI</th><th>P</th><th>A</th><th>%</th></tr></thead><tbody>`;
+  const riesgo=[];
+  alumnos.forEach(al=>{
+    const datos=(c.datos&&c.datos[al.id])||{};
+    const p=fechas.filter(f=>datos[f]==='P').length;
+    const a=fechas.length-p;
+    const pct=fechas.length?Math.round((p/fechas.length)*100):0;
+    const cls=pct>=75?'ok':(pct>=50?'warn':'danger');
+    if(pct<75&&fechas.length)riesgo.push({nombre:al.nombre,dni:al.dni||'',pct});
+    html+=`<tr><td>${al.nombre}</td><td style="color:#888">${al.dni||'—'}</td><td>${p}</td><td>${a}</td><td><span class="badge-pct ${cls}">${pct}%</span></td></tr>`;
+  });
+  html+='</tbody></table>';
+  if(riesgo.length){
+    html+=`<div style="margin-top:14px;background:#ffebee;border-radius:6px;padding:12px;font-size:13px">
+      <strong style="color:#b71c1c">⚠ Menos del 75% de asistencia:</strong><br><br>`;
+    riesgo.forEach(a=>{html+=`• ${a.nombre}${a.dni?' ('+a.dni+')':''}: <strong>${a.pct}%</strong><br>`;});
+    html+='</div>';
+  }
+  document.getElementById('resumen-cont').innerHTML=html;
+  document.getElementById('modal-resumen').classList.add('open');
+}
+
+// ── Excel export ───────────────────────────────────────────────────────────────
+function descargarExcel(){
+  if(!cid){alert('Seleccione un curso');return;}
+  const c=db.cursos[cid];
+  const fechas=c.fechas||[];
+  const alumnos=c.alumnos||[];
+  const enc=['Apellido y Nombre','DNI',...fechas.map(f=>{
+    const d=new Date(f+'T00:00:00');
+    return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+  }),'% Asistencia'];
+  const filas=alumnos.map(al=>{
+    const datos=(c.datos&&c.datos[al.id])||{};
+    const celdas=fechas.map(f=>datos[f]==='P'?'P':'A');
+    const p=celdas.filter(v=>v==='P').length;
+    const pct=fechas.length?Math.round((p/fechas.length)*100)+'%':'';
+    return [al.nombre,al.dni||'',...celdas,pct];
+  });
+  const ws=XLSX.utils.aoa_to_sheet([enc,...filas]);
+  ws['!cols']=[{wch:28},{wch:12},...fechas.map(()=>({wch:9})),{wch:13}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Asistencia');
+  XLSX.writeFile(wb,`Asistencia_${c.lbl.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]/g,'').trim()}.xlsx`);
+}
+
+// ── Tabs / modales ─────────────────────────────────────────────────────────────
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function cerrarModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    if(document.getElementById('modal-alumno').classList.contains('open'))guardarAlumno();
+  }
+});
+</script>
+</body>
+</html>
