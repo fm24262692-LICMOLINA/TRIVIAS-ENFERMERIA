@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia – Salud Pública | Lic. Molina</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#0a2342;--azul2:#1a4a7a;--cian:#00bcd4;--verde:#00e676;--rojo:#ff1744;--amarillo:#ffea00;--blanco:#f0f6ff;--gris:#8ab0cc;--card:#0d2e50;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--azul);color:var(--blanco);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(0,188,212,.12) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 10% 90%,rgba(0,230,118,.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:16px}
+#s-inicio{text-align:center;padding:32px 16px}
+.logo-line{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:4px;color:var(--cian);margin-bottom:8px}
+.titulo-trivia{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,10vw,72px);line-height:1;color:var(--blanco);margin-bottom:4px}
+.titulo-trivia span{color:var(--cian)}
+.subtitulo{font-size:14px;color:var(--gris);margin-bottom:24px;line-height:1.6}
+.docente-badge{display:inline-block;background:rgba(0,188,212,.12);border:1px solid var(--cian);border-radius:8px;padding:8px 20px;font-size:13px;color:var(--cian);margin-bottom:24px;letter-spacing:1px}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.info-card{background:var(--card);border-radius:10px;padding:14px 10px;text-align:center}
+.info-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--cian)}
+.info-lbl{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:1px}
+.temas-lista{background:var(--card);border-radius:12px;padding:16px 20px;text-align:left;margin-bottom:24px}
+.temas-lista h3{font-size:12px;letter-spacing:3px;color:var(--cian);text-transform:uppercase;margin-bottom:12px}
+.tema-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:13px;color:var(--gris);line-height:1.4}
+.tema-num{background:var(--cian);color:var(--azul);border-radius:4px;padding:1px 7px;font-weight:800;font-size:12px;flex-shrink:0;margin-top:1px}
+.btn-start{background:linear-gradient(135deg,var(--cian),#0097a7);border:none;border-radius:12px;padding:18px 48px;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--azul);cursor:pointer;width:100%;box-shadow:0 4px 24px rgba(0,188,212,.35);transition:transform .15s,box-shadow .15s;}
+.btn-start:active{transform:scale(.97)}
+#s-juego{display:none}
+.hud{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.hud-item{background:var(--card);border-radius:8px;padding:7px 12px;font-size:11px;color:var(--gris);display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0}
+.hud-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--blanco);line-height:1}
+.timer-wrap{flex:1;position:relative;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.timer-bar{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,var(--verde),var(--cian));border-radius:4px;transition:width 1s linear,background .5s;width:100%;}
+.timer-bar.warn{background:linear-gradient(90deg,var(--rojo),#ff6b35)}
+.tema-tag{display:inline-block;background:rgba(0,188,212,.15);border:1px solid rgba(0,188,212,.4);border-radius:6px;padding:4px 12px;font-size:11px;color:var(--cian);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.pregunta-wrap{background:var(--card);border-radius:14px;padding:18px 16px;margin-bottom:12px;border-left:3px solid var(--cian);min-height:90px;}
+.pregunta-num{font-size:11px;color:var(--gris);margin-bottom:6px;letter-spacing:1px}
+.pregunta-txt{font-size:14px;font-weight:700;line-height:1.5;color:var(--blanco)}
+.opciones{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+@media(max-width:480px){.opciones{grid-template-columns:1fr}}
+.opt{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 13px;font-size:13px;font-weight:600;color:var(--blanco);cursor:pointer;text-align:left;line-height:1.4;transition:border-color .15s,background .15s,transform .1s;min-height:54px;display:flex;align-items:center;}
+.opt:active:not([disabled]){transform:scale(.97)}
+.opt:hover:not([disabled]):not(.opt-ok):not(.opt-mal){border-color:var(--cian);background:rgba(0,188,212,.08)}
+.opt-ok{background:rgba(0,230,118,.18)!important;border-color:var(--verde)!important;color:var(--verde)!important}
+.opt-mal{background:rgba(255,23,68,.15)!important;border-color:var(--rojo)!important;color:#ff6b6b!important}
+.opt[disabled]{cursor:default}
+.feedback{background:var(--card);border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.5;color:var(--gris);margin-bottom:12px;border-left:3px solid var(--verde);display:none;}
+.feedback.show{display:block}
+.feedback.inc{border-left-color:var(--rojo)}
+#s-resultado{display:none;text-align:center;padding:16px 0}
+.result-icono{font-size:56px;margin-bottom:10px}
+.result-pct{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,16vw,92px);line-height:1;margin-bottom:4px}
+.result-msg{font-size:17px;font-weight:800;margin-bottom:6px}
+.result-sub{font-size:13px;color:var(--gris);margin-bottom:20px;line-height:1.5}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.rs-card{background:var(--card);border-radius:10px;padding:12px 6px;text-align:center}
+.rs-num{font-family:'Bebas Neue',sans-serif;font-size:28px}
+.rs-lbl{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:1px}
+.tema-scores{background:var(--card);border-radius:12px;padding:14px;margin-bottom:20px;text-align:left}
+.tema-scores h3{font-size:12px;letter-spacing:2px;color:var(--cian);text-transform:uppercase;margin-bottom:12px}
+.ts-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ts-lbl{font-size:12px;color:var(--gris);width:54px;flex-shrink:0}
+.ts-bar{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.ts-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--cian),var(--verde));transition:width 1s ease}
+.ts-pct{font-size:12px;font-weight:700;color:var(--blanco);width:34px;text-align:right;flex-shrink:0}
+.btn-restart{background:linear-gradient(135deg,var(--cian),#0097a7);border:none;border-radius:12px;padding:15px 40px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--azul);cursor:pointer;width:100%;}
+.progress-dots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.12);transition:background .3s}
+.dot.ok{background:var(--verde)}
+.dot.mal{background:var(--rojo)}
+.dot.act{background:var(--cian)}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeInUp .3s ease forwards}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div id="s-inicio">
+  <div style="margin-bottom:20px">
+    <div style="font-size:44px;margin-bottom:8px">🫀</div>
+    <div class="logo-line">CENT N°74 · A.T.S.A · CONCEPCIÓN</div>
+    <h1 class="titulo-trivia">TRIVIA<br><span>SALUD PÚBLICA</span></h1>
+    <p class="subtitulo">Repaso para el Examen Parcial · 2° Año · 2026</p>
+    <div class="docente-badge">Prof. Lic. Francisco Molina</div>
+  </div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-num">48</div><div class="info-lbl">Preguntas</div></div>
+    <div class="info-card"><div class="info-num">35s</div><div class="info-lbl">Por pregunta</div></div>
+    <div class="info-card"><div class="info-num">4</div><div class="info-lbl">Temas</div></div>
+  </div>
+  <div class="temas-lista">
+    <h3>Temas evaluados</h3>
+    <div class="tema-item"><span class="tema-num">T1</span>Proceso Salud-Enfermedad · Estratificación socioeconómica · Perspectiva crítica</div>
+    <div class="tema-item"><span class="tema-num">T2</span>Atención Primaria de la Salud · Diversidad cultural · Garantía de Calidad</div>
+    <div class="tema-item"><span class="tema-num">T3</span>Políticas Nacionales · Plan Federal · Organización de la Atención Médica · OMS-OPS</div>
+    <div class="tema-item"><span class="tema-num">T4</span>Salud Pública: FESP · Derechos Humanos · Derechos del Niño</div>
+  </div>
+  <button class="btn-start" onclick="iniciarJuego()">COMENZAR TRIVIA →</button>
+</div>
+
+<div id="s-juego">
+  <div class="hud">
+    <div class="hud-item"><span class="hud-val" style="color:var(--cian)" id="hud-q">1/48</span><span>Pregunta</span></div>
+    <div class="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    <div class="hud-item"><span class="hud-val" style="color:var(--verde)" id="hud-pts">0</span><span>Correctas</span></div>
+    <div class="hud-item"><span class="hud-val" style="color:var(--cian)" id="hud-time">35</span><span>Seg.</span></div>
+  </div>
+  <div class="progress-dots" id="progress-dots"></div>
+  <div class="tema-tag" id="tema-tag">Tema 1</div>
+  <div class="pregunta-wrap fade-in" id="pregunta-wrap">
+    <div class="pregunta-num" id="p-num">Pregunta 1 de 48</div>
+    <div class="pregunta-txt" id="p-txt"></div>
+  </div>
+  <div class="opciones" id="opciones"></div>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<div id="s-resultado">
+  <div class="result-icono" id="r-icono">🏆</div>
+  <div style="font-size:13px;letter-spacing:3px;color:var(--cian);margin-bottom:4px">TU RESULTADO</div>
+  <div class="result-pct" id="r-pct">0%</div>
+  <div class="result-msg" id="r-msg"></div>
+  <div class="result-sub" id="r-sub"></div>
+  <div class="result-stats">
+    <div class="rs-card"><div class="rs-num" style="color:var(--verde)" id="r-ok">0</div><div class="rs-lbl">Correctas</div></div>
+    <div class="rs-card"><div class="rs-num" style="color:var(--rojo)" id="r-mal">0</div><div class="rs-lbl">Incorrectas</div></div>
+    <div class="rs-card"><div class="rs-num" style="color:var(--cian)" id="r-tot">0</div><div class="rs-lbl">Total</div></div>
+  </div>
+  <div class="tema-scores">
+    <h3>Puntaje por tema</h3>
+    <div id="ts-bars"></div>
+  </div>
+  <button class="btn-restart" onclick="reiniciar()">JUGAR DE NUEVO →</button>
+</div>
+</div>
+
+<script>
+const Q=[
+{t:1,p:"¿Qué concepción histórica de la salud predominó en la era paleolítica, donde las enfermedades eran atribuidas a fuerzas sobrenaturales y los principales actores eran brujos o shamanes?",ops:["La concepción mágica, vinculada a lo sobrenatural y a ritos chamánicos","La concepción somático-fisiológica basada en el equilibrio de los humores","La concepción sanitaria centrada en el saneamiento ambiental colectivo","La concepción político-legal fundamentada en derechos universales del hombre"],c:0,exp:"En la era paleolítica predominó la concepción mágica: todo se atribuía a lo sobrenatural, siendo brujos y shamanes los actores principales del proceso salud-enfermedad."},
+{t:1,p:"La concepción 'político-legal' de la salud trata la salud como un derecho universal con reconocimiento legal y participación estatal. ¿Cuándo surge históricamente esta concepción?",ops:["Desde las revoluciones políticas hasta los sistemas de seguros sociales y de seguridad social","Durante la era paleolítica con el surgimiento de los rituales chamánicos y mágicos","En la Grecia antigua con el desarrollo de los métodos clínicos y epidemiológicos","A mediados del siglo XX únicamente en los países más industrializados del mundo"],c:0,exp:"La concepción político-legal nace desde las revoluciones políticas hasta los sistemas de seguros sociales y de seguridad social, reconociendo la salud como derecho y obligación universal."},
+{t:1,p:"La definición integral de salud de la OMS afirma que va 'más allá del sistema biomédico'. ¿Qué esfera, según el módulo, tiene especial importancia en este concepto integral?",ops:["La esfera subjetiva del individuo, incluyendo su bienestar psicológico y social","Exclusivamente la esfera biológica y la ausencia de enfermedades orgánicas","Solo los factores ambientales medidos de forma objetiva y cuantitativa","La esfera económica como el principal determinante del nivel de salud poblacional"],c:0,exp:"La concepción integral reconoce la importancia de la esfera subjetiva: el bienestar no es solo la ausencia de enfermedad sino también el pleno estado psicológico y social del individuo."},
+{t:1,p:"¿Por qué el módulo afirma que la salud-enfermedad es el 'producto final de las relaciones sociales'?",ops:["Porque los factores determinantes ambientales, económicos y sociales actúan sobre la población de forma dinámica y desigual","Porque depende exclusivamente del acceso a hospitales y médicos especialistas altamente calificados","Porque solo los factores biológicos hereditarios determinan verdaderamente el estado de salud","Porque la salud es resultado directo del nivel educativo individual de cada persona"],c:0,exp:"El módulo señala que la salud-enfermedad es el producto final de los factores determinantes ambientales, económicos y sociales que actúan sobre la población de manera dinámica y desigual."},
+{t:1,p:"El modelo médico tradicional o 'biologista' es criticado en el módulo por sus limitaciones. ¿Cuál describe correctamente una de sus características negativas?",ops:["Excluye el saber del paciente, siendo curativo, individualista y ajeno a los determinantes sociales","Incorpora todos los determinantes sociales en cada diagnóstico clínico individual","Prioriza la prevención comunitaria y el abordaje integral sobre el tratamiento individual","Aplica sistemáticamente un enfoque biopsicosocial en todos sus diagnósticos y tratamientos"],c:0,exp:"El modelo biologista es criticado por ser curativo, individualista y por excluir el saber del paciente, ignorando los determinantes sociales y psicológicos del proceso salud-enfermedad."},
+{t:1,p:"Según el módulo, el 'estatus' social se determina en base a cuatro criterios. ¿Cuáles son correctamente los cuatro criterios que lo determinan?",ops:["Grado de riqueza, nivel de instrucción, utilidad funcional y caracteres biológicos","Edad, género, nacionalidad y nivel de ingresos económicos mensuales","Profesión, lugar de residencia, afiliación religiosa y participación política","Herencia familiar, contactos influyentes, aspecto físico y nivel de educación formal"],c:0,exp:"Los cuatro criterios del estatus son: grado de riqueza (no solo cantidad sino procedencia), nivel de instrucción, utilidad funcional en la sociedad y caracteres biológicos."},
+{t:1,p:"¿Qué grupos integran la 'Clase Media Asalariada' según la estructura de estratificación presentada en el módulo de Salud Pública?",ops:["Profesionales en función específica, cuadros técnicos y empleados administrativos y vendedores","Solo propietarios de pequeñas empresas y pequeños productores autónomos independientes","Trabajadores especializados autónomos y obreros calificados del sector industrial","Peones autónomos, empleados domésticos y trabajadores considerados marginales"],c:0,exp:"La Clase Media Asalariada incluye: profesionales en función específica, cuadros técnicos y asimilados, y empleados administrativos y vendedores."},
+{t:1,p:"La crítica a la Teoría de la Estratificación Social señala que los individuos no parten del mismo punto. ¿Qué desigualdad concreta ejemplifica el módulo?",ops:["Un nivel socioeconómico superior permite acceder a universidades, posgrados y contactos influyentes que quienes nacen en niveles inferiores no tienen","La desigualdad se debe únicamente a diferencias de inteligencia y capacidad biológica innata","El Estado garantiza plena igualdad de oportunidades pero los individuos no siempre la aprovechan","La estratificación depende exclusivamente del esfuerzo personal y la voluntad individual de superación"],c:0,exp:"El módulo señala que un nivel socioeconómico superior permite acceder a universidades, posgrados, amistades influyentes y lugares exclusivos, mientras que niveles inferiores carecen de esas mismas oportunidades."},
+{t:1,p:"Según la causalidad compleja del módulo, el enfermar ya no se entiende como fenómeno lineal. ¿Cómo se describe correctamente este enfoque?",ops:["Como un proceso dinámico y multivariado ligado a la subjetividad, condiciones sociales, culturales y económico-políticas de la persona","Como una relación simple y directa entre el agente patógeno y el huésped susceptible sin mediación social","Como resultado exclusivo de factores genéticos que se transmiten de forma hereditaria entre generaciones","Como consecuencia directa y únicamente de hábitos individuales que pueden modificarse con voluntad propia"],c:0,exp:"La causalidad compleja entiende el enfermar como proceso dinámico y multivariado, ligado a la subjetividad, circunstancias vitales y condiciones sociales, culturales y económico-políticas."},
+{t:1,p:"Las concepciones 'economista' y 'económico-social' comparten que ven la salud como condicionante de la productividad. ¿Qué las diferencia temporalmente?",ops:["La economista surge a mediados del siglo XX en países industrializados; la económico-social aparece después de la Segunda Guerra Mundial","Ambas surgieron simultáneamente en el siglo XIX durante la Revolución Industrial en Europa","La económico-social apareció primero en el siglo XVIII y la economista surgió posteriormente en el siglo XIX","La economista es una concepción contemporánea del siglo XXI y la económico-social es de la época medieval"],c:0,exp:"La concepción economista surge a mediados del siglo XX en países de industrialización, y la económico-social aparece después de la Segunda Guerra Mundial, ambas midiendo costos de salud y enfermedad."},
+{t:1,p:"Entre los factores del medio ambiente social y cultural que influyen en el proceso salud-enfermedad, ¿cuáles menciona correctamente el módulo?",ops:["Calentamiento global, contaminación, estilos de vida, drogadicción, hacimiento y acceso a servicios básicos","Solo factores genéticos y hereditarios de carácter exclusivamente biológico e individual","Exclusivamente factores económicos como la pobreza y el nivel de ingresos monetarios","Únicamente la infraestructura hospitalaria pública y el acceso a medicamentos esenciales"],c:0,exp:"Los factores del medio social y cultural incluyen: calentamiento global, contaminación, cambios demográficos, estilos de vida, actividad física, red social, acceso a servicios básicos, hacimiento y adicciones."},
+{t:1,p:"La Teoría de la Estratificación Social es criticada por tener implicaciones racistas. ¿Por qué sostiene esto el módulo?",ops:["Porque afirma que la competencia asegura el éxito de los más capaces, ocultando las verdaderas relaciones de clase y justificando la dominación de pocos sobre la colectividad","Porque propone que todos los seres humanos son iguales por naturaleza sin importar su origen social","Porque sugiere eliminar la estratificación mediante políticas redistributivas del Estado igualitario","Porque reconoce explícitamente que el punto de partida desigual determina el resultado final de la competencia"],c:0,exp:"El módulo señala que la teoría sostiene que la competencia asegura el éxito de los más capaces, ocultando las verdaderas relaciones de clase y justificando la opresión y dominio de unos pocos sobre la colectividad."},
+{t:2,p:"La definición de APS de Alma-Ata señala que debe estar 'puesta al alcance de todos los individuos'. ¿Cómo se relaciona esto con el concepto de prioridades según el módulo?",ops:["Implica reconocer desigualdades y priorizar la atención en los grupos más expuestos al riesgo de enfermar y morir","Significa que absolutamente todos deben recibir exactamente el mismo servicio sin ninguna distinción de riesgo","Implica que solo quienes puedan pagar tienen derecho a acceso prioritario a los servicios de salud","Supone eliminar todas las diferencias sociales antes de poder implementar efectivamente la estrategia de APS"],c:0,exp:"La frase implica reconocer las desigualdades entre los grupos y establecer prioridades, atendiendo con mayor énfasis a los más expuestos al riesgo de enfermar y morir."},
+{t:2,p:"¿Cuál es la diferencia fundamental entre los componentes programáticos y los componentes estratégicos de la APS según el módulo?",ops:["Los programáticos deben cumplirse en el 1° nivel de atención; los estratégicos articulan y potencian la estrategia en todos los niveles con participación comunitaria como eje","Los programáticos son de aplicación internacional mientras que los estratégicos son exclusivamente de aplicación local","Los estratégicos solo corresponden al tercer nivel de atención especializada hospitalaria","Los programáticos incluyen la participación social y los estratégicos son únicamente de carácter asistencial"],c:0,exp:"Los componentes programáticos deben cumplirse en el 1° nivel. Los estratégicos articulan y potencian la evolución en todos los niveles, siendo la participación comunitaria su eje principal."},
+{t:2,p:"El componente de 'Articulación Intersectorial' sostiene que la salud no puede lograrse solo con el sector sanitario. ¿Qué implica concretamente en la práctica?",ops:["Requiere trabajo conjunto con sectores como educación, saneamiento y vivienda, organizándose con responsabilidad compartida","Significa que solo médicos y enfermeros son los únicos responsables de la salud de la comunidad","Implica que el sector privado debe financiar toda la atención primaria de salud comunitaria","Solo involucra al ministerio de salud sin necesidad de coordinación con otros organismos estatales"],c:0,exp:"La articulación intersectorial implica que las instituciones se organizan y coordinan con otros sectores (educación, saneamiento) con claro sentido de esfuerzo común y responsabilidad compartida."},
+{t:2,p:"¿Qué significa que la tecnología en APS sea 'científicamente fundada y socialmente aceptada' según el módulo?",ops:["Los métodos deben ser prácticos, basados en evidencia científica y aceptables para la comunidad donde se aplican, incluyendo recursos tradicionales locales","Implica usar únicamente tecnología de alta complejidad importada de países desarrollados del primer mundo","Significa aplicar solo tecnologías modernas aunque la comunidad no las comprenda ni las haya demandado","Supone reemplazar completamente las prácticas tradicionales por la medicina occidental dominante"],c:0,exp:"Tecnología apropiada supone seleccionar la disponible o creada mediante investigación local, práctica, científicamente fundada y socialmente aceptada para satisfacer las necesidades de la población."},
+{t:2,p:"¿Qué es la 'Competencia Cultural' según el módulo y por qué es relevante para la práctica de enfermería?",ops:["La capacidad del equipo de salud de superar sus propios filtros culturales para brindar atención equitativa a personas de diversas culturas","El dominio obligatorio de idiomas extranjeros que necesitan los enfermeros para atender a pacientes inmigrantes","El conocimiento exclusivo de las culturas originarias sin ninguna aplicación práctica en la atención de salud","La habilidad para imponer los estándares médicos occidentales como únicos válidos en todas las comunidades"],c:0,exp:"La competencia cultural implica que el equipo de salud supere el obstáculo de sus filtros culturales propios para comprender la vivencia del otro y brindar asistencia con equidad."},
+{t:2,p:"¿Cuáles son ejemplos de situaciones de riesgo cultural que requieren formación transcultural del equipo de salud según el módulo?",ops:["Inmigración, diferencia idiomática, emigración desde área rural, estatus socioeconómico menor y segregación en un grupo étnico subcultural","Solo las diferencias religiosas en contextos urbanos de alta densidad poblacional específicamente","Únicamente la atención a pacientes de países limítrofes en las zonas de frontera del territorio nacional","Solo el trabajo con comunidades originarias que hablan lenguas indígenas en zonas rurales remotas"],c:0,exp:"El módulo menciona: inmigración, retorno al país, emigración rural, falta de educación formal, estatus socioeconómico menor, segregación étnica, inexperiencia con el sistema occidental de salud y diferencia idiomática."},
+{t:2,p:"Según el módulo, ¿cuál fue el papel específico del personal de enfermería en la implementación del Programa Nacional de Garantía de Calidad?",ops:["Fue decisivo en la estructuración, unificación de procesos institucionales y de enfermería, y en el monitoreo de la calidad asistencial","Se limitó a cumplir órdenes médicas sin participar activamente en la gestión de calidad institucional","Solo participó en la habilitación y categorización de establecimientos de salud del sector público","Tuvo un rol secundario enfocado exclusivamente en la atención directa al paciente a nivel de cama"],c:0,exp:"El módulo afirma que el papel del personal de enfermería fue decisivo en la estructuración, unificación de procesos institucionales y de enfermería, y en el monitoreo de la calidad."},
+{t:2,p:"Desde 2004, las áreas de calidad adoptaron la visión centrada en la seguridad del paciente. ¿Qué implicó concretamente esta nueva perspectiva?",ops:["La seguridad del paciente se convirtió en un corte transversal que abarca estructura física, recursos humanos, tecnología, procesos y resultados","Se focalizó solo en la calidad de los equipamientos tecnológicos y la infraestructura edilicia de los hospitales","Implicó reducir el número de camas hospitalarias como estrategia para mejorar la calidad de atención","Se orientó exclusivamente a la capacitación del personal médico en nuevas técnicas avanzadas especializadas"],c:0,exp:"La seguridad del paciente como centro asistencial implicó ser un corte transversal a las condiciones de estructuras físicas, tecnologías, recursos humanos, procesos y resultados de la atención."},
+{t:2,p:"La 'Participación Social' como componente estratégico de APS implica una responsabilidad concreta. ¿En qué consiste según el módulo?",ops:["Los individuos y familias desarrollan sus capacidades para la acción, organizándose con instituciones con esfuerzo común y responsabilidad compartida","Solo implica asistir puntualmente a las consultas médicas cuando los profesionales de salud lo indican","Significa que las familias son responsables de financiar todos los servicios de salud que consumen","Implica únicamente votar en elecciones sanitarias para elegir autoridades del sistema de salud"],c:0,exp:"La participación social implica que los individuos y familias desarrollen sus capacidades para la acción, organizándose y coordinando con instituciones con claro sentido de esfuerzo común y responsabilidad compartida."},
+{t:2,p:"¿Qué perfil profesional requiere la estrategia de APS según el módulo respecto a la 'Adecuación del Recurso Humano'?",ops:["Médicos generalistas con formación científica y humanística integral para comprender el proceso salud-enfermedad en su dimensión biológica y social","Solo especialistas de alta complejidad con formación exclusivamente biomédica y técnica sin componente humanístico","Profesionales con exclusiva formación técnica quirúrgica y sin ninguna formación en ciencias sociales","Personal comunitario sin formación universitaria formal pero con experiencia práctica empírica acumulada"],c:0,exp:"La APS requiere médicos generalistas con formación científica y humanística integral que permita comprender el proceso salud-enfermedad en su dimensión biológica-social."},
+{t:2,p:"La Constitución Nacional Argentina de 1994, artículo 65 inciso 17, estableció garantías para la diversidad cultural en salud. ¿Qué establece puntualmente?",ops:["Reconoce la preexistencia étnica y cultural de los pueblos indígenas argentinos y garantiza el respeto a su identidad cultural","Establece que solo se practicará medicina occidental en todos los establecimientos públicos de salud","Prohíbe explícitamente el ejercicio de prácticas de medicina tradicional en todo el territorio nacional","Solo garantiza el derecho a la salud en sentido biomédico sin ninguna mención a la identidad cultural"],c:0,exp:"El artículo 65 inciso 17 de la Constitución de 1994 reconoce la preexistencia étnica y cultural de los pueblos indígenas argentinos y garantiza el respeto a su identidad."},
+{t:3,p:"¿Cuál es la diferencia entre las intervenciones dirigidas a 'determinantes estructurales' y las dirigidas a 'estilos de vida' en las Políticas Nacionales de Salud?",ops:["Las estructurales buscan mejorar condiciones sociales y reducir desigualdades; las de estilos de vida orientan cambios de comportamientos individuales no saludables","Ambas son completamente iguales ya que toda política de salud apunta exclusivamente al comportamiento individual","Las de estilos de vida atacan las causas estructurales profundas mientras que las estructurales solo atacan el síntoma","Las intervenciones estructurales son únicamente las que realiza el sector privado de salud"],c:0,exp:"Las estructurales se dirigen al mantenimiento de determinantes que mejoran la salud y reducen desigualdades. Las de estilos de vida orientan el cambio de comportamientos no saludables."},
+{t:3,p:"¿Cuál de estos es un indicador de intervenciones de estilo de vida mencionado en el módulo y por qué tiene importancia en salud pública?",ops:["El porcentaje de lactancia materna exclusiva hasta los 4-6 meses, porque al menos el 30% de enfermedades se relacionan con comportamientos alimenticios","La cantidad de hospitales por provincia, porque determina directamente el nivel de atención disponible para la población","El número de médicos especialistas por habitante en las principales zonas urbanas del país","La tasa de afiliación a obras sociales en los trabajadores formales del sector privado de la economía"],c:0,exp:"El porcentaje de lactancia exclusiva es un indicador clave. Al menos el 30% de las enfermedades se relacionan con comportamientos alimenticios, siendo el sobrepeso uno de los principales problemas actuales."},
+{t:3,p:"¿Qué fue el 'Acuerdo Sanitario Federal de San Nicolás' y qué objetivos específicos consensuaron los ministros en 2003?",ops:["Los ministros acordaron mejorar el acceso a medicamentos, reducir la mortalidad materno-infantil, proteger programas prioritarios y fortalecer la APS","Solo se acordó la descentralización de los hospitales nacionales hacia las provincias y municipios","El acuerdo estableció formalmente la privatización del sistema de salud pública argentino","Se consensuó el cierre de las obras sociales provinciales y su unificación en un único sistema nacional"],c:0,exp:"En el Acuerdo de San Nicolás (2003) los ministros consensuaron: mejorar acceso a medicamentos, disminuir la mortalidad materno-infantil, acortar brechas entre provincias, proteger programas prioritarios y fortalecer la APS."},
+{t:3,p:"El módulo señala que 'revertir la inequidad equivale a brindar acceso'. ¿Cuál es el ejemplo relacionado con el control perinatal que se menciona?",ops:["En zonas carenciadas no puede llegar un centro de vacunación ni hay adecuado control perinatal para el bebé, ni posibilidad de consultas preventivas","Solo existe inequidad en el acceso a medicamentos de alto costo disponibles en grandes ciudades","La inequidad afecta únicamente la atención de enfermedades crónicas no transmisibles en adultos mayores","El problema de equidad se limita exclusivamente a la distribución de camas en hospitales de alta complejidad"],c:0,exp:"El módulo señala que en zonas carenciadas no puede llegar un centro de vacunación, no hay adecuado control perinatal para el bebé, ni posibilidad de consultas preventivas para los hijos."},
+{t:3,p:"¿Cuáles son los tres subsistemas del Sistema Sanitario Nacional argentino y por qué se dice que el sistema está 'fragmentado'?",ops:["Público (sin exclusión), Obras Sociales (trabajadores afiliados) y Privado (prepaga). Fragmentado porque cada subsistema opera de forma independiente con coberturas desiguales","Solo existen el sistema público y el privado, siendo el sistema argentino universalmente integrado y articulado","Los tres subsistemas están perfectamente articulados y ofrecen cobertura idéntica y equitativa a toda la población","El sistema se divide en nacional, provincial y municipal pero con criterios técnicos unificados y coordinados"],c:0,exp:"Los subsistemas son: Público (atiende a todos sin exclusión), Obras Sociales (cobertura a afiliados) y Privado (medicina prepaga). La fragmentación surge porque cada uno opera independientemente con coberturas desiguales."},
+{t:3,p:"¿Qué establece el módulo sobre el primer nivel de atención médica respecto a sus funciones y ejemplos concretos?",ops:["Se ocupa de prevenir enfermedades, atender patologías frecuentes y menos graves con relación directa a la comunidad. Ejemplos: Centros de Salud, CAPS y Salas de Primeros Auxilios","Es el nivel de mayor complejidad donde se tratan exclusivamente patologías que requieren técnicas sofisticadas y especializadas","Solo atiende emergencias derivadas de otros niveles sin ninguna relación directa con la comunidad","Es exclusivamente hospitalario y no realiza ninguna acción de prevención ni promoción de la salud"],c:0,exp:"El primer nivel previene enfermedades, atiende patologías frecuentes y menos graves con relación directa a la comunidad. Ejemplos: Centros de Salud, Centros Comunitarios, Salas de Primeros Auxilios."},
+{t:3,p:"¿Cómo define el módulo la 'regionalización' y cuál es su objetivo principal dentro del sistema de salud?",ops:["Asignación de recursos y servicios en un área que facilita el acceso con calidad, bajo costo y equidad; es un concepto organizacional y gerencial, no solo geográfico","Es únicamente la división política del territorio argentino en provincias, municipios y comunas","Solo implica la construcción de nuevos hospitales en zonas rurales sin ningún criterio organizacional","Es la descentralización absoluta de todos los servicios de salud al nivel municipal sin rectoría central"],c:0,exp:"Regionalización es la asignación de recursos en un área ordenada para facilitar acceso, calidad, bajo costo y equidad. No es solo un concepto geográfico sino también organizacional y gerencial."},
+{t:3,p:"El sistema SIPROSA organiza Tucumán en cuatro áreas programáticas. ¿Qué función cumplen los CAPS en esta red?",ops:["Son el primer nivel de atención ambulatoria distribuidos en toda la provincia, con horarios variables, con área de responsabilidad y población asignada","Son hospitales de alta complejidad que atienden urgencias provenientes de toda la provincia sin restricción","Son centros especializados del tercer nivel sin ninguna población asignada específica","Son oficinas puramente administrativas del SIPROSA sin ninguna función asistencial directa"],c:0,exp:"Los CAPS constituyen la red periférica del primer nivel de atención ambulatoria, distribuidos en toda la provincia, con horarios de 6, 12 y 24 horas, con área de responsabilidad y población asignada."},
+{t:3,p:"Según el módulo, la OMS tiene sede en Ginebra, Suiza. ¿Cuál es su función principal como organismo especializado?",ops:["Lograr que todos los pueblos puedan gozar del grado máximo de salud como objetivo fundamental","Financiar únicamente los sistemas de salud de los países en vías de desarrollo del mundo","Controlar la producción y comercialización de medicamentos y dispositivos médicos a nivel mundial","Regular exclusivamente las políticas de atención médica privada dentro de cada país miembro"],c:0,exp:"La OMS es el organismo especializado que depende del Consejo Económico Social de la ONU, cuya función es lograr que todos los pueblos puedan gozar del grado máximo de salud posible."},
+{t:3,p:"¿Qué son las 'vías de circulación bidireccionales' dentro de una red de servicios de salud según el módulo?",ops:["Conectores bidireccionales por donde circulan recursos, personas y formación, incluyendo el sistema de referencia y contrarreferencia con telefonía y telemática","Son solo las rutas de circulación de ambulancias entre hospitales de distintos niveles de complejidad","Son los canales formales de comunicación exclusivos entre el Estado y las obras sociales provinciales","Son los sistemas de transferencia de financiamiento entre el sector público y el sector privado de salud"],c:0,exp:"Son conectores bidireccionales por donde circulan recursos, personas y formación. Esto incluye el sistema de referencia y contrarreferencia con telefonía, radiotransmisión y telemática."},
+{t:3,p:"¿Cuál de estos problemas del sistema de salud argentino menciona el módulo vinculado a la planificación de recursos humanos?",ops:["La concentración de recursos en centros tecnológicos, el exceso de especialidades y subespecialidades y la falta de recursos humanos en atención primaria","El exceso de médicos generalistas en todo el país y la escasez de especialistas en hospitales de tercer nivel","La sobrepoblación de enfermeros en zonas rurales y la escasez en las ciudades capitales del interior","La falta de universidades para formar profesionales de la salud en las regiones del interior del país"],c:0,exp:"El módulo señala que la concentración de recursos en centros de desarrollo tecnológico, el exceso de especialidades y subespecialidades, generan falta de recursos humanos en atención primaria."},
+{t:3,p:"La OPS tiene sede en Washington, EE.UU. ¿Cuál es el propósito fundamental que le asigna el módulo?",ops:["Promover y coordinar los esfuerzos de los países de la región de las Américas para combatir enfermedades y elevar el nivel de salud","Financiar exclusivamente la investigación biomédica básica en universidades de América Latina","Regular los precios de medicamentos y tecnología médica en todos los países del continente americano","Controlar las epidemias únicamente en los países de América del Sur y el Caribe insular"],c:0,exp:"El propósito fundamental de la OPS es la promoción y coordinación de los esfuerzos de los países de la región de las Américas para combatir enfermedades y elevar el nivel de salud."},
+{t:4,p:"¿Cuál es la diferencia entre la definición de Salud Pública de Winslow (1920) y la definición moderna presentada en el módulo?",ops:["Winslow: ciencia y arte de evitar enfermedades y alargar la vida con esfuerzos comunitarios. La moderna agrega: proteger, fomentar, recuperar y rehabilitar la salud","Ambas definiciones son idénticas ya que Winslow formuló la definición definitiva y completa de Salud Pública","Winslow ya incluía la rehabilitación y la definición moderna solo se enfoca en la prevención primaria","La definición moderna elimina el componente comunitario y lo reemplaza por el enfoque exclusivamente individual"],c:0,exp:"Winslow (1920): ciencia y arte de evitar enfermedades, alargar la vida y fomentar la salud con esfuerzos comunitarios. La moderna agrega: proteger, fomentar, recuperar y rehabilitar mediante el esfuerzo de la comunidad."},
+{t:4,p:"¿Qué es el 'Monitoreo y análisis de la situación de salud' como Función Esencial de la Salud Pública (FESP)?",ops:["La función que identifica desigualdades y riesgos, maneja estadísticas vitales y evalúa el desempeño de los servicios de salud en la población","La función que exclusivamente controla la distribución y stock de medicamentos en los centros de salud","Es exclusivamente la vigilancia epidemiológica de enfermedades transmisibles de notificación obligatoria","La función de supervisar solo el equipamiento tecnológico y el mantenimiento de los hospitales públicos"],c:0,exp:"El Monitoreo y análisis identifica desigualdades, riesgos y daños en el acceso a los servicios, identifica necesidades de la población, maneja estadísticas vitales y evalúa el desempeño de los servicios."},
+{t:4,p:"¿Qué tareas concretas implica la 'Vigilancia Epidemiológica' como FESP según el módulo?",ops:["Capacitación para investigar, detección de casos, investigación epidemiológica y control de enfermedades y brotes en la comunidad","Solo implica registrar administrativamente los fallecimientos ocurridos en hospitales y clínicas públicas","Únicamente la elaboración de informes estadísticos anuales de morbilidad y mortalidad general","Se limita estrictamente al control de enfermedades transmisibles exclusivamente en zonas de frontera"],c:0,exp:"La vigilancia epidemiológica implica: capacitación para investigar, detección de casos, investigación epidemiológica, vigilancia epidemiológica y control de enfermedades y brotes."},
+{t:4,p:"Según la FESP de 'Promoción de la Salud', ¿en qué lugares además del hospital debe colaborar el personal de salud?",ops:["En escuelas, iglesias y lugares de trabajo, con acciones dirigidas especialmente hacia jóvenes y niños de la comunidad","Solo en los centros de salud del primer nivel de atención y bajo ningún concepto fuera de ellos","Únicamente en los hospitales de alta complejidad del tercer nivel de atención especializada","En los consultorios privados exclusivamente con los pacientes afiliados a obras sociales"],c:0,exp:"La Promoción de la Salud incluye la colaboración activa del personal de salud en escuelas, iglesias y lugares de trabajo, dirigida especialmente a jóvenes y niños."},
+{t:4,p:"¿Por qué definir la salud como un 'derecho humano' cambia el enfoque ante una muerte prevenible según el módulo?",ops:["Porque deja de ser una tragedia inevitable y se convierte en una injusticia social de la que el Estado es responsable y debe rendir cuentas","Porque convierte cada muerte en un problema exclusivamente médico-técnico sin implicancias políticas ni sociales","Porque elimina completamente la responsabilidad del Estado y la traslada al individuo y su familia","Porque solo sirve para documentar estadísticas de mortalidad sin implicar cambios reales en política sanitaria"],c:0,exp:"El marco de derechos implica que las muertes prevenibles no son simples tragedias sino injusticias sociales por las cuales el Estado debe hacerse responsable a través de leyes, políticas y programas."},
+{t:4,p:"¿Qué establece el Artículo 25 de la Declaración Universal de los Derechos Humanos respecto al derecho a la salud?",ops:["Toda persona tiene derecho a un nivel de vida adecuado que asegure la salud y el bienestar, incluyendo alimentación, vestido, vivienda y asistencia médica","Solo establece el derecho al trabajo digno sin mencionar directamente el derecho al acceso a la salud","Limita el derecho a la salud exclusivamente a los ciudadanos de los países fundadores de las Naciones Unidas","Define la salud como responsabilidad exclusivamente individual sin ninguna obligación por parte del Estado"],c:0,exp:"El Artículo 25 establece el derecho a un nivel de vida adecuado que asegure la salud y el bienestar, incluyendo alimentación, vestido, vivienda y asistencia médica para toda persona."},
+{t:4,p:"¿En qué se diferencia el 'Derecho a la Supervivencia' del 'Derecho al Desarrollo' de los niños según la Convención sobre los Derechos del Niño?",ops:["Supervivencia: cubre necesidades básicas de existencia (albergue, nutrición, atención médica). Desarrollo: condiciones para alcanzar el máximo potencial (educación, juego, esparcimiento, cultura)","Ambos derechos son idénticos y se refieren exclusivamente al acceso a los servicios médicos básicos","El derecho al desarrollo solo se aplica a niños mayores de 12 años que ya cuentan con capacidad jurídica","La supervivencia incluye educación y esparcimiento y el desarrollo se limita exclusivamente a nutrición y albergue"],c:0,exp:"Supervivencia: derecho a la vida y necesidades básicas (albergue, nutrición, servicios médicos). Desarrollo: condiciones para el máximo potencial, incluyendo educación, juego, esparcimiento, cultura e información."},
+{t:4,p:"¿Qué implica el 'Derecho a la Participación y Ciudadanía' de los niños dentro del ámbito de la salud según el módulo?",ops:["Permite al niño asumir un papel activo en su comunidad, expresar opiniones sobre asuntos que afectan su vida y ejercer derechos de asociación con fines pacíficos","Solo implica el derecho a recibir atención médica gratuita en todos los hospitales públicos del país","Se refiere únicamente al voto en elecciones escolares sin ninguna implicación en el campo de la salud","Es un derecho exclusivo de niños mayores de 16 años que han alcanzado la madurez jurídica necesaria"],c:0,exp:"El derecho de participación permite al niño asumir un papel activo en la comunidad, expresar opiniones sobre asuntos que afectan su vida, con derechos de asociación y reunión pacífica, como preparación para la adultez."},
+{t:4,p:"El 'Derecho a la Protección Jurídica Especial' de los niños exige protección ante diversas formas de vulneración. ¿Cuáles menciona el módulo?",ops:["Abuso, abandono, explotación, tortura, trabajo infantil, conflictos armados, consumo de drogas y explotación sexual son las formas que deben ser prevenidas","Solo protege contra el abandono familiar en menores de 3 años y en situaciones de desamparo extremo","Únicamente regula la participación de niños en procesos judiciales civiles sin otras disposiciones","Solo comprende la protección contra el trabajo infantil en zonas rurales del interior del país"],c:0,exp:"El derecho de protección exige salvaguardar a los niños de: abuso, abandono, explotación, tortura, sistema de justicia criminal, conflictos armados, trabajo infantil, consumo de drogas y explotación sexual."},
+{t:4,p:"La Convención sobre los Derechos del Niño (1989) establece obligaciones en materia de salud. ¿Qué ratifica en su artículo 24?",ops:["Los Estados deben asegurar atención sanitaria prenatal y postnatal para las madres y desarrollar atención preventiva incluyendo orientación y planificación familiar","Solo establece el derecho a la educación básica sin ninguna mención a la atención de salud materno-infantil","Regula exclusivamente el trabajo infantil sin ninguna disposición específica sobre atención médica","Establece la edad mínima para que un niño reciba atención médica sin acompañante adulto"],c:0,exp:"El artículo 24 ratifica que los Estados deben asegurar atención sanitaria prenatal y postnatal para las madres y desarrollar atención preventiva, incluyendo orientación y planificación familiar."},
+{t:4,p:"¿Cuáles son los fines y objetivos de la Salud Pública según el módulo de estudio?",ops:["Vigilar el estado de salud de la población y sus necesidades; desarrollar las mejores políticas de salud y garantizar la prestación de servicios sanitarios","Solo curar las enfermedades existentes en la población mediante la atención en hospitales y clínicas públicas","Exclusivamente prevenir enfermedades transmisibles mediante programas masivos de vacunación en la comunidad","Administrar los recursos económicos del sector salud sin ninguna función preventiva ni de promoción de salud"],c:0,exp:"Los fines de la Salud Pública son: vigilar el estado de salud de la población y sus necesidades; y desarrollar las mejores políticas de salud garantizando la prestación de servicios sanitarios."},
+{t:4,p:"El Protocolo Adicional de la Convención Americana sobre Derechos Humanos define el derecho a la salud. ¿Cómo lo define su artículo 10?",ops:["Toda persona tiene derecho a la salud entendida como el disfrute del más alto nivel de bienestar físico, mental y social posible","La salud es un privilegio que se adquiere mediante la contribución obligatoria a los sistemas de seguridad social","El derecho a la salud corresponde exclusivamente a los ciudadanos con residencia legal en el territorio nacional","Solo incluye el derecho a la atención de urgencias vitales en los establecimientos públicos habilitados"],c:0,exp:"El Artículo 10 define que toda persona tiene derecho a la salud, entendida como el disfrute del más alto nivel de bienestar físico, mental y social posible."},
+{t:4,p:"¿Qué establece la FESP de 'Participación Social y Empoderamiento de los Ciudadanos en Salud' según el módulo?",ops:["Implica la participación comunitaria, promover un ambiente saludable y el apoyo tecnológico para la promoción activa de la salud","Solo corresponde a los técnicos y especialistas del Ministerio de Salud de la Nación sin participación comunitaria","Es exclusivamente la participación ciudadana en encuestas de satisfacción con la atención hospitalaria","Se limita a la organización de jornadas de vacunación masiva en comunidades rurales aisladas"],c:0,exp:"Esta FESP implica la participación de la comunidad, el empoderamiento ciudadano, promover un ambiente saludable y el apoyo tecnológico para la promoción activa de la salud."}
+];
+
+function shuf(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shufOps(ops,c){const idx=[0,1,2,3];for(let i=3;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}return{ops:idx.map(i=>ops[i]),c:idx.indexOf(c)};}
+
+let preguntas=[],cur=0,ok=0,tmr=null,seg=35,done=false;
+let rs={1:{ok:0,tot:0},2:{ok:0,tot:0},3:{ok:0,tot:0},4:{ok:0,tot:0}};
+const TL={1:'TEMA 1 – Proceso Salud-Enfermedad',2:'TEMA 2 – Atención Primaria de la Salud',3:'TEMA 3 – Políticas Nacionales y Organización',4:'TEMA 4 – Salud Pública y Derechos'};
+
+function iniciarJuego(){
+  preguntas=shuf(Q).map(q=>{const r=shufOps(q.ops,q.c);return{...q,...r};});
+  cur=0;ok=0;done=false;
+  rs={1:{ok:0,tot:0},2:{ok:0,tot:0},3:{ok:0,tot:0},4:{ok:0,tot:0}};
+  document.getElementById('s-inicio').style.display='none';
+  document.getElementById('s-resultado').style.display='none';
+  document.getElementById('s-juego').style.display='block';
+  const dots=document.getElementById('progress-dots');
+  dots.innerHTML=preguntas.map((_,i)=>`<div class="dot" id="dot_${i}"></div>`).join('');
+  document.getElementById('dot_0').classList.add('act');
+  mP();
+}
+
+function mP(){
+  done=false;
+  const q=preguntas[cur];
+  rs[q.t].tot++;
+  document.getElementById('hud-q').textContent=`${cur+1}/48`;
+  document.getElementById('p-num').textContent=`Pregunta ${cur+1} de 48`;
+  document.getElementById('p-txt').textContent=q.p;
+  document.getElementById('tema-tag').textContent=TL[q.t];
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('feedback').style.display='none';
+  const co=document.getElementById('opciones');
+  co.innerHTML=q.ops.map((o,i)=>`<button class="opt" onclick="resp(${i})" id="op_${i}">${o}</button>`).join('');
+  const pw=document.getElementById('pregunta-wrap');
+  pw.style.animation='none';pw.offsetHeight;pw.style.animation='fadeInUp .3s ease forwards';
+  startT();
+}
+
+function startT(){
+  clearInterval(tmr);seg=35;updT();
+  tmr=setInterval(()=>{seg--;updT();if(seg<=0){clearInterval(tmr);tOut();}},1000);
+}
+function updT(){
+  document.getElementById('hud-time').textContent=seg;
+  const b=document.getElementById('timer-bar');
+  b.style.width=((seg/35)*100)+'%';
+  b.className='timer-bar'+(seg<=10?' warn':'');
+}
+function tOut(){
+  if(done)return;done=true;
+  const q=preguntas[cur];
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  document.getElementById('op_'+q.c).classList.add('opt-ok');
+  fb(false,'⏱ Tiempo agotado. '+q.exp);
+  document.getElementById('dot_'+cur).classList.remove('act');
+  document.getElementById('dot_'+cur).classList.add('mal');
+  setTimeout(sig,3500);
+}
+function resp(i){
+  if(done)return;done=true;clearInterval(tmr);
+  const q=preguntas[cur];const cor=(i===q.c);
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  document.getElementById('op_'+q.c).classList.add('opt-ok');
+  if(!cor)document.getElementById('op_'+i).classList.add('opt-mal');
+  document.getElementById('dot_'+cur).classList.remove('act');
+  if(cor){ok++;rs[q.t].ok++;document.getElementById('hud-pts').textContent=ok;document.getElementById('dot_'+cur).classList.add('ok');fb(true,'✅ ¡Correcto! '+q.exp);}
+  else{document.getElementById('dot_'+cur).classList.add('mal');fb(false,'❌ Incorrecto. '+q.exp);}
+  setTimeout(sig,3500);
+}
+function fb(cor,txt){
+  const el=document.getElementById('feedback');
+  el.innerHTML=txt;el.className='feedback show'+(cor?'':' inc');el.style.display='block';
+}
+function sig(){
+  cur++;
+  if(cur>=preguntas.length){mR();}
+  else{document.getElementById('dot_'+cur).classList.add('act');mP();}
+}
+function mR(){
+  document.getElementById('s-juego').style.display='none';
+  document.getElementById('s-resultado').style.display='block';
+  const tot=preguntas.length,pct=Math.round((ok/tot)*100);
+  document.getElementById('r-pct').textContent=pct+'%';
+  document.getElementById('r-ok').textContent=ok;
+  document.getElementById('r-mal').textContent=tot-ok;
+  document.getElementById('r-tot').textContent=tot;
+  let ico,msg,sub,col;
+  if(pct<=39){ico='📖';msg='Debés estudiar más';sub='El esfuerzo es la clave de todo éxito. ¡Tú puedes!';col='var(--rojo)';}
+  else if(pct<=50){ico='💪';msg='Sigue estudiando, supérate';sub='¡Sabés que podés dar más!';col='#ff6b35';}
+  else if(pct<=60){ico='😊';msg='Seguro estás para aprobar';sub='Vas por buen camino, ¡no pares!';col='var(--amarillo)';}
+  else if(pct<=70){ico='👍';msg='Con este puntaje seguro aprobás';sub='Muy bien, seguí repasando los temas más difíciles.';col='var(--amarillo)';}
+  else if(pct<=80){ico='🚀';msg='Mega seguro que aprobás';sub='¡Excelente trabajo! Estás muy bien preparado.';col='var(--cian)';}
+  else if(pct<=90){ico='⭐';msg='Tu puntaje es épico';sub='Seguí estudiando para ser un 10. ¡Casi perfecto!';col='var(--verde)';}
+  else{ico='🏆';msg='¡Perfección en su máxima expresión!';sub='Esta es tu materia. ¡El Prof. Lic. Molina estará orgulloso!';col='var(--verde)';}
+  document.getElementById('r-icono').textContent=ico;
+  document.getElementById('r-msg').textContent=msg;document.getElementById('r-msg').style.color=col;
+  document.getElementById('r-pct').style.color=col;document.getElementById('r-sub').textContent=sub;
+  let bH='';
+  [1,2,3,4].forEach(t=>{
+    const{ok:o,tot:tv}=rs[t];const p=tv?Math.round((o/tv)*100):0;
+    bH+=`<div class="ts-row"><span class="ts-lbl">Tema ${t}</span><div class="ts-bar"><div class="ts-fill" id="ts_${t}" style="width:0%"></div></div><span class="ts-pct">${p}%</span></div>`;
+  });
+  document.getElementById('ts-bars').innerHTML=bH;
+  setTimeout(()=>{[1,2,3,4].forEach(t=>{const{ok:o,tot:tv}=rs[t];document.getElementById('ts_'+t).style.width=(tv?Math.round((o/tv)*100):0)+'%';});},200);
+}
+function reiniciar(){document.getElementById('s-resultado').style.display='none';document.getElementById('s-inicio').style.display='block';}
+</script>
+</body>
+</html>
