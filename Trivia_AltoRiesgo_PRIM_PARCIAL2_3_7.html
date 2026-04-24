@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia – Enfermería en Alto Riesgo | Prof. Lic. Francisco Molina</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+  :root {
+    --rojo:    #B71C1C;
+    --rojo-m:  #C62828;
+    --rojo-c:  #FFEBEE;
+    --naranja: #E65100;
+    --azul:    #0D47A1;
+    --azul-m:  #1565C0;
+    --azul-c:  #E3F2FD;
+    --verde:   #1B5E20;
+    --verde-m: #2E7D32;
+    --verde-c: #E8F5E9;
+    --gris-bg: #1a1a2e;
+    --card:    #ffffff;
+    --dark:    #1a1a2e;
+    --radius:  16px;
+    --blanco:  #ffffff;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px;
+  }
+
+  .header { text-align:center; color:white; margin-bottom:22px; width:100%; max-width:800px; }
+  .header .logo { font-size:46px; margin-bottom:4px; }
+  .header h1 { font-size:clamp(1.3rem,4vw,2rem); font-weight:900; letter-spacing:1px; }
+  .header p  { font-size:0.85rem; opacity:0.65; margin-top:4px; }
+
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 28px 30px; max-width:800px; width:100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+
+  /* START */
+  #startScreen { text-align:center; }
+  #startScreen h2 { color:var(--rojo); font-size:1.5rem; font-weight:900; margin-bottom:10px; }
+  #startScreen p  { color:#555; font-size:0.92rem; margin-bottom:16px; line-height:1.6; }
+  .info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0 26px; }
+  .info-item { background:#fff3f3; border:2px solid #ffcdd2; border-radius:12px; padding:14px 10px; text-align:center; }
+  .info-item .num { font-size:2rem; font-weight:900; color:var(--rojo); }
+  .info-item .lbl { font-size:0.75rem; color:#888; margin-top:2px; }
+
+  /* QUIZ */
+  #quizScreen { display:none; }
+
+  .top-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:8px; }
+  .badge-tema {
+    font-size:0.7rem; font-weight:800; padding:5px 13px; border-radius:20px;
+    letter-spacing:0.5px; text-transform:uppercase; color:white;
+  }
+  .badge-t2 { background:var(--azul-m); }
+  .badge-t3 { background:var(--verde-m); }
+  .badge-t7 { background:var(--rojo-m); }
+  .q-counter { font-size:0.82rem; color:#888; font-weight:700; }
+
+  .timer-wrap { display:flex; align-items:center; gap:8px; width:100%; margin-bottom:12px; }
+  .timer-bar-bg { flex:1; height:11px; background:#e0e0e0; border-radius:10px; overflow:hidden; }
+  .timer-bar {
+    height:100%; width:100%;
+    background: linear-gradient(90deg, #1565C0, #E65100, #B71C1C);
+    border-radius:10px; transition: width 1s linear;
+  }
+  .timer-num { font-size:1.3rem; font-weight:900; color:var(--azul); min-width:32px; text-align:right; }
+  .timer-num.urgent { color:var(--rojo); animation:pulse .5s infinite alternate; }
+  @keyframes pulse { from{opacity:1} to{opacity:.35} }
+
+  .score-mini { display:flex; gap:16px; font-size:0.8rem; font-weight:700; margin-bottom:14px; color:#666; }
+  .score-mini .ok { color:var(--verde-m); }
+  .score-mini .ko { color:var(--rojo-m); }
+
+  .question-text {
+    font-size:clamp(.93rem,2.4vw,1.07rem); font-weight:700; color:var(--dark);
+    line-height:1.6; margin-bottom:20px; padding:16px 18px;
+    background:#f9f9f9; border-left:5px solid var(--azul-m); border-radius:10px;
+  }
+
+  .options { display:flex; flex-direction:column; gap:9px; }
+  .opt-btn {
+    background:#f4f7ff; border:2px solid #c5d5f5; border-radius:12px;
+    padding:12px 16px; font-size:.9rem; font-family:'Nunito',sans-serif;
+    font-weight:600; color:var(--dark); cursor:pointer;
+    text-align:left; transition:all .18s;
+    display:flex; align-items:flex-start; gap:10px;
+  }
+  .opt-btn:hover:not(:disabled) { background:#dde8ff; border-color:var(--azul-m); transform:translateX(4px); }
+  .opt-btn .letter {
+    min-width:26px; height:26px; border-radius:50%;
+    background:var(--azul-m); color:white;
+    font-size:.78rem; font-weight:900;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;
+  }
+  .opt-btn.correct { background:#d4efdf; border-color:var(--verde-m); color:var(--verde); }
+  .opt-btn.correct .letter { background:var(--verde-m); }
+  .opt-btn.wrong   { background:#ffebee; border-color:var(--rojo-m); color:var(--rojo); }
+  .opt-btn.wrong .letter { background:var(--rojo-m); }
+  .opt-btn:disabled { cursor:not-allowed; opacity:.85; }
+
+  .feedback { margin-top:13px; padding:11px 15px; border-radius:10px; font-size:.87rem; font-weight:700; display:none; }
+  .feedback.show { display:block; }
+  .feedback.ok { background:#d4efdf; color:var(--verde); }
+  .feedback.ko { background:#ffebee; color:var(--rojo); }
+
+  .progress-wrap { margin-top:20px; }
+  .progress-label { font-size:.75rem; color:#bbb; margin-bottom:4px; text-align:right; }
+  .progress-bg { background:#e0e0e0; border-radius:10px; height:8px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--azul-m),var(--rojo)); border-radius:10px; transition:width .5s ease; }
+
+  .btn-next {
+    margin-top:16px; width:100%; background:var(--azul); color:white;
+    border:none; border-radius:12px; padding:13px;
+    font-size:.97rem; font-weight:800; font-family:'Nunito',sans-serif;
+    cursor:pointer; transition:background .2s,transform .1s; display:none; letter-spacing:.5px;
+  }
+  .btn-next:hover { background:var(--azul-m); transform:scale(1.02); }
+  .btn-next.show { display:block; }
+
+  /* RESULT */
+  #resultScreen { display:none; text-align:center; }
+  .result-emoji { font-size:60px; margin-bottom:8px; }
+  .result-pct { font-size:4rem; font-weight:900; color:var(--rojo); line-height:1; margin-bottom:6px; }
+  .result-msg { font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:16px; line-height:1.5; }
+  .result-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:18px 0 24px; }
+  .stat-box { background:#f5f5f5; border-radius:12px; padding:14px 10px; }
+  .stat-box .n { font-size:1.9rem; font-weight:900; }
+  .stat-box .l { font-size:.75rem; color:#777; margin-top:2px; }
+  .stat-box.ok .n { color:var(--verde-m); }
+  .stat-box.ko .n { color:var(--rojo-m); }
+  .stat-box.sk .n { color:var(--naranja); }
+
+  .breakdown { text-align:left; margin-bottom:22px; }
+  .breakdown h3 { font-size:.85rem; color:#aaa; font-weight:800; margin-bottom:10px; text-transform:uppercase; letter-spacing:.5px; }
+  .tema-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .tema-row .tname { font-size:.8rem; font-weight:700; color:var(--dark); min-width:100px; }
+  .tema-row .tbar-bg { flex:1; height:14px; background:#e0e0e0; border-radius:10px; overflow:hidden; }
+  .tema-row .tbar { height:100%; border-radius:10px; transition:width 1s ease; }
+  .tema-row .tpct { font-size:.8rem; font-weight:800; min-width:38px; text-align:right; }
+
+  .btn-retry {
+    background:linear-gradient(135deg,var(--rojo),var(--naranja));
+    color:white; border:none; border-radius:12px; padding:14px 28px;
+    font-size:1rem; font-weight:800; font-family:'Nunito',sans-serif;
+    cursor:pointer; transition:transform .2s; box-shadow:0 6px 20px rgba(183,28,28,.35);
+  }
+  .btn-retry:hover { transform:scale(1.04); }
+
+  .btn-start {
+    background:linear-gradient(135deg,var(--rojo),#E53935);
+    color:white; border:none; border-radius:14px; padding:16px 40px;
+    font-size:1.1rem; font-weight:900; font-family:'Nunito',sans-serif;
+    cursor:pointer; transition:transform .2s,box-shadow .2s;
+    box-shadow:0 6px 20px rgba(183,28,28,.4); letter-spacing:.5px;
+  }
+  .btn-start:hover { transform:scale(1.05); }
+
+  .nivel-badge {
+    display:inline-block; background:#B71C1C; color:white;
+    font-size:.72rem; font-weight:900; padding:4px 12px; border-radius:20px;
+    text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;
+  }
+
+  .footer-note { color:rgba(255,255,255,.4); font-size:.72rem; margin-top:18px; text-align:center; }
+
+  @media(max-width:500px){
+    .card { padding:18px 14px; }
+    .info-grid { grid-template-columns:1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🫁</div>
+  <h1>TRIVIA – ENFERMERÍA EN ALTO RIESGO</h1>
+  <p>CENT 74 ATSA · Filial Concepción · 3° Año · Prof. Lic. Francisco Molina</p>
+</div>
+
+<!-- START -->
+<div class="card" id="startScreen">
+  <div class="nivel-badge">⚡ NIVEL DIFÍCIL</div>
+  <h2>Repaso para el Parcial 🏥</h2>
+  <p>Esta trivia cubre los temas del parcial de <strong>Enfermería en Alto Riesgo</strong>: Farmacología UCI (Tema 2), Insuficiencia Respiratoria (Tema 3) y Cardiopatías Isquémicas (Tema 7). ¡35 segundos por pregunta, nivel difícil!</p>
+  <div class="info-grid">
+    <div class="info-item"><div class="num">27</div><div class="lbl">Preguntas</div></div>
+    <div class="info-item"><div class="num">35s</div><div class="lbl">Por pregunta</div></div>
+    <div class="info-item"><div class="num">3</div><div class="lbl">Temas</div></div>
+  </div>
+  <div style="background:#fff3e0;border:2px solid #ffcc80;border-radius:12px;padding:14px;margin-bottom:22px;font-size:.87rem;color:#5D4037;font-weight:700;text-align:left;">
+    📋 <strong>Distribución:</strong> Tema 2 Farmacología → 12 preguntas &nbsp;|&nbsp; Tema 3 Insuficiencia Respiratoria → 10 preguntas &nbsp;|&nbsp; Tema 7 Cardiopatías Isquémicas → 5 preguntas
+  </div>
+  <button class="btn-start" onclick="startQuiz()">🚨 COMENZAR TRIVIA</button>
+</div>
+
+<!-- QUIZ -->
+<div class="card" id="quizScreen">
+  <div class="top-bar">
+    <span class="badge-tema" id="badgeTema">TEMA 2</span>
+    <span class="q-counter" id="qCounter">Pregunta 1 de 27</span>
+  </div>
+  <div class="timer-wrap">
+    <div class="timer-bar-bg"><div class="timer-bar" id="timerBar"></div></div>
+    <div class="timer-num" id="timerNum">35</div>
+  </div>
+  <div class="score-mini">
+    <span class="ok">✔ <span id="scoreOk">0</span> correctas</span>
+    <span class="ko">✘ <span id="scoreKo">0</span> incorrectas</span>
+    <span>⏱ <span id="scoreTime">0</span> vencidas</span>
+  </div>
+  <div class="question-text" id="questionText">Cargando...</div>
+  <div class="options" id="optionsContainer"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="progress-wrap">
+    <div class="progress-label" id="progressLabel">0 / 27</div>
+    <div class="progress-bg"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <button class="btn-next" id="btnNext" onclick="nextQuestion()">SIGUIENTE →</button>
+</div>
+
+<!-- RESULT -->
+<div class="card" id="resultScreen">
+  <div class="result-emoji" id="resultEmoji">🎉</div>
+  <div class="result-pct" id="resultPct">0%</div>
+  <div class="result-msg" id="resultMsg"></div>
+  <div class="result-stats">
+    <div class="stat-box ok"><div class="n" id="rOk">0</div><div class="l">Correctas</div></div>
+    <div class="stat-box ko"><div class="n" id="rKo">0</div><div class="l">Incorrectas</div></div>
+    <div class="stat-box sk"><div class="n" id="rSk">0</div><div class="l">Vencidas</div></div>
+  </div>
+  <div class="breakdown" id="breakdown"></div>
+  <button class="btn-retry" onclick="retryQuiz()">🔄 JUGAR DE NUEVO</button>
+</div>
+
+<div class="footer-note">Prof. Lic. Francisco Molina · Enfermería en Alto Riesgo 2026 · CENT 74 ATSA</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+// BANCO – 27 preguntas nivel DIFÍCIL
+// tema: código numérico 2/3/7
+// ══════════════════════════════════════════════════════════════════════════
+const BANCO = [
+
+// ══════════ TEMA 2 – FARMACOLOGÍA UCI (12 preguntas) ══════════════════════
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"La Noradrenalina (norepinefrina) actúa principalmente sobre receptores adrenérgicos. ¿Cuál es el PRINCIPAL efecto hemodinámico que diferencia su acción clínica de la Dopamina en dosis alfa?",
+  opciones:[
+    "Produce vasodilatación renal selectiva aumentando la diuresis sin modificar la presión arterial media.",
+    "Produce vasoconstricción periférica intensa con incremento de la resistencia vascular sistémica y de la presión arterial, siendo de elección en el shock séptico.",
+    "Genera efecto inotrópico positivo sin modificar la frecuencia cardíaca ni la resistencia periférica.",
+    "Actúa exclusivamente sobre receptores beta-1 aumentando el gasto cardíaco sin efecto vasoconstrictor."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"La extravasación de Dopamina puede producir necrosis hística. ¿Cuál es la conducta correcta de enfermería ante este evento y qué fármaco se utiliza para revertirla?",
+  opciones:[
+    "Aplicar compresas calientes en la zona y suspender la infusión definitivamente.",
+    "Infiltrar la zona con 5-10 mg de Fentolamina (bloqueador alfa-adrenérgico) diluida en 10 ml de solución fisiológica para inducir hiperemia y reducir la necrosis.",
+    "Administrar adrenalina subcutánea en el sitio de extravasación para generar vasoconstricción local.",
+    "Cubrir con apósito oclusivo y notificar al médico sin intervenir localmente hasta su indicación."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"La Dobutamina se diferencia de la Dopamina en su mecanismo de acción. ¿En cuál de las siguientes condiciones clínicas la Dobutamina es la droga vasoactiva de PRIMERA elección según el módulo?",
+  opciones:[
+    "Shock séptico con hipotensión refractaria y resistencia vascular periférica muy baja.",
+    "Pacientes con congestión pulmonar y gasto cardíaco disminuido por disfunción ventricular izquierda, que no toleran vasodilatadores.",
+    "Bradiarritmias con bloqueo aurículo-ventricular completo que requieren cronotropismo positivo.",
+    "Fibrilación ventricular en contexto de paro cardiorrespiratorio como droga de primera línea."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"El Propofol es un anestésico IV de acción corta. En el contexto de UCI, ¿qué precaución ESPECÍFICA de enfermería es CRÍTICA para prevenir complicaciones infecciosas graves?",
+  opciones:[
+    "Mezclar el propofol con lidocaína en la misma jeringa para potenciar su efecto sedante.",
+    "Proteger de la luz solar directa y mantener la temperatura del frasco entre 15-30°C.",
+    "Manipular con técnica aséptica estricta, ya que no contiene conservantes antimicrobianos; la solución abierta debe descartarse a las 6 horas para preparación en jeringa y 12 horas en sistema infusión.",
+    "Diluir siempre en solución fisiológica 0,9% antes de administrar para evitar embolias lipídicas."
+  ],
+  correcta:2
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"La Atropina es un parasimpaticolitico que actúa como antagonista competitivo del receptor muscarínico de acetilcolina. ¿Cuál es su mecanismo de acción ESPECÍFICO sobre el sistema de conducción cardíaco?",
+  opciones:[
+    "Bloquea los canales de calcio en el nodo sinusal reduciendo la frecuencia cardíaca.",
+    "Aumenta el automatismo del nodo sinusal y mejora la conducción AV por acción vagolítica, revirtiendo bradicardias y bloqueos.",
+    "Genera efecto inotrópico negativo reduciendo la contractilidad miocárdica en taquiarritmias.",
+    "Actúa sobre receptores beta-2 pulmonares produciendo broncodilatación y aumento de la frecuencia cardíaca."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"La Amiodarona es el antiarrítmico de elección en UCI para arritmias graves. ¿Cuál es la dosis de ATAQUE por vía EV y cómo se administra según el módulo?",
+  opciones:[
+    "2 mg/kg en bolo IV directo sin dilución, a pasar en menos de 5 minutos.",
+    "5 mg/kg en goteo durante 15 minutos, seguido de infusión continua de 5 mg/kg/día.",
+    "10 mg/kg/día oral fraccionado cada 8 horas durante la primera semana.",
+    "1 mg/kg en infusión de 30 minutos mezclado con solución fisiológica al 0,9%."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"El Midazolam es una benzodiazepina ampliamente utilizada en UCI. ¿Cuál es la dosis de infusión continua IV para sedación en adultos y cuál es su nombre comercial según el módulo?",
+  opciones:[
+    "Infusión continua: 0,5-1 mg/kg/hora. Nombre comercial: Valium.",
+    "Infusión continua: 0,01-0,06 mg/kg/hora (10-60 mcg/kg/hora). Nombre comercial: Dormicum / Dalam.",
+    "Bolo IV: 5 mg/kg cada 6 horas. Nombre comercial: Rivotril.",
+    "Infusión continua: 2-4 mg/kg/hora. Nombre comercial: Diazepam."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"La Succinilcolina es el único bloqueante neuromuscular DESPOLARIZANTE de uso clínico. ¿Cuál es la DIFERENCIA fundamental en su mecanismo de acción respecto a los bloqueantes NO despolarizantes como Rocuronio?",
+  opciones:[
+    "La succinilcolina compite con la acetilcolina por los receptores nicotínicos sin activarlos, produciendo parálisis por bloqueo competitivo.",
+    "La succinilcolina se une a los receptores colinérgicos de la placa motora y los activa produciendo despolarización sostenida (fasciculaciones seguidas de parálisis), siendo metabolizada por seudocolinesterasa.",
+    "La succinilcolina actúa bloqueando los canales de sodio en el axón motor, impidiendo la propagación del impulso nervioso.",
+    "La succinilcolina inhibe la liberación de acetilcolina desde la vesícula presináptica de la unión neuromuscular."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"El Nitroprusiato de Sodio (NPS) es un potente vasodilatador. ¿Cuál es la complicación TÓXICA más grave de su uso prolongado y qué parámetro de enfermería es CRÍTICO monitorizar?",
+  opciones:[
+    "Nefrotoxicidad grave con oliguria; monitorizar diuresis horaria y creatinina sérica.",
+    "Intoxicación por tiocianatos (cianuro) con riesgo de acidosis metabólica; es fotosensible, por lo que se debe proteger el frasco y las guías de suero de la luz.",
+    "Hepatotoxicidad con ictericia; controlar transaminasas y bilirrubina sérica.",
+    "Neurotoxicidad con convulsiones; monitorizar estado de conciencia con escala de Glasgow horaria."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"La Nitroglicerina (NTG) en infusión IV se prepara diluyendo 1 ampolla de 25 mg en 250 cc de Dextrosa 5%. ¿Por qué NO se deben utilizar envases de PVC ni equipos estándar para su administración?",
+  opciones:[
+    "Porque el PVC aumenta la temperatura de la solución alterando la farmacocinética del fármaco.",
+    "Porque la nitroglicerina es inestable en medio ácido y el PVC contiene plastificantes que la degradan.",
+    "Porque la nitroglicerina se absorbe en el PVC (polivinilcloruro) reduciendo significativamente la dosis real administrada al paciente; deben usarse equipos de vidrio o polietileno.",
+    "Porque el PVC produce una reacción química con la nitroglicerina liberando óxido nitroso tóxico."
+  ],
+  correcta:2
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"La Vancomicina se utiliza en UCI para gérmenes resistentes. ¿Cuál es la dilución correcta y por qué debe administrarse LENTAMENTE (en más de 1 hora)?",
+  opciones:[
+    "Diluir en 50 cc de solución fisiológica; debe pasar lentamente para evitar flebitis en el catéter central.",
+    "Diluir en 100 cc de Dextrosa 5%, pasar en más de 1 hora a 35 gotas/min para evitar el 'Síndrome del Hombre Rojo' (liberación masiva de histamina que puede simular cuadro alérgico).",
+    "Administrar en bolo IV de 3-5 minutos diluida en 20 cc de agua destilada estéril.",
+    "Diluir en 500 cc de solución fisiológica, pasar en 30 minutos para lograr el pico sérico terapéutico."
+  ],
+  correcta:1
+},
+{
+  tema:2, badge:"TEMA 2 · Farmacología UCI",
+  pregunta:"El Bicarbonato de Sodio se usa en UCI para corrección de acidosis metabólica grave. ¿Cuál es la INTERACCIÓN farmacológica MÁS peligrosa que enfermería debe conocer y por qué NO debe mezclarse con Adrenalina?",
+  opciones:[
+    "Potencia la acción cronotrópica de la adrenalina produciendo taquicardia maligna.",
+    "Inactiva a la adrenalina por oxidación en medio alcalino, anulando su efecto vasopresor.",
+    "El bicarbonato provoca precipitación al mezclarse con adrenalina en la misma vía, y además la alcalinidad del bicarbonato puede producir necrosis si hay extravasación.",
+    "Aumenta la vida media de la adrenalina en plasma produciendo vasoconstricción prolongada y necrosis tisular."
+  ],
+  correcta:2
+},
+
+// ══════════ TEMA 3 – INSUFICIENCIA RESPIRATORIA (10 preguntas) ═══════════
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"La Insuficiencia Respiratoria Hipoxémica se produce por mecanismos fisiopatológicos específicos. ¿Cuál de los siguientes mecanismos NO RESPONDE al aumento de la FiO2 administrada?",
+  opciones:[
+    "La alteración de la relación V/Q (ventilación-perfusión) en neumonías e hipertensión pulmonar.",
+    "El shunt intrapulmonar verdadero (sangre venosa que pasa a circulación arterial sin pasar por unidades alveolares funcionantes), ya que el O2 no puede llegar a las unidades colapsadas.",
+    "La disminución del oxígeno en el aire inspirado por la altitud.",
+    "La hipoventilación alveolar con aumento de la PaCO2 secundaria a depresión del SNC."
+  ],
+  correcta:1
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"En la fisiopatología de la IR hipoxémica, ¿cuál es el gradiente alveolo-arterial de O2 que indica que el mecanismo es SHUNT o alteración V/Q, según el módulo?",
+  opciones:[
+    "Mayor a 5 mmHg, indicando cualquier alteración en el intercambio gaseoso.",
+    "Mayor a 15 mmHg, indicando shunt intrapulmonar o alteración de la relación ventilación/perfusión.",
+    "Menor a 10 mmHg, siendo normal en adultos de cualquier edad.",
+    "Mayor a 40 mmHg, siendo indicativo exclusivo de fibrosis pulmonar avanzada."
+  ],
+  correcta:1
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"Los Bloqueantes Neuromusculares (BNM) se utilizan en UCI para facilitar la ventilación mecánica. Según el módulo, ¿en cuál de las siguientes situaciones clínicas su uso es MANDATORIO independientemente de la adaptación del paciente al ARM?",
+  opciones:[
+    "Fiebre mayor a 38,5°C con necesidad de ventilación mecánica para reducir el consumo de O2.",
+    "Hipertensión endocraneana refractaria, estado de mal convulsivo de difícil control, shock severo y tétanos/síndrome neuroléptico maligno.",
+    "Broncoespasmo grave con SatO2 menor a 88% que requiere presión de soporte elevada.",
+    "Síndrome de abstinencia por benzodiazepinas con agitación psicomotriz en paciente intubado."
+  ],
+  correcta:1
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"El neumotórax es una causa de IR por mecanismo extrapulmonar. ¿Qué determina el grado de compromiso respiratorio del paciente con neumotórax, según el módulo?",
+  opciones:[
+    "Exclusivamente el antecedente de enfermedad pulmonar obstructiva crónica del paciente.",
+    "El tipo de neumotórax (abierto o cerrado) y el volumen de aire inhalado al momento del colapso.",
+    "El grado de colapso pulmonar producido por el neumotórax Y la reserva funcional respiratoria previa del paciente.",
+    "La velocidad de instalación del neumotórax y el nivel de hemoglobina en sangre."
+  ],
+  correcta:2
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"Respecto a la Insuficiencia Respiratoria Hipercápnica, ¿qué característica DISTINGUE la hipoventilación como mecanismo fisiopatológico de los demás mecanismos hipoxémicos?",
+  opciones:[
+    "Se acompaña de gradiente alveolo-arterial de O2 NORMAL y de AUMENTO de la PaCO2 (hipercapnia), a diferencia del shunt o la alteración V/Q.",
+    "Produce hipoxemia sin hipercapnia y no responde al aumento de FiO2.",
+    "Genera un gradiente alveolo-arterial mayor a 15 mmHg con PaCO2 disminuida.",
+    "Se caracteriza por taquipnea compensadora eficaz que normaliza la PaCO2 sin intervención."
+  ],
+  correcta:0
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"La oxigenoterapia tiene características físicas que el enfermero debe conocer. Según el módulo, ¿cuál de las siguientes propiedades del oxígeno justifica las PRECAUCIONES especiales en su manejo?",
+  opciones:[
+    "El oxígeno es incoloro, inodoro, insaboro y NO inflamable, por lo que puede manejarse sin precauciones especiales.",
+    "El oxígeno es incoloro, inodoro, insaboro, INFLAMABLE, seco e irritativo de las mucosas; además es tóxico en concentraciones elevadas y prolongadas.",
+    "El oxígeno es un gas húmedo con olor característico que requiere filtración antes de administrarse.",
+    "El oxígeno es tóxico exclusivamente en pacientes con EPOC, siendo inocuo para el resto de los pacientes."
+  ],
+  correcta:1
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"En la administración de oxígeno, la máscara de NO reinhalación aporta una FiO2 específica. ¿Cuál es el FLUJO MÍNIMO requerido y qué FiO2 brinda este dispositivo?",
+  opciones:[
+    "Flujo mínimo de 4 L/min y aporta una FiO2 de entre 24-35%.",
+    "Flujo mínimo de 6 L/min y aporta una FiO2 de entre 35-50%.",
+    "Flujo mínimo de 10 L/min y aporta una FiO2 de entre 60-80%.",
+    "Flujo mínimo de 15 L/min y aporta una FiO2 del 100%."
+  ],
+  correcta:2
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"En el manejo de enfermería del paciente con IR, el módulo indica que si es posible, la gasometría arterial debe realizarse ANTES de una acción específica. ¿Cuál es y por qué?",
+  opciones:[
+    "Antes de colocar la vía venosa central, para evitar neumotórax iatrogénico durante el procedimiento.",
+    "Antes de administrar oxígeno, ya que la FiO2 modifica los valores de PaO2 y PaCO2 impidiendo evaluar la situación basal real del paciente.",
+    "Antes de posicionar al paciente, porque los cambios posturales alteran la distribución V/Q y los gases arteriales.",
+    "Antes de aspirar secreciones, ya que la aspiración produce hipoxemia transitoria que altera los resultados."
+  ],
+  correcta:1
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"La neumonía nosocomial (NN) se diferencia de la NAC. ¿Cuál es la DIFERENCIA principal entre ambas y qué implicación tiene para el tratamiento antibiótico?",
+  opciones:[
+    "La NAC es más grave que la NN y requiere siempre internación en UCI; la NN puede manejarse ambulatoriamente.",
+    "La NAC se adquiere fuera del hospital con flora bacteriana habitual; la NN se adquiere durante la internación con gérmenes hospitalarios multirresistentes que requieren antibióticos de amplio espectro y diferente esquema.",
+    "La diferencia es exclusivamente epidemiológica sin impacto en la elección del antibiótico.",
+    "La NN siempre es causada por virus hospitalarios y no responde a antibióticos convencionales."
+  ],
+  correcta:1
+},
+{
+  tema:3, badge:"TEMA 3 · Insuficiencia Respiratoria",
+  pregunta:"En el manejo de las vías aéreas del paciente con IR, el módulo describe la conducta ante secreciones abundantes. ¿Qué condición del paciente hace NECESARIA la aspiración orotraqueal por el enfermero?",
+  opciones:[
+    "Cuando el paciente presenta fiebre mayor a 38°C con secreciones de cualquier característica.",
+    "Cuando el paciente no presente un adecuado nivel de conciencia o no sea capaz de movilizar las secreciones por sí mismo.",
+    "Solo cuando el médico indica el procedimiento por escrito en la hoja de indicaciones.",
+    "Únicamente cuando el paciente está intubado y conectado a ARM con presiones de vía aérea elevadas."
+  ],
+  correcta:1
+},
+
+// ══════════ TEMA 7 – CARDIOPATÍAS ISQUÉMICAS (5 preguntas) ══════════════
+{
+  tema:7, badge:"TEMA 7 · Cardiopatías Isquémicas",
+  pregunta:"La Angina de Pecho Inestable se distingue de la estable por características clínicas específicas. ¿Cuál es la definición de 'angina increscendo' o 'preinfarto' y por qué constituye una urgencia médica?",
+  opciones:[
+    "Angina que aparece durante el reposo, dura menos de 5 minutos y cede con 1 comprimido de nitroglicerina sublingual.",
+    "Angina grave que persiste más de 20 minutos y NO se alivia con tres tabletas de nitroglicerina; representa una urgencia porque indica trombosis coronaria aguda con riesgo inminente de IAM.",
+    "Angina producida por espasmo coronario sin placa aterosclerótica subyacente, más frecuente en mujeres jóvenes.",
+    "Angina que aparece solo con el ejercicio de alta intensidad y desaparece con reposo en menos de 10 minutos."
+  ],
+  correcta:1
+},
+{
+  tema:7, badge:"TEMA 7 · Cardiopatías Isquémicas",
+  pregunta:"Para diagnosticar un IAM el módulo describe tres criterios. ¿Cuál es la enzima cardíaca que actualmente constituye el GOLD STANDARD para el diagnóstico de necrosis miocárdica y por qué es superior a la CPK-MB?",
+  opciones:[
+    "La Lactato Deshidrogenasa (LDH), por su elevación precoz a las 2 horas del inicio del dolor.",
+    "La GOT/AST, ya que se eleva en las primeras horas del IAM y permanece alta por 2 semanas.",
+    "La Troponina cardíaca (T e I), ya que es una proteína ESPECÍFICA del músculo cardíaco con mayor sensibilidad y especificidad que la CPK-MB, permitiendo detectar incluso daños miocárdicos mínimos.",
+    "La Mioglobina, ya que es la primera proteína en elevarse (a los 30 minutos) y es cardio-específica."
+  ],
+  correcta:2
+},
+{
+  tema:7, badge:"TEMA 7 · Cardiopatías Isquémicas",
+  pregunta:"En el ECG del IAM, ¿en qué derivaciones se evidencian los cambios cuando el infarto compromete la CARA INFERIOR del miocardio y cuál es la arteria habitualmente ocluida?",
+  opciones:[
+    "Derivaciones V1, V2, V3 por oclusión de la arteria descendente anterior izquierda.",
+    "Derivaciones DI, aVL, V4, V5, V6 por oclusión de la arteria coronaria circunfleja.",
+    "Derivaciones DII, DIII, aVF por oclusión de la arteria coronaria derecha.",
+    "Derivaciones V1, V2 con onda R inicial alta por oclusión de rama coronaria izquierda (cara posterior)."
+  ],
+  correcta:2
+},
+{
+  tema:7, badge:"TEMA 7 · Cardiopatías Isquémicas",
+  pregunta:"En el tratamiento del IAM con estreptoquinasa (trombolítico), ¿cuál es la CONTRAINDICACIÓN ESPECÍFICA que menciona el módulo respecto al uso de morfina para analgesia?",
+  opciones:[
+    "La morfina está contraindicada en todo IAM porque produce taquicardia que aumenta la demanda de O2 miocárdico.",
+    "En el IAM inferior con compromiso del ventrículo derecho, la morfina disminuye la precarga y puede producir colapso hemodinámico; debe administrarse con control estricto de signos vitales.",
+    "La morfina está contraindicada en el IAM anterior extenso porque produce depresión del ST en derivaciones derechas.",
+    "En todos los IAM la morfina está absolutamente contraindicada; debe usarse ketorolac como analgésico de elección."
+  ],
+  correcta:1
+},
+{
+  tema:7, badge:"TEMA 7 · Cardiopatías Isquémicas",
+  pregunta:"El desarrollo de la PLACA ATEROSCLERÓTICA sigue etapas secuenciales. ¿Cuál es el PRIMER evento celular que inicia la aterosclerosis según el módulo?",
+  opciones:[
+    "La calcificación de la capa media arterial como respuesta al envejecimiento vascular fisiológico.",
+    "La trombosis espontánea en la adventicia arterial por disfunción de los factores de coagulación.",
+    "La migración de monocitos desde el flujo sanguíneo hacia la pared arterial, transformándose en macrófagos cargados de lípidos que forman vetas de grasa.",
+    "La proliferación de células musculares lisas en la capa íntima como respuesta directa a la hipercolesterolemia."
+  ],
+  correcta:2
+}
+
+];
+
+// ══════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════
+let questions=[], current=0, correct=0, incorrect=0, timedOut=0, timer=null, timeLeft=35, answered=false;
+const temaStats = {2:{ok:0,tot:0}, 3:{ok:0,tot:0}, 7:{ok:0,tot:0}};
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function startQuiz(){
+  questions=shuffle(BANCO).map(q=>{
+    const opts=q.opciones.map((o,i)=>({text:o,original:i}));
+    const shuffledOpts=shuffle(opts);
+    const newCorrecta=shuffledOpts.findIndex(o=>o.original===q.correcta);
+    return{...q,shuffledOpts,newCorrecta};
+  });
+  current=0;correct=0;incorrect=0;timedOut=0;answered=false;
+  Object.keys(temaStats).forEach(k=>{temaStats[k].ok=0;temaStats[k].tot=0;});
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('resultScreen').style.display='none';
+  document.getElementById('quizScreen').style.display='block';
+  loadQuestion();
+}
+
+function loadQuestion(){
+  answered=false;
+  const q=questions[current];
+  // badge color
+  const badge=document.getElementById('badgeTema');
+  badge.textContent=q.badge;
+  badge.className='badge-tema badge-t'+q.tema;
+  document.getElementById('qCounter').textContent=`Pregunta ${current+1} de ${questions.length}`;
+  document.getElementById('questionText').textContent=q.pregunta;
+  // options
+  const container=document.getElementById('optionsContainer');
+  container.innerHTML='';
+  const letters=['A','B','C','D'];
+  q.shuffledOpts.forEach((opt,idx)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=`<span class="letter">${letters[idx]}</span><span>${opt.text}</span>`;
+    btn.onclick=()=>selectAnswer(idx);
+    container.appendChild(btn);
+  });
+  const fb=document.getElementById('feedback');
+  fb.className='feedback';fb.textContent='';
+  document.getElementById('btnNext').classList.remove('show');
+  document.getElementById('scoreOk').textContent=correct;
+  document.getElementById('scoreKo').textContent=incorrect;
+  document.getElementById('scoreTime').textContent=timedOut;
+  const pct=Math.round((current/questions.length)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`${current} / ${questions.length}`;
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(timer);timeLeft=35;updateTimerUI();
+  timer=setInterval(()=>{timeLeft--;updateTimerUI();if(timeLeft<=0){clearInterval(timer);timeOut();}},1000);
+}
+
+function updateTimerUI(){
+  document.getElementById('timerBar').style.width=(timeLeft/35*100)+'%';
+  const num=document.getElementById('timerNum');
+  num.textContent=timeLeft;
+  timeLeft<=8?num.classList.add('urgent'):num.classList.remove('urgent');
+}
+
+function timeOut(){
+  if(answered)return;answered=true;timedOut++;
+  const q=questions[current];temaStats[q.tema].tot++;
+  disableOptions();highlightCorrect(q.newCorrecta);
+  const fb=document.getElementById('feedback');
+  fb.textContent=`⏱ ¡Tiempo! La correcta era la opción ${['A','B','C','D'][q.newCorrecta]}.`;
+  fb.className='feedback ko show';
+  document.getElementById('scoreTime').textContent=timedOut;
+  document.getElementById('btnNext').classList.add('show');
+}
+
+function selectAnswer(idx){
+  if(answered)return;answered=true;clearInterval(timer);
+  const q=questions[current];temaStats[q.tema].tot++;
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  const fb=document.getElementById('feedback');
+  if(idx===q.newCorrecta){
+    btns[idx].classList.add('correct');correct++;temaStats[q.tema].ok++;
+    fb.textContent='✔ ¡Correcto! Excelente manejo del tema.';fb.className='feedback ok show';
+  }else{
+    btns[idx].classList.add('wrong');highlightCorrect(q.newCorrecta);incorrect++;
+    fb.textContent=`✘ Incorrecto. La respuesta correcta es la opción ${['A','B','C','D'][q.newCorrecta]}.`;
+    fb.className='feedback ko show';
+  }
+  document.getElementById('scoreOk').textContent=correct;
+  document.getElementById('scoreKo').textContent=incorrect;
+  document.getElementById('btnNext').classList.add('show');
+}
+
+function highlightCorrect(ci){document.querySelectorAll('.opt-btn')[ci].classList.add('correct');}
+function disableOptions(){document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);}
+
+function nextQuestion(){
+  current++;
+  current>=questions.length?showResult():loadQuestion();
+}
+
+function showResult(){
+  document.getElementById('quizScreen').style.display='none';
+  document.getElementById('resultScreen').style.display='block';
+  const total=questions.length;
+  const pct=Math.round((correct/total)*100);
+  document.getElementById('resultPct').textContent=pct+'%';
+  document.getElementById('rOk').textContent=correct;
+  document.getElementById('rKo').textContent=incorrect;
+  document.getElementById('rSk').textContent=timedOut;
+  let emoji,msg;
+  if(pct<=39){emoji='📖';msg='¡Debés estudiar más! El esfuerzo es la clave de todo éxito. ¡Vos podés!';}
+  else if(pct<=50){emoji='📚';msg='¡Seguí estudiando! Superáte, que sí podés dar más.';}
+  else if(pct<=60){emoji='👍';msg='¡Seguro estás para aprobar! Revisá los temas donde fallaste.';}
+  else if(pct<=70){emoji='🎯';msg='¡Con este puntaje seguro aprobás! Seguí repasando.';}
+  else if(pct<=80){emoji='🔥';msg='¡Con este puntaje MEGA SEGURO que aprobás! Estás muy bien preparado.';}
+  else if(pct<=90){emoji='⭐';msg='¡Tu puntaje es ÉPICO! Seguí estudiando para ser un 10.';}
+  else{emoji='🏆';msg='¡PERFECCIÓN EN SU MÁXIMA EXPRESIÓN! ¡Ésta es tu materia!';}
+  document.getElementById('resultEmoji').textContent=emoji;
+  document.getElementById('resultMsg').textContent=msg;
+  // Breakdown
+  const bd=document.getElementById('breakdown');
+  bd.innerHTML='<h3>Resultados por tema</h3>';
+  const temas=[
+    [2,'Tema 2 · Farmacología','#1565C0'],
+    [3,'Tema 3 · Insuf. Resp.','#2E7D32'],
+    [7,'Tema 7 · Cardiopatías','#B71C1C'],
+  ];
+  temas.forEach(([num,name,color])=>{
+    const s=temaStats[num];
+    const tPct=s.tot>0?Math.round((s.ok/s.tot)*100):0;
+    const row=document.createElement('div');
+    row.className='tema-row';
+    row.innerHTML=`<span class="tname">${name}</span><div class="tbar-bg"><div class="tbar" style="width:${tPct}%;background:${color}"></div></div><span class="tpct" style="color:${color}">${tPct}%</span>`;
+    bd.appendChild(row);
+  });
+}
+
+function retryQuiz(){
+  document.getElementById('resultScreen').style.display='none';
+  document.getElementById('startScreen').style.display='block';
+}
+</script>
+</body>
+</html>
