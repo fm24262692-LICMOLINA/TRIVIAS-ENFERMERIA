@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia · Diplomatura en Salud Mental y Psiquiátrica · UNT</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c14;
+    --deep: #07080f;
+    --surface: #111420;
+    --card: #161b2c;
+    --border: #1f2840;
+    --accent: #c8a96e;
+    --accent2: #8bb4d8;
+    --green: #5ecba1;
+    --red: #e5737a;
+    --muted: #4a556e;
+    --text: #d8dff0;
+    --light: #eef1fa;
+    --radius: 14px;
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 14px 60px;
+    position: relative; overflow-x: hidden;
+  }
+
+  /* ── fondo textural ── */
+  body::before {
+    content:''; position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse 60% 40% at 5% 0%, rgba(200,169,110,.07) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 35% at 95% 100%, rgba(139,180,216,.06) 0%, transparent 50%),
+      radial-gradient(ellipse 30% 20% at 50% 50%, rgba(94,203,161,.03) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  body::after {
+    content:''; position:fixed; inset:0; z-index:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    background-size: 180px;
+    pointer-events:none; opacity:.5;
+  }
+  .wrap { position:relative; z-index:1; width:100%; max-width:760px; }
+
+  /* ── HEADER ── */
+  header { text-align:center; padding:34px 0 28px; position:relative; }
+  .inst-line {
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    margin-bottom:18px;
+  }
+  .inst-line::before, .inst-line::after {
+    content:''; flex:1; max-width:80px; height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent));
+  }
+  .inst-line::after { background:linear-gradient(90deg,var(--accent),transparent); }
+  .inst-text {
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:500;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--accent);
+  }
+  header h1 {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(26px,5vw,44px); font-weight:700; line-height:1.1;
+    color:var(--light); letter-spacing:.02em; margin-bottom:8px;
+  }
+  header h1 em { font-style:italic; color:var(--accent); }
+  header p {
+    font-family:'DM Mono',monospace; font-size:11px; color:var(--muted);
+    letter-spacing:.1em; text-transform:uppercase; line-height:1.7;
+  }
+
+  /* ── STATS ── */
+  .score-row { display:flex; gap:8px; margin-bottom:18px; }
+  .chip {
+    flex:1; background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:10px 8px; text-align:center;
+    position:relative; overflow:hidden;
+  }
+  .chip::before {
+    content:''; position:absolute; inset:0; opacity:0;
+    background:linear-gradient(135deg,rgba(200,169,110,.06),transparent);
+    transition:opacity .3s;
+  }
+  .chip:hover::before { opacity:1; }
+  .chip .v { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; line-height:1; }
+  .chip .l { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:3px; }
+  .v.c { color:var(--green); } .v.w { color:var(--red); } .v.p { color:var(--accent); }
+
+  /* ── PROGRESS ── */
+  .prog-wrap { margin-bottom:18px; }
+  .prog-top {
+    display:flex; justify-content:space-between;
+    font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:6px;
+  }
+  .prog-bar { height:2px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .prog-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:2px; transition:width .5s cubic-bezier(.4,0,.2,1); }
+
+  /* ── TIMER ── */
+  .timer-row { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .timer-lbl { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+  .timer-bar { flex:1; height:4px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .timer-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--green),var(--accent)); transition:width .08s linear, background .4s; }
+  .timer-fill.urgent { background:linear-gradient(90deg,var(--red),#ff9f43); }
+  .timer-num { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:600; min-width:28px; text-align:right; color:var(--light); }
+
+  /* ── CARD PREGUNTA ── */
+  .q-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:28px 26px 24px;
+    margin-bottom:14px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.03);
+    position:relative; overflow:hidden;
+  }
+  .q-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent 5%,var(--accent) 40%,var(--accent2) 60%,transparent 95%);
+  }
+  .q-card::after {
+    content:''; position:absolute; bottom:-40px; right:-40px;
+    width:120px; height:120px; border-radius:50%;
+    background:radial-gradient(circle,rgba(200,169,110,.05) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .q-meta { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .q-num {
+    font-family:'DM Mono',monospace; font-size:10px; color:var(--accent);
+    font-weight:500; letter-spacing:.15em; text-transform:uppercase;
+  }
+  .q-tema {
+    font-family:'DM Mono',monospace; font-size:9px; color:var(--muted);
+    letter-spacing:.1em; text-transform:uppercase;
+  }
+  .q-meta::before { content:''; width:1px; height:12px; background:var(--border); display:inline-block; }
+  .q-text {
+    font-family:'Outfit',sans-serif; font-size:17px; font-weight:500;
+    line-height:1.55; color:var(--light);
+  }
+
+  /* ── OPCIONES ── */
+  .options { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+  .opt {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:13px 16px;
+    cursor:pointer; display:flex; align-items:flex-start; gap:14px;
+    font-size:14px; line-height:1.5; color:var(--text);
+    transition:border-color .15s, background .15s, transform .12s;
+    position:relative; overflow:hidden;
+  }
+  .opt::before {
+    content:''; position:absolute; inset:0; opacity:0;
+    background:linear-gradient(135deg,rgba(200,169,110,.06),transparent);
+    transition:opacity .2s;
+  }
+  .opt:hover:not(.locked) { border-color:var(--accent); transform:translateX(4px); }
+  .opt:hover:not(.locked)::before { opacity:1; }
+  .opt.correct { border-color:var(--green); background:rgba(94,203,161,.08); }
+  .opt.wrong   { border-color:var(--red);   background:rgba(229,115,122,.07); }
+  .opt.locked  { cursor:default; }
+  .opt .lt {
+    width:24px; height:24px; border-radius:5px; flex-shrink:0;
+    background:var(--border); display:flex; align-items:center; justify-content:center;
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:500;
+    transition:background .2s, color .2s; margin-top:1px; color:var(--muted);
+  }
+  .opt.correct .lt { background:var(--green); color:#001a0e; }
+  .opt.wrong   .lt { background:var(--red);   color:#fff; }
+  .opt-txt { flex:1; }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    padding:13px 16px; border-radius:10px; font-size:13px; line-height:1.6;
+    margin-bottom:14px; display:none; font-family:'Outfit',sans-serif;
+  }
+  .feedback.show { display:block; }
+  .feedback.ok {
+    background:rgba(94,203,161,.08); border:1px solid rgba(94,203,161,.22);
+    color:#a8f0d0;
+  }
+  .feedback.ok::before { content:'✦ '; color:var(--green); }
+  .feedback.no {
+    background:rgba(229,115,122,.08); border:1px solid rgba(229,115,122,.22);
+    color:#f5aeb3;
+  }
+  .feedback.no::before { content:'✦ '; color:var(--red); }
+
+  /* ── BTN NEXT ── */
+  .btn-next {
+    width:100%; padding:14px;
+    background:transparent;
+    border:1px solid var(--accent);
+    color:var(--accent);
+    font-family:'DM Mono',monospace; font-weight:500; font-size:12px;
+    letter-spacing:.15em; text-transform:uppercase;
+    border-radius:10px; cursor:pointer;
+    transition:background .2s, color .2s, transform .1s; display:none;
+    position:relative; overflow:hidden;
+  }
+  .btn-next::before {
+    content:''; position:absolute; inset:0;
+    background:var(--accent); opacity:0; transition:opacity .2s;
+  }
+  .btn-next:hover::before { opacity:1; }
+  .btn-next:hover { color:var(--bg); transform:scale(1.005); }
+  .btn-next span { position:relative; z-index:1; }
+  .btn-next.show { display:block; }
+
+  /* ── RESULTS ── */
+  .results {
+    text-align:center; padding:50px 30px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:0 24px 80px rgba(0,0,0,.6);
+    position:relative; overflow:hidden;
+  }
+  .results::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent 5%,var(--accent) 40%,var(--accent2) 60%,transparent 95%);
+  }
+  .trophy { font-size:60px; margin-bottom:14px; display:block; }
+  .results h2 {
+    font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:700;
+    color:var(--light); margin-bottom:6px;
+  }
+  .results .pct {
+    font-family:'Cormorant Garamond',serif; font-size:72px; font-weight:700;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    line-height:1; margin:10px 0;
+  }
+  .res-grid { display:flex; gap:10px; margin:18px 0 24px; }
+  .res-chip { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center; }
+  .res-chip .rv { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; }
+  .res-chip .rl { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:3px; }
+  .results p { color:var(--muted); font-size:14px; line-height:1.7; margin-bottom:26px; font-family:'Outfit',sans-serif; }
+  .btn-restart {
+    padding:13px 44px;
+    background:transparent; border:1px solid var(--accent);
+    color:var(--accent); font-family:'DM Mono',monospace; font-weight:500; font-size:12px;
+    letter-spacing:.15em; text-transform:uppercase;
+    border-radius:10px; cursor:pointer; transition:all .2s; position:relative; overflow:hidden;
+  }
+  .btn-restart::before {
+    content:''; position:absolute; inset:0; background:var(--accent); opacity:0; transition:opacity .2s;
+  }
+  .btn-restart:hover::before { opacity:1; }
+  .btn-restart:hover { color:var(--bg); }
+  .btn-restart span { position:relative; z-index:1; }
+
+  .footer {
+    text-align:center; color:var(--muted);
+    font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em;
+    margin-top:36px; line-height:2; text-transform:uppercase;
+  }
+  .footer strong { color:var(--accent); font-weight:500; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="inst-line"><span class="inst-text">Universidad Nacional de Tucumán · Escuela de Enfermería</span></div>
+    <h1>Salud Mental<br><em>&amp; Psiquiatría</em></h1>
+    <p>Diplomatura Universitaria · Prof. Lic. Martin Padilla<br>
+    60 preguntas · 35 segundos · Respuestas aleatorias</p>
+  </header>
+
+  <div class="score-row">
+    <div class="chip"><div class="v c" id="sc">0</div><div class="l">Correctas</div></div>
+    <div class="chip"><div class="v w" id="sw">0</div><div class="l">Incorrectas</div></div>
+    <div class="chip"><div class="v p" id="sp">0</div><div class="l">Puntos</div></div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-top">
+      <span id="pnum">Pregunta 1 de 60</span>
+      <span id="ppct">0%</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  </div>
+
+  <div id="game">
+    <div class="timer-row">
+      <span class="timer-lbl">Tiempo</span>
+      <div class="timer-bar"><div class="timer-fill" id="tbar" style="width:100%"></div></div>
+      <span class="timer-num" id="tnum">35</span>
+    </div>
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="q-num" id="qnum">01</span>
+        <span class="q-tema" id="qtema">—</span>
+      </div>
+      <div class="q-text" id="qtext"></div>
+    </div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next show" id="btnNext" onclick="next()" style="display:none">
+      <span>Siguiente →</span>
+    </button>
+  </div>
+
+  <div id="results" class="results" style="display:none">
+    <span class="trophy" id="trophy">🏆</span>
+    <h2>Resultado final</h2>
+    <div class="pct" id="rpct">—</div>
+    <div class="res-grid">
+      <div class="res-chip"><div class="rv" id="rc" style="color:var(--green)">0</div><div class="rl">Correctas</div></div>
+      <div class="res-chip"><div class="rv" id="rw" style="color:var(--red)">0</div><div class="rl">Incorrectas</div></div>
+      <div class="res-chip"><div class="rv" id="rp" style="color:var(--accent)">0</div><div class="rl">Puntos</div></div>
+    </div>
+    <p id="rmsg"></p>
+    <button class="btn-restart" onclick="restart()"><span>Jugar de nuevo</span></button>
+  </div>
+
+  <div class="footer">
+    <strong>Prof. Lic. Martin Padilla</strong> · Diplomatura en Salud Mental y Psiquiátrica<br>
+    UNT · Escuela de Enfermería · Material educativo 2026
+  </div>
+</div>
+
+<script>
+const TIEMPO = 35;
+const Q = [
+
+  // ══ CONSUMO PROBLEMÁTICO DE SUSTANCIAS ══
+  { tema:"Consumo problemático",
+    q:"¿Cuál es la definición de 'droga' según Fernández Alonso que la diferencia de un simple medicamento?",
+    a:"Sustancia que modifica el estado mental y tiene capacidad patológica para generar ligazón adictiva, con uso frecuente independiente de prescripción",
+    ops:["Sustancia que modifica el estado mental y tiene capacidad patológica para generar ligazón adictiva, con uso frecuente independiente de prescripción",
+         "Cualquier compuesto químico que altere transitoriamente el humor sin producir dependencia física ni tolerancia",
+         "Principio activo de uso exclusivamente médico, prescripto por facultativo, con control sanitario del Estado",
+         "Toda sustancia ilegal que produce euforia, sin importar su capacidad adictiva ni su uso social contextualizado"],
+    exp:"Fernández Alonso define la droga como una sustancia con uso frecuente independiente de prescripción, cuya acción prevalente modifica el estado mental, y que tiene capacidad patológica para generar ligazón adictiva. Esto la distingue del medicamento."},
+
+  { tema:"Consumo problemático",
+    q:"En el modelo ético-jurídico del consumo problemático, ¿qué elemento ocupa el rol central y cómo concibe al consumidor?",
+    a:"La sustancia es el elemento central y el consumidor es visto como culpable de una debilidad moral o transgresión legal",
+    ops:["La sustancia es el elemento central y el consumidor es visto como culpable de una debilidad moral o transgresión legal",
+         "El contexto social es el eje; el consumidor es víctima de condicionantes económicos y desigualdad estructural",
+         "La persona ocupa el centro; se entiende el consumo como síntoma de un conflicto psíquico no resuelto",
+         "El vínculo persona-sustancia-contexto se analiza sin jerarquía entre los tres componentes del modelo"],
+    exp:"En el modelo ético-jurídico la sustancia ocupa el lugar central y el consumidor es visto como responsable moral o infractor legal. Este modelo impulsa la demonización de la sustancia y tiende a criminalizar al usuario."},
+
+  { tema:"Consumo problemático",
+    q:"¿Cuál es la diferencia conceptual entre 'tolerancia' y 'dependencia' en el contexto del consumo problemático?",
+    a:"Tolerancia: necesitar más cantidad para obtener el mismo efecto. Dependencia: el organismo requiere la sustancia para funcionar con normalidad y presenta síndrome de abstinencia al suspenderla",
+    ops:["Tolerancia: necesitar más cantidad para obtener el mismo efecto. Dependencia: el organismo requiere la sustancia para funcionar con normalidad y presenta síndrome de abstinencia al suspenderla",
+         "Son sinónimos que describen el mismo proceso de adaptación neurobiológica sin consecuencias clínicas diferenciables",
+         "Tolerancia implica incapacidad de consumir sin consecuencias legales; dependencia implica disfunción laboral exclusiva",
+         "Tolerancia es exclusiva de depresores del SNC; dependencia solo ocurre con estimulantes y alucinógenos"],
+    exp:"La tolerancia implica que se requiere una dosis cada vez mayor para lograr el mismo efecto. La dependencia significa que el organismo necesita la sustancia para funcionar, y su ausencia genera el síndrome de abstinencia, con manifestaciones físicas y/o psicológicas específicas."},
+
+  { tema:"Consumo problemático",
+    q:"¿Qué caracteriza el síndrome de abstinencia alcohólica grave (delirium tremens) y cuándo suele aparecer?",
+    a:"Aparece alrededor de los 7 días de suspensión: fiebre, alteración del sensorio, convulsiones, diaforesis, temblor, HTA y taquicardia",
+    ops:["Aparece alrededor de los 7 días de suspensión: fiebre, alteración del sensorio, convulsiones, diaforesis, temblor, HTA y taquicardia",
+         "Ocurre a las 2 horas del último trago con somnolencia, bradicardia e hipoglucemia severa sin convulsiones",
+         "Se presenta a las 24 horas con euforia, midriasis, hipertermia leve y alucinaciones visuales de contenido placentero",
+         "Aparece entre los 12 días y 3 semanas de abstinencia como ansiedad leve, irritabilidad y sin compromiso autonómico"],
+    exp:"El delirium por abstinencia alcohólica (delirium tremens) aparece aproximadamente a los 7 días de supresión y se caracteriza por fiebre, alteraciones del sensorio, convulsiones, diaforesis, temblor, HTA y taquicardia. El síndrome de abstinencia más leve aparece entre las 12 horas y los 3 días."},
+
+  { tema:"Consumo problemático",
+    q:"Las cuatro fases del proceso integral de tratamiento de las adicciones son, en orden correcto:",
+    a:"Desintoxicación → deshabituación → rehabilitación → reinserción social",
+    ops:["Desintoxicación → deshabituación → rehabilitación → reinserción social",
+         "Diagnóstico → farmacoterapia → internación → alta programada sin seguimiento",
+         "Contención → desintoxicación → reinserción social → prevención de recaídas exclusiva",
+         "Evaluación → tratamiento ambulatorio → hospitalización → egreso sin rehabilitación"],
+    exp:"El módulo describe cuatro fases en orden: desintoxicación (lograr abstinencia sin síndrome agudo), deshabituación (romper patrones de dependencia), rehabilitación y reinserción social. La deshabituación busca reeducar al paciente para vivir sin la sustancia."},
+
+  // ══ SISTEMA INMUNOLÓGICO / SALUD MENTAL ══
+  { tema:"Enfermería en salud mental",
+    q:"Según el módulo, ¿qué especialidad de enfermería atiende a personas de todas las edades con esquizofrenia, trastorno bipolar, psicosis, depresión o demencia?",
+    a:"Enfermería de salud mental de la comunidad",
+    ops:["Enfermería de salud mental de la comunidad",
+         "Enfermería médico-quirúrgica de alta complejidad",
+         "Enfermería geriátrica y paliativa de cuidados especiales",
+         "Enfermería de urgencias y trauma neurológico"],
+    exp:"El módulo define a la enfermería de salud mental de la comunidad como la especialidad que atiende a personas de todas las edades con enfermedades mentales: esquizofrenia, trastorno bipolar, psicosis, depresión, demencia, entre otras."},
+
+  { tema:"Enfermería en salud mental",
+    q:"¿Cuáles son los cinco roles de enfermería explicitados en el módulo frente a un paciente con trastorno mental?",
+    a:"Observación de signos y síntomas, acompañamiento emocional, educación al paciente y familia, administración segura de medicación y prevención de conductas de riesgo",
+    ops:["Observación de signos y síntomas, acompañamiento emocional, educación al paciente y familia, administración segura de medicación y prevención de conductas de riesgo",
+         "Diagnóstico diferencial, prescripción farmacológica, derivación al psiquiatra, alta y seguimiento domiciliario",
+         "Contención física, administración de psicofármacos, restricción de visitas, evaluación neurológica y terapia ocupacional",
+         "Valoración psicopatológica, entrevista semiestructurada, informe forense y gestión de internación involuntaria"],
+    exp:"El módulo enumera cinco roles de enfermería: observación de signos y síntomas, acompañamiento emocional, educación al paciente y la familia, administración segura de medicación y prevención de conductas de riesgo."},
+
+  // ══ PSICOPATOLOGÍA ══
+  { tema:"Psicopatología",
+    q:"El DSM-V define el trastorno de personalidad como un patrón permanente que se caracteriza por:",
+    a:"Desviarse de las expectativas culturales, ser penetrante e inflexible, iniciarse en la adolescencia o adultez temprana y generar malestar o deterioro significativo",
+    ops:["Desviarse de las expectativas culturales, ser penetrante e inflexible, iniciarse en la adolescencia o adultez temprana y generar malestar o deterioro significativo",
+         "Presentar síntomas psicóticos breves recurrentes sin causa orgánica, con inicio exclusivo en la edad adulta tardía",
+         "Origen exclusivamente traumático, curso episódico y reversibilidad total con psicoterapia breve de tres meses",
+         "Responder a factores estresores ambientales transitorios y desaparecer espontáneamente al cesar el factor desencadenante"],
+    exp:"El DSM-V define el trastorno de personalidad como un patrón permanente de experiencia interna y comportamiento que se aparta de las expectativas culturales, es generalizado e inflexible, estable en el tiempo, con inicio en la adolescencia o adultez temprana, y que genera malestar o deterioro."},
+
+  { tema:"Psicopatología",
+    q:"¿Cuál de los siguientes es un factor de riesgo o precursor de psicopatía según el módulo?",
+    a:"Incapacidad para aprender del castigo entendido como reprimenda y crueldad con animales",
+    ops:["Incapacidad para aprender del castigo entendido como reprimenda y crueldad con animales",
+         "Antecedentes familiares de trastorno bipolar y consumo temprano de cannabis en la adolescencia",
+         "Baja tolerancia a la frustración con episodios de llanto y retraimiento social sin conductas violentas",
+         "Introversión extrema, incapacidad para empatizar con pares y tendencia a la fantasía no dañina"],
+    exp:"El módulo describe como factores de riesgo o precursores de la psicopatía: incapacidad para aprender del castigo (entendido como reprimenda), no importarle el otro, crueldad con animales y mayor habilidad para la mentira. Estos factores pueden ser temporales."},
+
+  { tema:"Psicopatología",
+    q:"¿Cuál es la diferencia entre 'actuación' (acting out) y 'pasaje al acto' según el módulo?",
+    a:"En el acting out el sujeto actúa buscando que el Otro vea o responda; en el pasaje al acto el sujeto se expulsa de la escena sin intención de ser visto",
+    ops:["En el acting out el sujeto actúa buscando que el Otro vea o responda; en el pasaje al acto el sujeto se expulsa de la escena sin intención de ser visto",
+         "Ambos términos son sinónimos en psiquiatría forense y solo difieren en la escuela teórica que los utiliza",
+         "El pasaje al acto es siempre verbal y controlado; el acting out implica acción física impulsiva sin mediación simbólica",
+         "El acting out es una actuación simbólica con carga de sentido; el pasaje al acto es un acto verbal y controlado"],
+    exp:"Según el módulo: en el acting out el pasaje al acto es verbal y controlado, el sujeto actúa buscando que el Otro vea o responda. En el pasaje al acto, en cambio, el sujeto se expulsa de la escena sin intención de ser visto."},
+
+  { tema:"Psicopatología",
+    q:"Según el módulo, ¿cuál es la definición de psicosis?",
+    a:"Enfermedad mental grave con pérdida completa, temporal o permanente de la autonomía psíquica y del sentido de la realidad",
+    ops:["Enfermedad mental grave con pérdida completa, temporal o permanente de la autonomía psíquica y del sentido de la realidad",
+         "Cuadro ansioso crónico con pensamiento rumiativo, sin pérdida de contacto con la realidad ni alteración sensoperceptiva",
+         "Deterioro global progresivo de las funciones conscientes con empobrecimiento intelectual e irreversibilidad",
+         "Trastorno afectivo episódico caracterizado por alternancia de fases maníacas y depresivas sin distorsión de la realidad"],
+    exp:"El módulo define la psicosis como una enfermedad mental de grave entidad caracterizada por la pérdida completa, temporal o permanente de la autonomía psíquica, que cursa con pérdida del sentido de la realidad."},
+
+  // ══ DELIRIUM ══
+  { tema:"Delirium",
+    q:"¿Cuál es la característica temporal que distingue al delirium de una demencia?",
+    a:"El delirium tiene inicio rápido, duración breve y curso fluctuante; la demencia es un deterioro global, progresivo y generalmente definitivo",
+    ops:["El delirium tiene inicio rápido, duración breve y curso fluctuante; la demencia es un deterioro global, progresivo y generalmente definitivo",
+         "Ambos tienen inicio insidioso; la única diferencia es que la demencia compromete la memoria y el delirium no",
+         "El delirium es irreversible si no se trata; la demencia puede revertir completamente con el tratamiento adecuado",
+         "La demencia tiene inicio agudo y curso fluctuante; el delirium es crónico y de resolución espontánea en semanas"],
+    exp:"El delirium (síndrome confusional agudo) tiene inicio rápido, duración breve y curso fluctuante; es potencialmente reversible si se trata a tiempo. La demencia, en cambio, es un deterioro global progresivo, generalmente definitivo, con empobrecimiento del intelecto."},
+
+  { tema:"Delirium",
+    q:"¿Cuál es el tipo de delirium que más frecuentemente pasa desapercibido en la práctica clínica?",
+    a:"El delirium hipoactivo, porque cursa con somnolencia, lentitud y apatía que suelen confundirse con depresión o sedación",
+    ops:["El delirium hipoactivo, porque cursa con somnolencia, lentitud y apatía que suelen confundirse con depresión o sedación",
+         "El delirium hiperactivo, porque la agitación y las alucinaciones son signos inespecíficos difíciles de interpretar",
+         "El delirium mixto, porque sus características se superponen exactamente con el cuadro del trastorno bipolar",
+         "Todos los tipos de delirium se detectan con igual facilidad mediante el examen mental de rutina"],
+    exp:"El delirium hipoactivo se caracteriza por somnolencia, lentitud y apatía, síntomas que suelen confundirse con depresión o sedación farmacológica. Esto lo hace el tipo más frecuentemente subdiagnosticado en la clínica."},
+
+  { tema:"Delirium",
+    q:"Una de las causas más frecuentes de delirium mencionada en el módulo que el enfermero puede prevenir activamente es:",
+    a:"Deshidratación, inmovilización prolongada y ambientes nuevos u hospitalización",
+    ops:["Deshidratación, inmovilización prolongada y ambientes nuevos u hospitalización",
+         "Tumores cerebrales primarios y metástasis del sistema nervioso central",
+         "Enfermedades neurodegenerativas como el Alzheimer en estadio terminal",
+         "Genoma alterado y predisposición hereditaria de primer grado"],
+    exp:"El módulo menciona entre las causas prevenibles de delirium: dolor, deshidratación, inmovilización y ambientes nuevos u hospitalización. El enfermero tiene un rol activo en prevenir estas causas mediante movilización precoz, hidratación, orientación del paciente y humanización del entorno hospitalario."},
+
+  // ══ DEMENCIA ══
+  { tema:"Demencia",
+    q:"¿Cuál es el tipo de demencia más frecuente según el módulo y qué porcentaje del total representa?",
+    a:"Alzheimer, con un 60-70% de los casos",
+    ops:["Alzheimer, con un 60-70% de los casos",
+         "Demencia vascular, con un 80% de los casos en mayores de 80 años",
+         "Demencia por cuerpos de Lewy, con más del 50% de prevalencia en la población general",
+         "Demencia frontotemporal, la más prevalente en menores de 65 años con un 45% de los casos"],
+    exp:"El módulo indica que el Alzheimer representa entre el 60 y el 70% de todos los casos de demencia, siendo el tipo más frecuente. Le siguen la demencia vascular, por cuerpos de Lewy y frontotemporal."},
+
+  { tema:"Demencia",
+    q:"En las etapas de la demencia descritas en el módulo, ¿qué caracteriza la etapa leve?",
+    a:"Olvido de eventos recientes e inicio de desorientación, con el paciente aún capaz de funcionar en actividades básicas",
+    ops:["Olvido de eventos recientes e inicio de desorientación, con el paciente aún capaz de funcionar en actividades básicas",
+         "Pérdida total de la comunicación verbal, incontinencia total y dependencia absoluta para todas las AVD",
+         "Alucinaciones visuales intensas, agitación nocturna y síndrome crepuscular sin alteración de la memoria",
+         "Incapacidad para reconocer familiares cercanos con comportamientos agresivos y deambulación sin destino"],
+    exp:"La etapa leve de la demencia se caracteriza principalmente por el olvido como signo inicial, con desorientación temporal y espacial incipiente, pero con la persona aún capaz de realizar actividades básicas de la vida diaria con cierta independencia."},
+
+  // ══ SUICIDIO ══
+  { tema:"Conducta suicida",
+    q:"¿Cuántos intentos de suicidio se generan estadísticamente por cada suicidio consumado, según los datos del módulo?",
+    a:"Entre 10 y 30 intentos por cada suicidio consumado",
+    ops:["Entre 10 y 30 intentos por cada suicidio consumado",
+         "Entre 2 y 5 intentos; la mayoría de las personas que intentan suicidarse no repiten el intento",
+         "Exactamente 1 intento previo por cada suicidio; el primer intento suele ser letal en el 50% de los casos",
+         "Más de 100 intentos por cada suicidio, lo que demuestra que los intentos rara vez son letales"],
+    exp:"Según el módulo, por cada suicidio consumado se generan entre 10 y 30 intentos de suicidio, lo que fundamenta la urgencia tanto de la prevención primaria como de la postvención (atención a familiares y amigos de la víctima)."},
+
+  { tema:"Conducta suicida",
+    q:"¿Cuál es la recomendación de la OMS para los medios de comunicación respecto al manejo del suicidio?",
+    a:"Evitar lenguaje e imágenes sensacionalistas, no dar detalles del método y no presentarlo como solución simple a un problema puntual",
+    ops:["Evitar lenguaje e imágenes sensacionalistas, no dar detalles del método y no presentarlo como solución simple a un problema puntual",
+         "Difundir ampliamente los métodos para concientizar sobre su peligro real y así disuadir a potenciales imitadores",
+         "Publicar nombres y datos de la víctima para que el caso sirva de ejemplo y disuasión para la comunidad",
+         "Cubrir el tema con la máxima visibilidad posible ya que la exposición mediática reduce las tasas de suicidio"],
+    exp:"La OMS recomienda: evitar lenguaje, imágenes y títulos sensacionalistas; no proporcionar detalles del método; no dar la impresión de que el suicidio es solución simple a un problema puntual; cuestionar los mitos; y consultar a familias antes de publicar material privado."},
+
+  { tema:"Conducta suicida",
+    q:"Un mito sobre el suicidio que el módulo señala como falso es que 'quien lo anuncia no lo hace'. ¿Por qué es incorrecto?",
+    a:"Porque la mayoría de las personas que consuman el suicidio habían dado señales o avisos previos a su entorno cercano",
+    ops:["Porque la mayoría de las personas que consuman el suicidio habían dado señales o avisos previos a su entorno cercano",
+         "Porque los avisos de suicidio son siempre manipuladores y nunca deben tomarse en serio clínicamente",
+         "Porque quien anuncia el suicidio tiene mayor capacidad de afrontamiento y menor riesgo real de concretarlo",
+         "Porque solo los adolescentes anuncian el suicidio; los adultos lo consuman sin señales previas de ningún tipo"],
+    exp:"El módulo aborda los mitos del suicidio. Quien anuncia un suicidio sí puede concretarlo; de hecho, la mayoría de las personas que lo consuman habían dado señales previas. El mito de que 'quien lo dice no lo hace' es falso y peligroso porque lleva a minimizar los avisos."},
+
+  { tema:"Conducta suicida",
+    q:"En la triada de evaluación de riesgo en urgencias psiquiátricas, ¿cuáles son los tres componentes?",
+    a:"Violencia, autoagresiones y heteroagresiones",
+    ops:["Violencia, autoagresiones y heteroagresiones",
+         "Ideación suicida, plan estructurado y acceso a medios letales",
+         "Historia previa, diagnóstico actual y red de apoyo social disponible",
+         "Exploración psiquiátrica, exploración somática y evaluación familiar"],
+    exp:"Según el módulo, la triada de evaluación del riesgo en urgencias psiquiátricas comprende: 1) violencia, 2) autoagresiones y 3) heteroagresiones. Esta triada orienta la exploración rápida del paciente en crisis."},
+
+  // ══ VIOLENCIA Y CONTENCIÓN ══
+  { tema:"Violencia y contención",
+    q:"Según el módulo, los tres pilares del tratamiento del paciente con conducta violenta o agresiva son:",
+    a:"Contención verbal, contención física y psicofármacos",
+    ops:["Contención verbal, contención física y psicofármacos",
+         "Aislamiento, sedación profunda y traslado inmediato a unidad de alta seguridad",
+         "Entrevista psiquiátrica, laboratorio urgente y evaluación forense simultánea",
+         "Restricción de visitas, sujeción preventiva y notificación judicial inmediata"],
+    exp:"El módulo describe tres pilares para el tratamiento del paciente con conducta violenta: contención verbal (primera línea), contención física y psicofármacos. La escalada terapéutica sigue ese orden."},
+
+  { tema:"Violencia y contención",
+    q:"¿Cuál es la definición de contención mecánica según el módulo?",
+    a:"Último recurso terapéutico que se utiliza en situaciones extremas para garantizar la seguridad del paciente y del medio, cuando éste se vuelve un peligro para sí mismo o para otros",
+    ops:["Último recurso terapéutico que se utiliza en situaciones extremas para garantizar la seguridad del paciente y del medio, cuando éste se vuelve un peligro para sí mismo o para otros",
+         "Primera medida ante cualquier conducta agitada, aplicada de manera preventiva para facilitar la entrevista clínica inicial",
+         "Procedimiento de elección en el trastorno límite de personalidad para interrumpir los episodios de automutilación",
+         "Técnica de rehabilitación física utilizada en la recuperación de pacientes con secuelas neurológicas postcrisis"],
+    exp:"El módulo define la contención mecánica como un último recurso terapéutico para situaciones extremas en que el paciente se vuelve un peligro para sí mismo o para otros. Se aplica en unidades médicas, quirúrgicas, geriátricas, psiquiátricas y servicios de urgencias."},
+
+  { tema:"Violencia y contención",
+    q:"¿Qué respuesta emocional en el equipo de salud frente al paciente violento debe ser identificada y abordada para no dificultar la tarea?",
+    a:"Miedo a ser dañados, enojo por la agresividad y negación de la potencial violencia del paciente",
+    ops:["Miedo a ser dañados, enojo por la agresividad y negación de la potencial violencia del paciente",
+         "Exceso de empatía que lleva a tomar decisiones clínicas en favor del paciente sin consenso de equipo",
+         "Satisfacción por la contención exitosa, que genera complacencia y reduce la vigilancia posterior",
+         "Indiferencia afectiva como mecanismo adaptativo que protege al personal del desgaste emocional"],
+    exp:"El módulo señala que el equipo puede experimentar miedo a ser dañado, temor a lesionar a terceros o a consecuencias legales, enojo por la conducta del paciente y negación de su potencial violencia. Si no se reconocen, estas respuestas dificultan la tarea o aumentan la violencia."},
+
+  { tema:"Violencia y contención",
+    q:"¿Qué actitud debe adoptar el profesional frente a un paciente psicópata que amenaza con suicidarse, según el módulo?",
+    a:"No dejar que el profesional sea manipulado, pero tampoco desestimar la amenaza porque la frustración puede llevar a su concreción",
+    ops:["No dejar que el profesional sea manipulado, pero tampoco desestimar la amenaza porque la frustración puede llevar a su concreción",
+         "Ignorar completamente la amenaza ya que los psicópatas nunca consuman el suicidio sino que lo utilizan instrumentalmente",
+         "Internar de forma involuntaria e inmediata sin evaluación, ya que toda amenaza de psicópata implica riesgo real",
+         "Confrontar al paciente con la falsedad de su amenaza para interrumpir el ciclo manipulador de manera directa"],
+    exp:"El módulo indica: si el paciente es un psicópata, no debemos dejarnos manipular, pero tampoco desestimar una amenaza de suicidio, porque la frustración puede llevarlo a la concreción del hecho."},
+
+  // ══ PSICOFARMACOLOGÍA ══
+  { tema:"Psicofarmacología",
+    q:"¿Cuál es la característica que define a los antipsicóticos atípicos frente a los típicos en cuanto a efectos adversos?",
+    a:"No producen síntomas extrapiramidales a dosis usuales y tienen menor tendencia a causar hiperprolactinemia",
+    ops:["No producen síntomas extrapiramidales a dosis usuales y tienen menor tendencia a causar hiperprolactinemia",
+         "Generan mayor sedación y más efectos extrapiramidales, pero tienen mejor perfil metabólico que los típicos",
+         "Son idénticos a los típicos en eficacia y efectos adversos; la distinción es solo comercial y no clínica",
+         "Solo actúan sobre síntomas positivos y no tienen eficacia sobre síntomas negativos ni cognitivos"],
+    exp:"Los antipsicóticos atípicos se distinguen por: no producir síntomas extrapiramidales a dosis usuales, eficacia tanto para síntomas positivos, negativos y cognitivos, menor tendencia a producir trastornos motores tardíos y menor tendencia a generar hiperprolactinemia."},
+
+  { tema:"Psicofarmacología",
+    q:"¿Cuál es el efecto adverso grave específico de la clozapina que obliga a monitoreo hematológico sistemático?",
+    a:"Agranulocitosis, que puede manifestarse también como aumento de temperatura, síndrome neuroléptico maligno e hipertermia maligna",
+    ops:["Agranulocitosis, que puede manifestarse también como aumento de temperatura, síndrome neuroléptico maligno e hipertermia maligna",
+         "Prolongación del QT con riesgo de fibrilación ventricular, que requiere ECG semanal durante el primer año de uso",
+         "Insuficiencia hepática aguda fulminante, que exige controles de transaminasas mensuales durante el tratamiento",
+         "Hipernatremia severa con riesgo de desmielinización osmótica, controlada con ionograma bisemanal"],
+    exp:"El módulo señala que la clozapina puede producir aumento de temperatura, agranulocitosis, síndrome neuroléptico maligno e hipertermia maligna. Además, cuando se usa por encima de 600 mg siempre debe solicitarse EEG. La agranulocitosis es el efecto adverso más temido y exige hemograma periódico."},
+
+  { tema:"Psicofarmacología",
+    q:"¿Cuáles son los cuatro síntomas cardinales del síndrome neuroléptico maligno (SNM)?",
+    a:"Fiebre, rigidez muscular severa, estado mental alterado y disfunción autonómica",
+    ops:["Fiebre, rigidez muscular severa, estado mental alterado y disfunción autonómica",
+         "Hipotermia, flacidez muscular, hiperactividad y bradicardia con hipotensión arterial",
+         "Convulsiones tónico-clónicas, midriasis bilateral, sudoración fría e hiperreflexia osteotendinosa",
+         "Alucinaciones auditivas, ideación paranoide, discinesia orolingual y poliuria sin disfunción autonómica"],
+    exp:"El SNM es una reacción adversa potencialmente fatal a los antipsicóticos, caracterizada por: fiebre, rigidez muscular severa, estado mental alterado y disfunción autonómica. El tratamiento consiste en suspender el antipsicótico, medidas de soporte y cuidados intensivos."},
+
+  { tema:"Psicofarmacología",
+    q:"¿En qué momento de aparición se presenta típicamente el síndrome neuroléptico maligno desde el inicio del antipsicótico?",
+    a:"Aproximadamente 1 mes después de comenzar con neurolépticos, con evolución de síntomas en 24-72 horas",
+    ops:["Aproximadamente 1 mes después de comenzar con neurolépticos, con evolución de síntomas en 24-72 horas",
+         "En las primeras 48 horas de inicio del tratamiento, resolviéndose espontáneamente en 3-5 días",
+         "Solo cuando se supera la dosis máxima recomendada durante más de 6 meses de tratamiento continuado",
+         "Exclusivamente en el momento del cambio abrupto de un antipsicótico típico a uno atípico en pacientes añosos"],
+    exp:"El módulo indica que el SNM tiene momento de aparición de alrededor de 1 mes después de comenzar con neurolépticos, con síntomas que evolucionan en 24 a 72 horas y que, sin tratamiento, pueden durar de 10 a 14 días."},
+
+  { tema:"Psicofarmacología",
+    q:"¿Cuáles son los dos estabilizadores del ánimo del módulo que producen aumento de peso y somnolencia como efectos secundarios comunes?",
+    a:"Litio y divalproato",
+    ops:["Litio y divalproato",
+         "Lamotrigina y topiramato",
+         "Carbamazepina y pregabalina",
+         "Aripiprazol y quetiapina"],
+    exp:"El módulo menciona los estabilizadores del ánimo y sus efectos secundarios: el aumento de peso y la somnolencia son comunes tanto al litio (Ceglution) como al divalproato (Valcote). La lamotrigina y el topiramato, en cambio, pueden producir insomnio."},
+
+  { tema:"Psicofarmacología",
+    q:"¿Cuál es el plan de cuidados del módulo frente a un paciente con ansiedad en nivel grave o pánico?",
+    a:"Guardar la calma, aislar al paciente y actuar conjuntamente con otro profesional especialista (psiquiatra o psicólogo)",
+    ops:["Guardar la calma, aislar al paciente y actuar conjuntamente con otro profesional especialista (psiquiatra o psicólogo)",
+         "Dejar al paciente solo en un espacio tranquilo para evitar estímulos externos que aumenten la crisis ansiosa",
+         "Administrar de inmediato medicación ansiolítica sin consultar al equipo, priorizando la rapidez de acción",
+         "Confrontar racionalmente las creencias irracionales del paciente para interrumpir el ciclo ansioso de forma cognitiva"],
+    exp:"El módulo indica que ante ansiedad grave o pánico que compromete el funcionamiento corporal se debe: guardar la calma, aislar al paciente y actuar conjuntamente con otro profesional especialista (psiquiatra o psicólogo). También se destaca que la ansiedad se comunica de forma interpersonal, por lo que la calma del profesional es terapéutica."},
+
+  // ══ ASPECTOS LEGALES ══
+  { tema:"Marco legal",
+    q:"Según el módulo, ¿cuál es la definición legal de imputabilidad en el marco del artículo 34 inc. 1 del Código Penal?",
+    a:"Capacidad de comprender la criminalidad de los actos propios y dirigir las acciones en consecuencia; es requisito previo para admitir culpabilidad y responsabilidad",
+    ops:["Capacidad de comprender la criminalidad de los actos propios y dirigir las acciones en consecuencia; es requisito previo para admitir culpabilidad y responsabilidad",
+         "Presunción legal de que toda persona es responsable de sus actos, salvo que demuestre lo contrario en juicio oral",
+         "Condena penal reducida para personas con trastornos mentales que actúan en estado de emoción violenta",
+         "Requisito para obtener el beneficio de la prisión domiciliaria en personas con diagnóstico psiquiátrico grave"],
+    exp:"El módulo define la imputabilidad como el requisito previo para admitir la culpabilidad y la responsabilidad (art. 34 inc. 1 CPP): capacidad para comprender la criminalidad de sus actos y sus acciones."},
+
+  { tema:"Marco legal",
+    q:"¿Qué dispone el artículo 34 inc. 1 del Código Penal respecto a personas con psicosis al momento del hecho?",
+    a:"No son punibles quienes no puedan comprender la criminalidad del acto o dirigir sus acciones por insuficiencia de sus facultades mentales",
+    ops:["No son punibles quienes no puedan comprender la criminalidad del acto o dirigir sus acciones por insuficiencia de sus facultades mentales",
+         "Son punibles con pena reducida a la mitad, con internación compulsiva en establecimiento psiquiátrico de seguridad",
+         "Son siempre imputables; el diagnóstico psiquiátrico no exime de responsabilidad penal bajo ninguna circunstancia",
+         "Quedan a disposición del juez civil con restricción de capacidad, sin proceso penal ni medida de seguridad"],
+    exp:"El art. 34 inc. 1 del CP establece que no son punibles quienes al momento del hecho no puedan comprender la criminalidad del acto o dirigir sus acciones por insuficiencia de sus facultades mentales. La psicosis puede ser causa de inimputabilidad."},
+
+  { tema:"Marco legal",
+    q:"Según el módulo, ¿cuándo debe el consentimiento informado ser registrado por escrito en salud mental?",
+    a:"En las situaciones de internación, debidamente suscripto según el artículo 7 inciso a) de la Ley 26.529",
+    ops:["En las situaciones de internación, debidamente suscripto según el artículo 7 inciso a) de la Ley 26.529",
+         "En toda consulta ambulatoria de psiquiatría; la transmisión verbal no es válida en ningún caso en salud mental",
+         "Solo cuando el paciente es menor de edad o tiene un tutor legal designado por el poder judicial correspondiente",
+         "Nunca; en salud mental el consentimiento informado siempre es verbal y no requiere ningún tipo de registro escrito"],
+    exp:"El módulo señala que el consentimiento informado es de transmisión verbal como regla general, pero en situaciones de internación debe ser registrado por escrito y debidamente suscripto, según el artículo 7 inciso a) de la Ley 26.529 de derechos del paciente."},
+
+  { tema:"Marco legal",
+    q:"En relación a niños, niñas y adolescentes internados, ¿qué garantía establece el módulo como indispensable?",
+    a:"Un niño no puede estar solo durante el período de internación; se debe garantizar el acompañamiento permanente",
+    ops:["Un niño no puede estar solo durante el período de internación; se debe garantizar el acompañamiento permanente",
+         "Los NNyA deben ser internados siempre de forma involuntaria, sin posibilidad de dar consentimiento propio",
+         "La internación de NNyA no requiere control jurídico adicional cuando los padres dan su consentimiento",
+         "Los menores de 16 años no pueden dar consentimiento en ningún caso; solo los padres o tutores son válidos"],
+    exp:"El módulo es claro: un niño no puede estar solo durante el período de internación; se debe garantizar el acompañamiento. Además, los NNyA pueden dar su consentimiento y debe promoverse esa acción, aunque consentida la medida, debe aplicarse el control jurídico correspondiente."},
+
+  // ══ CONSUMO DE SUSTANCIAS ESPECÍFICAS ══
+  { tema:"Sustancias psicoactivas",
+    q:"¿Cuál es la clasificación farmacológica de las benzodiacepinas según el módulo?",
+    a:"Depresores del sistema nervioso central",
+    ops:["Depresores del sistema nervioso central",
+         "Estimulantes del sistema nervioso central",
+         "Alucinógenos mixtos con efecto sedante secundario",
+         "Cannabinoides sintéticos con perfil ansiolítico"],
+    exp:"El módulo clasifica las drogas farmacológicamente en depresores, estimulantes, alucinógenos y cannabinoides. Las benzodiacepinas son depresores del SNC, al igual que el alcohol, los barbitúricos y los opioides."},
+
+  { tema:"Sustancias psicoactivas",
+    q:"¿Cuál de los siguientes es un paso correcto cuando llega un paciente intoxicado o con síndrome de abstinencia, según el módulo?",
+    a:"Realizar historia clínica que incluya historia del consumo, examen mental, antecedentes en salud mental y médicos, exploración física, funcionamiento social y laboratorio",
+    ops:["Realizar historia clínica que incluya historia del consumo, examen mental, antecedentes en salud mental y médicos, exploración física, funcionamiento social y laboratorio",
+         "Administrar de inmediato el antídoto específico sin evaluación previa para evitar la progresión del cuadro tóxico",
+         "Aislar al paciente sin ninguna intervención hasta que el efecto de la sustancia desaparezca espontáneamente",
+         "Obtener solo la historia del consumo; la exploración física no es necesaria en el contexto de intoxicación aguda"],
+    exp:"El módulo indica que ante un paciente intoxicado o con síndrome de abstinencia se debe realizar una historia clínica completa que incluya: historia del consumo, examen mental, antecedentes en salud mental y médicos, exploración física, funcionamiento social y laboratorio."},
+
+  { tema:"Sustancias psicoactivas",
+    q:"Ante una intoxicación aguda por estimulantes con agitación, ¿cuáles son los psicofármacos de primera línea mencionados en el módulo?",
+    a:"Lorazepam IM o EV y Haloperidol IM",
+    ops:["Lorazepam IM o EV y Haloperidol IM",
+         "Clozapina oral y litio EV como combinación de primera elección",
+         "Fluoxetina EV y carbamazepina oral como tratamiento estabilizador inmediato",
+         "Clonazepam oral y quetiapina sublingual para cuadros de agitación moderada"],
+    exp:"El módulo indica para el manejo de la agitación e incoherencia en intoxicaciones agudas por estimulantes: Lorazepam (IM o EV) y Haloperidol (IM). Estos también se usan en el síndrome de abstinencia alcohólica grave."},
+
+  // ══ TRASTORNOS ESPECÍFICOS ══
+  { tema:"Trastornos del ánimo",
+    q:"¿Cuál es el objetivo central del cuidado de enfermería explicitado en el módulo para pacientes con trastornos del ánimo?",
+    a:"La estabilidad emocional y la adherencia al tratamiento",
+    ops:["La estabilidad emocional y la adherencia al tratamiento",
+         "La remisión total de síntomas en un plazo máximo de dos semanas de tratamiento farmacológico",
+         "La modificación cognitiva de los esquemas disfuncionales sin necesidad de psicofármacos",
+         "El alta hospitalaria temprana y la reintegración laboral antes de completar la estabilización"],
+    exp:"El módulo señala expresamente que 'la estabilidad emocional y la adherencia al tratamiento son objetivos centrales' en el cuidado de los pacientes con trastornos del ánimo. Esto guía tanto el plan de cuidados farmacológico como el psicoterapéutico."},
+
+  { tema:"Trastornos del ánimo",
+    q:"¿Cuál es el tratamiento mencionado por el módulo para el trastorno bipolar o las fases maníacas?",
+    a:"Estabilizadores del ánimo, antipsicóticos y antidepresivos combinados con psicoterapia cognitivo-conductual y psicoeducación",
+    ops:["Estabilizadores del ánimo, antipsicóticos y antidepresivos combinados con psicoterapia cognitivo-conductual y psicoeducación",
+         "Solo estabilizadores del ánimo en monoterapia; los antipsicóticos están contraindicados en el trastorno bipolar",
+         "Antidepresivos en dosis altas como único tratamiento de los episodios maníacos agudos sin necesidad de hospitalización",
+         "Electroconvulsoterapia como primera línea de tratamiento para todos los episodios maníacos y depresivos"],
+    exp:"El módulo describe el tratamiento del trastorno bipolar con: farmacológico (estabilizadores del ánimo, antipsicóticos, antidepresivos) y psicoterapia (cognitivo-conductual y psicoeducación). El rol de enfermería incluye observación de síntomas, acompañamiento, educación y administración segura de medicación."},
+
+  { tema:"Trastornos del ánimo",
+    q:"¿Qué dato histórico sobre antidepresivos IRSS menciona el módulo en relación a la mortalidad por suicidio?",
+    a:"Desde la introducción de los IRSS en la década de 1990, la tasa de suicidio bajó considerablemente",
+    ops:["Desde la introducción de los IRSS en la década de 1990, la tasa de suicidio bajó considerablemente",
+         "Los IRSS aumentaron la tasa de suicidio en adolescentes, por lo que están contraindicados en menores de 18 años",
+         "Los IRSS no tuvieron ningún impacto en las tasas de suicidio; solo mejoran la calidad de vida subjetiva",
+         "Antes de los IRSS la tasa de suicidio era más baja; su introducción coincidió con un aumento sostenido en adultos"],
+    exp:"El módulo afirma que a partir de 1990, con la introducción de los antidepresivos IRSS, la tasa de suicidio bajó considerablemente, lo que destaca la importancia del acceso y la adherencia al tratamiento farmacológico en la prevención del suicidio."},
+
+  // ══ EVALUACIÓN PSIQUIÁTRICA ══
+  { tema:"Evaluación psiquiátrica",
+    q:"¿Por qué el módulo indica que no se debe realizar entrevista al paciente confuso en urgencias?",
+    a:"Porque el paciente confuso no puede brindar información confiable ni colaborar con la evaluación; primero debe tratarse el estado confusional",
+    ops:["Porque el paciente confuso no puede brindar información confiable ni colaborar con la evaluación; primero debe tratarse el estado confusional",
+         "Porque la entrevista puede agravar el estado confusional al estimular al paciente con preguntas dirigidas",
+         "Porque la entrevista en pacientes confusos es exclusiva del psiquiatra y el enfermero no debe intervenir",
+         "Porque todo paciente confuso es considerado inimputable y la entrevista carece de valor legal y clínico"],
+    exp:"El módulo indica: si el paciente está confuso, no se realizará entrevista. Esto se debe a que en ese estado el paciente no puede brindar información confiable ni participar activamente en la exploración psiquiátrica, y primero debe estabilizarse el cuadro confusional."},
+
+  { tema:"Evaluación psiquiátrica",
+    q:"¿Cuáles son los cuatro componentes de la evaluación del paciente en urgencias psiquiátricas según el módulo?",
+    a:"Exploración psiquiátrica, exploración somática, evaluación familiar y evaluación del entorno social",
+    ops:["Exploración psiquiátrica, exploración somática, evaluación familiar y evaluación del entorno social",
+         "Historia de consumo, examen mental, laboratorio urgente y tomografía computada cerebral de rutina",
+         "Anamnesis, diagnóstico diferencial, plan farmacológico y derivación a la unidad correspondiente",
+         "Triaje, contención verbal, administración de psicofármaco y alta con seguimiento ambulatorio"],
+    exp:"El módulo describe cuatro componentes de la evaluación del paciente en urgencias: 1) exploración psiquiátrica, 2) exploración somática, 3) evaluación familiar y 4) evaluación del entorno social."},
+
+  { tema:"Evaluación psiquiátrica",
+    q:"¿Cuál es el abordaje recomendado para el paciente neurótico descompensado según el módulo?",
+    a:"Dedicarle tiempo suficiente para escucharlo, adoptando una actitud comprensiva y evitando la censura",
+    ops:["Dedicarle tiempo suficiente para escucharlo, adoptando una actitud comprensiva y evitando la censura",
+         "Realizar entrevista breve de no más de 5 minutos para evitar que el paciente elabore un discurso manipulador",
+         "Aplicar contención mecánica preventiva antes de que el cuadro se descompense aún más durante la entrevista",
+         "Derivarlo inmediatamente sin entrevista al psiquiatra de guardia porque el enfermero no puede manejarlo"],
+    exp:"El módulo indica que si el paciente es un neurótico descompensado, hay que dedicarle el tiempo suficiente para escucharlo, adoptando una actitud comprensiva y evitando la censura."},
+
+  // ══ ADICCIONES ══
+  { tema:"Consumo problemático",
+    q:"¿Cuál es la diferencia entre 'uso', 'abuso' y 'adicción' en la clasificación de los tipos de consumo?",
+    a:"Uso: consumo sin consecuencias negativas. Abuso: consumo que genera daño pero sin dependencia. Adicción: patrón compulsivo con dependencia, tolerancia y pérdida de control",
+    ops:["Uso: consumo sin consecuencias negativas. Abuso: consumo que genera daño pero sin dependencia. Adicción: patrón compulsivo con dependencia, tolerancia y pérdida de control",
+         "Las tres categorías son equivalentes y solo difieren en la cantidad de droga consumida por semana",
+         "Uso y abuso son idénticos; adicción implica exclusivamente dependencia física sin componente psicológico",
+         "Solo la adicción tiene consecuencias clínicas; el uso y el abuso son etapas normales del consumo social"],
+    exp:"El módulo distingue tres tipos de consumo: uso (sin consecuencias negativas para el individuo), abuso (uso que ya genera daño aunque sin dependencia clara) y adicción, que implica un patrón compulsivo con dependencia, tolerancia y pérdida de control sobre el consumo."},
+
+  { tema:"Consumo problemático",
+    q:"En el modelo multisectorial del consumo, ¿cuáles son los tres elementos que se interrelacionan para analizar el consumo problemático?",
+    a:"Sustancia, persona y contexto",
+    ops:["Sustancia, persona y contexto",
+         "Dosis, vía de administración y metabolismo individual",
+         "Familia, escuela y sistema de salud exclusivamente",
+         "Genética, ambiente y prescripción médica previa"],
+    exp:"El modelo multisectorial analiza el consumo problemático como un proceso multidimensional en que se interrelacionan tres elementos: la sustancia, los procesos individuales del sujeto (persona) y su organización social (contexto). Ninguno de los tres es suficiente por sí solo para explicar el consumo."},
+
+  // ══ ESTEREOTIPOS Y MODELO SOCIAL ══
+  { tema:"Estereotipos y salud mental",
+    q:"¿Cuál de los siguientes es un estereotipo relacionado al consumo de drogas mencionado en el módulo?",
+    a:"El concepto de que el consumo problemático es 'un problema de jóvenes' exclusivamente",
+    ops:["El concepto de que el consumo problemático es 'un problema de jóvenes' exclusivamente",
+         "La idea de que toda sustancia psicoactiva produce el mismo tipo de daño independientemente de la dosis y el contexto",
+         "La creencia de que el tratamiento de las adicciones siempre requiere internación prolongada como primera medida",
+         "La suposición de que las benzodiacepinas son más seguras que el alcohol por ser de uso médico regulado"],
+    exp:"El módulo menciona tres estereotipos sobre el consumo: el concepto monolítico de droga, el fetichismo o demonización de la sustancia y que es 'un problema de jóvenes'. Estos estereotipos distorsionan la comprensión del fenómeno y dificultan el abordaje clínico y comunitario."},
+
+  // ══ PSICOPATÍA ══
+  { tema:"Psicopatología",
+    q:"Según la clasificación de Vicente Garrido citada en el módulo, ¿cuál es la diferencia entre psicópatas 'integrados' y 'antisociales no integrados'?",
+    a:"Los integrados llevan una 'doble vida' como personas respetables; los antisociales crecen en ambientes marginales y son abiertamente violentos y egocéntricos",
+    ops:["Los integrados llevan una 'doble vida' como personas respetables; los antisociales crecen en ambientes marginales y son abiertamente violentos y egocéntricos",
+         "Los integrados son los más peligrosos y visibles; los no integrados se camuflan en roles sociales respetables",
+         "Ambos grupos tienen idénticas características; la diferencia es únicamente sociodemográfica y no conductual",
+         "Los integrados no delinquen nunca; los antisociales son psicópatas no delincuentes con conductas limítrofes"],
+    exp:"Según el módulo, los psicópatas integrados (delincuentes) son personas que se camuflan como respetables —homicidas, agresores sexuales, maltratadores con 'doble vida'—. Los antisociales o no integrados crecen en ambientes marginales, son duros, egocéntricos y violentos, no se vinculan con nadie."},
+
+  { tema:"Psicopatología",
+    q:"¿Qué es el 'Sistema de Vigilancia' del psicópata mencionado en el módulo y para qué sirve?",
+    a:"El conocimiento de las características del psicópata permite al equipo de salud vigilar su comportamiento y anticipar conductas de riesgo",
+    ops:["El conocimiento de las características del psicópata permite al equipo de salud vigilar su comportamiento y anticipar conductas de riesgo",
+         "Es un sistema de monitoreo judicial de los psicópatas que cumplen condena en establecimientos penitenciarios",
+         "Red de cámaras de seguridad instaladas en unidades psiquiátricas para registrar conductas agresivas en tiempo real",
+         "Protocolo policial de seguimiento de personas con trastorno antisocial tras el egreso de establecimientos penales"],
+    exp:"El módulo menciona el 'Sistema de Vigilancia' en el contexto del psicópata: el conocimiento de sus características (gran simulador, sin empatía, habilidad para la mentira) permite al equipo de salud vigilar su comportamiento, no ser manipulado y anticipar conductas de riesgo."},
+
+  // ══ EVALUACIÓN DE RIESGO ══
+  { tema:"Conducta suicida",
+    q:"¿Cuáles son las características del entorno físico adecuado para la evaluación de un paciente con riesgo suicida?",
+    a:"Espacio amplio, sin elementos contundentes, con muebles pesados y fijos, sin cerrojo interior, con doble circulación y timbre",
+    ops:["Espacio amplio, sin elementos contundentes, con muebles pesados y fijos, sin cerrojo interior, con doble circulación y timbre",
+         "Habitación pequeña con puerta con llave por fuera para evitar fugas, un sillón y una cama estándar de hospital",
+         "Box de urgencias convencional con elementos de reanimación disponibles y monitoreo cardíaco permanente",
+         "Sala grupal con otros pacientes para proporcionar estimulación social y reducir el aislamiento del paciente"],
+    exp:"El módulo describe las características del lugar de evaluación de paciente con riesgo suicida: debe ser el más amplio posible, sin elementos contundentes o con los menos posibles, muebles pesados y fijos al piso o pared, sin cerrojo interior, con doble circulación y timbre."},
+
+  { tema:"Conducta suicida",
+    q:"¿Por qué el módulo enfatiza que preguntar sobre el suicidio NO induce a su concreción?",
+    a:"Porque es un mito; preguntar de manera empática sobre la ideación suicida abre la posibilidad de intervención y no incrementa el riesgo",
+    ops:["Porque es un mito; preguntar de manera empática sobre la ideación suicida abre la posibilidad de intervención y no incrementa el riesgo",
+         "Porque científicamente está demostrado que hablar del suicidio tiene un efecto protector universal en todos los pacientes",
+         "Porque la pregunta directa sobre suicidio solo puede realizarla el psiquiatra; el enfermero debe evitarla siempre",
+         "Porque el suicidio es un tema que los pacientes nunca ponen sobre la mesa y preguntar es clínicamente irrelevante"],
+    exp:"El módulo señala que uno de los mitos sobre el suicidio es que preguntar sobre él puede inducir a su concreción. Este mito es falso: preguntar de manera empática y adecuada sobre la ideación suicida abre la posibilidad de intervención clínica sin incrementar el riesgo."},
+
+  // ══ ASPECTOS FORENSES ══
+  { tema:"Marco legal",
+    q:"¿Cuál de los siguientes estados es definido como 'psicosis' a efectos de la imputabilidad penal según el módulo?",
+    a:"Pérdida completa temporal o permanente de la autonomía psíquica con pérdida del sentido de la realidad",
+    ops:["Pérdida completa temporal o permanente de la autonomía psíquica con pérdida del sentido de la realidad",
+         "Cualquier trastorno de la personalidad diagnosticado por un perito psiquiátrico designado por el juez de la causa",
+         "Todo consumo de sustancias psicoactivas que altere el estado de conciencia al momento del delito",
+         "La demencia leve o moderada con deterioro parcial de funciones cognitivas superiores pero sin pérdida de realidad"],
+    exp:"El módulo define la psicosis como una enfermedad mental grave con pérdida completa, temporal o permanente de la autonomía psíquica y del sentido de la realidad. Esta definición es relevante para el análisis de imputabilidad penal, ya que puede excluir la culpabilidad."},
+
+  { tema:"Marco legal",
+    q:"Según el módulo, ¿qué es la 'emoción violenta' en el contexto del Código Penal (art. 81 inc. 1a)?",
+    a:"Es una circunstancia que puede atenuar la pena cuando el autor actúa en estado de profunda perturbación emocional",
+    ops:["Es una circunstancia que puede atenuar la pena cuando el autor actúa en estado de profunda perturbación emocional",
+         "Es una figura legal que exime de toda pena a quien comete un delito bajo el efecto de cualquier sustancia psicoactiva",
+         "Es la definición médico-legal de psicosis aguda que automáticamente genera inimputabilidad plena del acusado",
+         "Es un agravante penal que duplica la condena cuando el móvil del delito es de naturaleza pasional o afectiva"],
+    exp:"El módulo menciona la 'emoción violenta' en relación al art. 81 inc. 1a del CP en el contexto de las atenuantes penales. Es una circunstancia que puede atenuar la pena cuando el autor actúa bajo un estado de profunda perturbación emocional que no llega a la inimputabilidad."},
+
+  // ══ PSICOFARMACOLOGÍA AVANZADA ══
+  { tema:"Psicofarmacología",
+    q:"¿Cuál es la diferencia entre los antipsicóticos de primera generación (típicos) y los de tercera generación mencionados en el módulo?",
+    a:"Los de 3ª generación (aripiprazol, lurasidona, cariprazina) son agonistas parciales del receptor de dopamina, no solo antagonistas como los de 1ª generación",
+    ops:["Los de 3ª generación (aripiprazol, lurasidona, cariprazina) son agonistas parciales del receptor de dopamina, no solo antagonistas como los de 1ª generación",
+         "Los de 3ª generación producen más síntomas extrapiramidales que los típicos y menos eficacia sobre síntomas negativos",
+         "Los de 3ª generación son químicamente idénticos a los típicos; la diferencia es solo la vía de administración",
+         "Los de 3ª generación solo actúan sobre el receptor serotoninérgico sin ningún efecto sobre la dopamina"],
+    exp:"El módulo lista los antipsicóticos de 3ª generación: aripiprazol, lurasidona, pimavanserina, brexipiprazol y cariprazina. Estos actúan como agonistas parciales del receptor dopaminérgico D2, lo que les confiere un perfil de actividad diferente a los antagonistas típicos de 1ª generación."},
+
+  { tema:"Psicofarmacología",
+    q:"¿Cuál es la indicación de solicitar EEG ante el uso de clozapina según el módulo?",
+    a:"Siempre que se utilice clozapina por encima de 600 mg, porque puede producir convulsiones",
+    ops:["Siempre que se utilice clozapina por encima de 600 mg, porque puede producir convulsiones",
+         "Solo cuando el paciente tiene antecedentes personales de epilepsia, sin importar la dosis utilizada",
+         "Al inicio del tratamiento con cualquier antipsicótico atípico como parte del protocolo estándar",
+         "Únicamente si el paciente desarrolla cefalea, ya que esta es el primer signo de actividad epileptiforme"],
+    exp:"El módulo establece: 'SIEMPRE QUE SE USE CLOZAPINA POR ARRIBA DE 600 MG HAY QUE PEDIR EEG', porque la clozapina puede producir convulsiones como efecto adverso dependiente de dosis, además de agranulocitosis y otros efectos graves."},
+
+  // ══ DELIRIUM AVANZADO ══
+  { tema:"Delirium",
+    q:"¿Cuáles son los cuatro tipos etiológicos de delirium mencionados en el módulo?",
+    a:"Infecciones, fármacos, trastornos metabólicos, y factores como dolor, deshidratación, inmovilización y ambientes nuevos",
+    ops:["Infecciones, fármacos, trastornos metabólicos, y factores como dolor, deshidratación, inmovilización y ambientes nuevos",
+         "Enfermedades cerebrales primarias, traumatismos, isquemia y tumores del sistema nervioso central exclusivamente",
+         "Solo fármacos anticolinérgicos y psicotrópicos; las causas infecciosas no producen delirium sino meningitis",
+         "Exclusivamente causas psiquiátricas como psicosis aguda, manía y depresión con síntomas psicóticos"],
+    exp:"El módulo menciona las causas más frecuentes de delirium: infecciones (ITU, neumonía), fármacos (psicotrópicos, anticolinérgicos), trastornos metabólicos (hiponatremia, hipoglucemia) y dolor, deshidratación, inmovilización y ambientes nuevos u hospitalización."},
+
+  // ══ MODELOS DE CONSUMO ══
+  { tema:"Consumo problemático",
+    q:"¿Cuál es el modelo de consumo que plantea la prevención como promoción de alternativas, protagonismo y fortalecimiento de redes sociales?",
+    a:"Modelo multisectorial",
+    ops:["Modelo multisectorial",
+         "Modelo ético-jurídico",
+         "Modelo sanitarista centrado en la sustancia",
+         "Modelo de reducción de daños orientado a la abstinencia"],
+    exp:"El módulo describe el modelo multisectorial como aquel que plantea la prevención como promoción de alternativas, de protagonismo, de fortalecimiento de redes sociales, con el tiempo libre como ámbito privilegiado y la construcción de un proyecto personal articulado en lo grupal."},
+
+  // ══ ESTEREOTIPOS Y SIMULACIÓN ══
+  { tema:"Psicopatología",
+    q:"¿Cuál es la definición médico-legal de simulación mencionada en el módulo?",
+    a:"Forma de fraude voluntario que tiene que ver con asuntos de salud y enfermedad; proceso psíquico con decisión consciente de reproducir procesos patológicos",
+    ops:["Forma de fraude voluntario que tiene que ver con asuntos de salud y enfermedad; proceso psíquico con decisión consciente de reproducir procesos patológicos",
+         "Trastorno facticio inconsciente en que el paciente cree genuinamente padecer la enfermedad que simula",
+         "Conducta adaptativa normal ante situaciones de amenaza que no requiere evaluación ni intervención clínica",
+         "Síntoma disociativo propio de los trastornos de personalidad que el paciente no puede controlar voluntariamente"],
+    exp:"El módulo cita a Minkowski: la simulación es un proceso psíquico caracterizado por la decisión consciente de reproducir procesos patológicos, valiéndose de la imitación. En términos médico-legales, es una forma de fraude voluntario relacionado con asuntos de salud y enfermedad."},
+
+  // ══ PLAN DE CUIDADOS ══
+  { tema:"Enfermería en salud mental",
+    q:"¿Por qué el módulo afirma que la ansiedad del profesional de enfermería debe ser controlada durante la atención del paciente ansioso?",
+    a:"Porque la ansiedad se comunica de forma interpersonal y la ansiedad del profesional puede incrementar la del paciente",
+    ops:["Porque la ansiedad del profesional de enfermería puede comunicarse al paciente y aumentar su nivel de angustia",
+         "Porque la ansiedad del profesional interfiere con la redacción del informe de enfermería pero no afecta al paciente",
+         "Porque el control de la ansiedad del profesional es solo un requisito laboral sin impacto clínico demostrable",
+         "Porque el paciente ansioso percibe la calma del profesional como frialdad e indiferencia, lo que empeora el cuadro"],
+    exp:"El módulo advierte: 'evitar la ansiedad recíproca; recordar que la ansiedad se comunica de forma interpersonal'. Esto significa que el estado emocional del profesional de enfermería se transmite al paciente, y la calma del profesional tiene un efecto terapéutico real."},
+
+  { tema:"Enfermería en salud mental",
+    q:"¿Cuál es el primer paso del plan de cuidados ante un paciente con ansiedad, según el módulo?",
+    a:"Valorar el nivel de ansiedad (leve, moderada o grave) para orientar la intensidad de la intervención requerida",
+    ops:["Valorar el nivel de ansiedad (leve, moderada o grave) para orientar la intensidad de la intervención requerida",
+         "Administrar benzodiazepinas de inmediato sin evaluación previa para interrumpir el ciclo ansioso",
+         "Derivar de forma urgente al psiquiatra sin intervención de enfermería hasta que el médico esté presente",
+         "Colocar al paciente en decúbito lateral y monitorear signos vitales antes de cualquier intervención verbal"],
+    exp:"El primer paso del plan de cuidados descrito en el módulo es: 'valorar el nivel de ansiedad (leve, moderada o grave) de la persona'. Esta valoración orienta toda la intervención posterior: en casos leves puede manejarse de forma ambulatoria, en casos graves requiere trabajo conjunto con especialista."},
+
+  // ══ HISTORIA DE LA PSIQUIATRÍA ══
+  { tema:"Enfermería en salud mental",
+    q:"¿Cuándo comenzaron a sentarse las bases de la enfermería científica en salud mental según el módulo?",
+    a:"A mediados del siglo XIX, con las aportaciones de Florence Nightingale",
+    ops:["A mediados del siglo XIX, con las aportaciones de Florence Nightingale",
+         "A principios del siglo XX, con la creación del primer manicomio moderno en Viena por parte de Freud",
+         "En la segunda mitad del siglo XX, con la introducción de los antipsicóticos típicos en la práctica clínica",
+         "En el siglo XXI, con la Ley Nacional de Salud Mental 26.657 que redefinió el rol del enfermero psiquiátrico"],
+    exp:"El módulo indica que la enfermería se fue desarrollando como ciencia y profesión a lo largo del tiempo; sin embargo, hasta mediados del siglo XIX se comenzaron a sentar las bases de la enfermería científica, a partir de las aportaciones de Florence Nightingale."},
+
+  // ══ LEY SECA / HISTORIA ══
+  { tema:"Consumo problemático",
+    q:"¿Qué fue la Ley Volstead y en qué año entró en vigor?",
+    a:"La Ley Seca de EEUU que prohibía la producción, venta y consumo de bebidas alcohólicas, entró en vigor en enero de 1920",
+    ops:["La Ley Seca de EEUU que prohibía la producción, venta y consumo de bebidas alcohólicas, entró en vigor en enero de 1920",
+         "Ley federal norteamericana que legalizó el consumo de cannabis medicinal en 1920 bajo prescripción médica",
+         "Legislación internacional de la OMS que reguló el comercio de opiáceos entre naciones en el año 1915",
+         "Decreto argentino de 1930 que restringió la importación de sustancias psicoactivas de origen vegetal"],
+    exp:"En enero de 1920 entró en vigor la Ley Seca o Ley Volstead en EEUU, que prohibía la producción, venta y consumo de bebidas alcohólicas en todo el país. El módulo la menciona en el contexto histórico de la regulación de las sustancias psicoactivas."},
+
+  // ══ DEMENCIA AVANZADA ══
+  { tema:"Demencia",
+    q:"¿Cuáles son los cuatro tipos de demencia más comunes mencionados en el módulo, en orden de frecuencia?",
+    a:"Alzheimer (60-70%), demencia vascular, demencia por cuerpos de Lewy y demencia frontotemporal",
+    ops:["Alzheimer (60-70%), demencia vascular, demencia por cuerpos de Lewy y demencia frontotemporal",
+         "Demencia vascular (70%), Alzheimer (20%), demencia frontotemporal (7%) y demencia por VIH (3%)",
+         "Demencia por cuerpos de Lewy (50%), Alzheimer (30%), vascular (15%) y por déficit vitamínico (5%)",
+         "Demencia frontotemporal (60%), vascular (25%), Alzheimer (10%) y cuerpos de Lewy (5%)"],
+    exp:"El módulo lista los tipos de demencia más comunes: Alzheimer (60-70%), demencia vascular, demencia por cuerpos de Lewy y demencia frontotemporal. El Alzheimer es, con diferencia, el tipo más frecuente."},
+
+  // ══ DERECHOS ══
+  { tema:"Marco legal",
+    q:"¿Qué establece el artículo 25 de la Convención Internacional sobre los Derechos de las Personas con Discapacidad en relación al consentimiento?",
+    a:"Las personas con discapacidad tienen derecho a recibir atención en salud de calidad sobre la base de un consentimiento libre e informado, como toda la población",
+    ops:["Las personas con discapacidad tienen derecho a recibir atención en salud de calidad sobre la base de un consentimiento libre e informado, como toda la población",
+         "Las personas con discapacidad mental carecen de capacidad para dar consentimiento informado en cualquier circunstancia",
+         "Solo el representante legal o curador puede dar consentimiento en salud por las personas con discapacidad psiquiátrica",
+         "El consentimiento informado de personas con discapacidad es siempre implícito por su condición de vulnerabilidad"],
+    exp:"El art. 25 de la Convención Internacional sobre los Derechos de las Personas con Discapacidad establece que estas personas tienen derecho a recibir atención en salud de calidad, como la población toda, sobre la base de un consentimiento libre e informado."},
+
+  // ══ CIERRE ══
+  { tema:"Consumo problemático",
+    q:"¿Cuál es la definición de 'desintoxicación' como primera fase del tratamiento de las adicciones?",
+    a:"Proceso con el que se consigue que el paciente interrumpa el consumo y pueda permanecer abstinente sin experimentar síndrome de abstinencia agudo",
+    ops:["Proceso con el que se consigue que el paciente interrumpa el consumo y pueda permanecer abstinente sin experimentar síndrome de abstinencia agudo",
+         "Etapa en que se trabaja exclusivamente la reinserción laboral del paciente después del alta hospitalaria definitiva",
+         "Fase de psicoterapia grupal orientada a identificar los factores psicológicos que originaron el consumo problemático",
+         "Proceso de administración de la misma sustancia en dosis decrecientes para eliminar la tolerancia en 30 días"],
+    exp:"El módulo define la desintoxicación como el proceso con el que se consigue que el paciente interrumpa el consumo y pueda permanecer abstinente sin experimentar un síndrome de abstinencia agudo. La interrupción puede ser brusca o paulatina."},
+
+  { tema:"Enfermería en salud mental",
+    q:"¿Qué tipo de entrevista recomienda el módulo para el paciente coherente en urgencias psiquiátricas?",
+    a:"Entrevista semidirigida, porque las preguntas pueden ayudar al paciente a reorganizar su pensamiento y entender qué lo llevó a esa situación",
+    ops:["Entrevista semidirigida, porque las preguntas pueden ayudar al paciente a reorganizar su pensamiento y entender qué lo llevó a esa situación",
+         "Entrevista completamente libre sin ninguna estructura para no condicionar el relato espontáneo del paciente",
+         "Solo entrevista estructurada con cuestionarios estandarizados para garantizar la objetividad del diagnóstico",
+         "No se recomienda ningún tipo de entrevista al paciente coherente; solo se entrevista a los familiares presentes"],
+    exp:"El módulo indica: si el paciente es coherente, es útil realizar una entrevista semidirigida porque con las preguntas podemos ayudar a que el paciente reorganice su pensamiento y de este modo entienda qué lo llevó a esa situación."},
+
+  { tema:"Psicofarmacología",
+    q:"¿Cuál es el diagnóstico diferencial más importante del síndrome neuroléptico maligno mencionado en el módulo?",
+    a:"Síndrome serotoninérgico y otras enfermedades orgánicas o neurológicas",
+    ops:["Síndrome serotoninérgico y otras enfermedades orgánicas o neurológicas",
+         "Síndrome de abstinencia de benzodiacepinas y delirium por hipoglucemia severa",
+         "Crisis de angustia severa con compromiso autonómico y parálisis periódica hipopotasémica",
+         "Intoxicación aguda por litio y síndrome de Stevens-Johnson por lamotrigina"],
+    exp:"El módulo señala que el diagnóstico diferencial del SNM incluye otras enfermedades orgánicas o neurológicas y el síndrome serotoninérgico, que también cursa con hipertermia, rigidez, alteración del estado mental y disfunción autonómica, pero con mecanismo fisiopatológico diferente."},
+
+  { tema:"Demencia",
+    q:"¿Cuáles son los cuatro signos y síntomas del delirium que lo diferencian de otras condiciones, según el módulo?",
+    a:"Alteración de la atención y concentración, desorientación temporal y espacial, inicio rápido y curso fluctuante",
+    ops:["Alteración de la atención y concentración, desorientación temporal y espacial, inicio rápido y curso fluctuante",
+         "Pérdida de memoria de largo plazo, afasia progresiva, cambios de personalidad y marcha atáxica",
+         "Alucinaciones visuales complejas, parkinsonismo, fluctuaciones cognitivas y sueños vívidos",
+         "Desinhibición, hipersexualidad, pérdida de empatía y comportamiento perseverante sin alteración de la atención"],
+    exp:"El módulo describe los signos y síntomas del delirium: alteración de la atención y concentración, desorientación temporal y espacial, inicio rápido, duración breve y curso fluctuante. Es potencialmente reversible si se trata a tiempo."}
+];
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let preguntas, idx, correctas, incorrectas, puntos, timerInterval, tr, respondida;
+
+function init(){
+  preguntas = shuffle([...Q]).slice(0,60);
+  idx=0; correctas=0; incorrectas=0; puntos=0;
+  document.getElementById('results').style.display='none';
+  document.getElementById('game').style.display='block';
+  updateScore(); loadQ();
+}
+
+function loadQ(){
+  respondida=false;
+  const p=preguntas[idx];
+  const total=preguntas.length;
+
+  document.getElementById('qnum').textContent=String(idx+1).padStart(2,'0');
+  document.getElementById('qtema').textContent=p.tema;
+  document.getElementById('qtext').textContent=p.q;
+  document.getElementById('pnum').textContent=`Pregunta ${idx+1} de ${total}`;
+  const pct=Math.round(idx/total*100);
+  document.getElementById('ppct').textContent=pct+'%';
+  document.getElementById('pfill').style.width=pct+'%';
+
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('btnNext').style.display='none';
+
+  const ops=shuffle([...p.ops]);
+  const letters=['A','B','C','D'];
+  const cont=document.getElementById('opts');
+  cont.innerHTML='';
+  ops.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='opt';
+    d.innerHTML=`<span class="lt">${letters[i]}</span><span class="opt-txt">${o}</span>`;
+    d.onclick=()=>answer(d,o,p);
+    cont.appendChild(d);
+  });
+
+  clearInterval(timerInterval);
+  tr=TIEMPO;
+  updateTimer();
+  timerInterval=setInterval(tick,1000);
+}
+
+function tick(){
+  tr--;
+  updateTimer();
+  if(tr<=0){ clearInterval(timerInterval); timeUp(); }
+}
+
+function updateTimer(){
+  const pct=(tr/TIEMPO)*100;
+  const bar=document.getElementById('tbar');
+  bar.style.width=pct+'%';
+  bar.className='timer-fill'+(tr<=7?' urgent':'');
+  document.getElementById('tnum').textContent=tr;
+}
+
+function timeUp(){
+  if(respondida)return;
+  respondida=true; incorrectas++;
+  updateScore();
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const p=preguntas[idx];
+  document.querySelectorAll('.opt').forEach(o=>{
+    if(o.querySelector('.opt-txt').textContent.trim()===p.a) o.classList.add('correct');
+  });
+  showFeedback(false,p.exp);
+  document.getElementById('btnNext').style.display='block';
+}
+
+function answer(el,chosen,p){
+  if(respondida)return;
+  respondida=true;
+  clearInterval(timerInterval);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+  const ok=chosen===p.a;
+  if(ok){
+    el.classList.add('correct');
+    const bonus=Math.round(tr/TIEMPO*50)+50;
+    puntos+=bonus; correctas++;
+  } else {
+    el.classList.add('wrong'); incorrectas++;
+    document.querySelectorAll('.opt').forEach(o=>{
+      if(o.querySelector('.opt-txt').textContent.trim()===p.a) o.classList.add('correct');
+    });
+  }
+  updateScore();
+  showFeedback(ok,p.exp);
+  document.getElementById('btnNext').style.display='block';
+}
+
+function showFeedback(ok,exp){
+  const fb=document.getElementById('feedback');
+  fb.className='feedback show '+(ok?'ok':'no');
+  fb.textContent=exp;
+}
+
+function updateScore(){
+  document.getElementById('sc').textContent=correctas;
+  document.getElementById('sw').textContent=incorrectas;
+  document.getElementById('sp').textContent=puntos;
+}
+
+function next(){
+  idx++;
+  if(idx>=preguntas.length){ showResults(); return; }
+  loadQ();
+}
+
+function showResults(){
+  clearInterval(timerInterval);
+  document.getElementById('game').style.display='none';
+  const r=document.getElementById('results');
+  r.style.display='block';
+  const total=preguntas.length;
+  const pct=Math.round(correctas/total*100);
+  document.getElementById('rpct').textContent=pct+'%';
+  document.getElementById('rc').textContent=correctas;
+  document.getElementById('rw').textContent=incorrectas;
+  document.getElementById('rp').textContent=puntos;
+  let trophy='📚', msg='';
+  if(pct>=90){trophy='🏆';msg=`Excelente — ${correctas}/${total} correctas. Dominio sobresaliente del módulo.`;}
+  else if(pct>=75){trophy='🥇';msg=`Muy bien — ${correctas}/${total} correctas. Sólido manejo de los contenidos.`;}
+  else if(pct>=60){trophy='🥈';msg=`Bien — ${correctas}/${total} correctas. Revisá los temas donde fallaste.`;}
+  else if(pct>=40){trophy='🥉';msg=`Regular — ${correctas}/${total} correctas. Repasá el módulo completo.`;}
+  else{trophy='📚';msg=`${correctas}/${total} correctas. El material requiere un repaso profundo.`;}
+  document.getElementById('trophy').textContent=trophy;
+  document.getElementById('rmsg').textContent=msg;
+  document.getElementById('pfill').style.width='100%';
+  document.getElementById('ppct').textContent='100%';
+}
+
+function restart(){ init(); }
+init();
+</script>
+</body>
+</html>
