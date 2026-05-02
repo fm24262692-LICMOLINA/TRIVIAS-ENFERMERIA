@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constructor PES — Enfermería en Salud Mental</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2342;
+    --navy2: #1a3a5c;
+    --blue: #2563eb;
+    --blue-light: #3b82f6;
+    --sky: #e0f0ff;
+    --gold: #f59e0b;
+    --gold-light: #fef3c7;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --amber: #f59e0b;
+    --amber-light: #fffbeb;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --white: #ffffff;
+    --surface: #f8fafc;
+    --border: #e2e8f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── fondo animado ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(37,99,235,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(245,158,11,0.10) 0%, transparent 60%),
+      var(--navy);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* ── header ── */
+  header {
+    text-align: center;
+    padding: 36px 0 32px;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(37,99,235,0.2);
+    border: 1px solid rgba(59,130,246,0.4);
+    color: #93c5fd;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(26px, 6vw, 38px);
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+  header h1 em {
+    font-style: italic;
+    color: #93c5fd;
+  }
+  header p {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 300;
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  .cent-tag {
+    margin-top: 14px;
+    color: #64748b;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── card ── */
+  .card {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.15);
+    margin-bottom: 16px;
+  }
+
+  /* ── explicación PES ── */
+  .pes-intro {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  }
+  .pes-intro h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+  .pes-pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pes-pill {
+    flex: 1;
+    min-width: 140px;
+    border-radius: 14px;
+    padding: 14px 16px;
+    position: relative;
+  }
+  .pes-pill.p { background: #eff6ff; border: 1.5px solid #bfdbfe; }
+  .pes-pill.e { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+  .pes-pill.s { background: #fefce8; border: 1.5px solid #fde68a; }
+  .pes-pill .letra {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .pes-pill.p .letra { color: #2563eb; }
+  .pes-pill.e .letra { color: #16a34a; }
+  .pes-pill.s .letra { color: #d97706; }
+  .pes-pill .nombre { font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 2px; }
+  .pes-pill .formula { font-size: 11px; color: #6b7280; font-style: italic; }
+
+  /* ── sección de paso ── */
+  .step-section {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    margin-bottom: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .step-section:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 22px 16px;
+    background: var(--white);
+  }
+  .step-num {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .step-p .step-num { background: #eff6ff; color: #2563eb; }
+  .step-e .step-num { background: #f0fdf4; color: #16a34a; }
+  .step-s .step-num { background: #fefce8; color: #d97706; }
+  .step-header-text h3 { font-size: 15px; font-weight: 600; color: var(--navy); }
+  .step-header-text p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .step-body { background: var(--white); padding: 0 22px 22px; }
+
+  /* necesidades dropdown */
+  .necesidad-label {
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 8px; display: block;
+  }
+  .necesidades-grid {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+  }
+  .nec-btn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .nec-btn:hover { border-color: #93c5fd; color: var(--blue); background: #eff6ff; }
+  .nec-btn.active-p { background: #eff6ff; border-color: #2563eb; color: #2563eb; font-weight: 600; }
+  .nec-btn.active-e { background: #f0fdf4; border-color: #16a34a; color: #16a34a; font-weight: 600; }
+  .nec-btn.active-s { background: #fefce8; border-color: #d97706; color: #d97706; font-weight: 600; }
+
+  /* textarea */
+  .field-wrap { position: relative; }
+  textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.6;
+    background: var(--surface);
+  }
+  textarea::placeholder { color: #cbd5e1; }
+  .step-p textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .step-e textarea:focus { border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.1); }
+  .step-s textarea:focus { border-color: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,0.1); }
+
+  .char-count {
+    text-align: right;
+    font-size: 11px;
+    color: #cbd5e1;
+    margin-top: 4px;
+  }
+
+  /* hint */
+  .hint-box {
+    background: #f8fafc;
+    border-left: 3px solid;
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .step-p .hint-box { border-color: #93c5fd; }
+  .step-e .hint-box { border-color: #86efac; }
+  .step-s .hint-box { border-color: #fcd34d; }
+  .hint-box strong { display: block; margin-bottom: 3px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .step-p .hint-box strong { color: #2563eb; }
+  .step-e .hint-box strong { color: #16a34a; }
+  .step-s .hint-box strong { color: #d97706; }
+
+  /* error inline */
+  .field-error {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 6px;
+    display: none;
+    align-items: center;
+    gap: 5px;
+  }
+  .field-error.show { display: flex; }
+
+  /* ── botón generar ── */
+  .btn-generar {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+    letter-spacing: 0.02em;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-generar:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(37,99,235,0.5); }
+  .btn-generar:active { transform: translateY(0); }
+  .btn-generar svg { width: 20px; height: 20px; }
+
+  /* ── resultado ── */
+  #resultado {
+    display: none;
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    margin-top: 20px;
+    animation: slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .resultado-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+    padding: 24px 24px 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .resultado-header .check-icon {
+    width: 44px; height: 44px;
+    background: rgba(16,185,129,0.2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .resultado-header h2 {
+    font-family: 'DM Serif Display', serif;
+    color: var(--white);
+    font-size: 18px;
+  }
+  .resultado-header p { color: #94a3b8; font-size: 12px; margin-top: 2px; }
+
+  .resultado-body { padding: 24px; }
+
+  .diag-completo {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 16px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .diag-completo::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 10px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 80px;
+    color: rgba(37,99,235,0.08);
+    line-height: 1;
+  }
+  .diag-completo p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--navy);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+  .diag-completo .parte-p { color: #2563eb; font-weight: 700; }
+  .diag-completo .parte-e { color: #16a34a; font-weight: 700; }
+  .diag-completo .parte-s { color: #d97706; font-weight: 700; }
+
+  /* desglose */
+  .desglose { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .desglose-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+  .desglose-item.di-p { background: #eff6ff; }
+  .desglose-item.di-e { background: #f0fdf4; }
+  .desglose-item.di-s { background: #fefce8; }
+  .di-badge {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .di-p .di-badge { background: #dbeafe; color: #2563eb; }
+  .di-e .di-badge { background: #dcfce7; color: #16a34a; }
+  .di-s .di-badge { background: #fef9c3; color: #d97706; }
+  .di-content { flex: 1; }
+  .di-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 3px; }
+  .di-p .di-label { color: #2563eb; }
+  .di-e .di-label { color: #16a34a; }
+  .di-s .di-label { color: #d97706; }
+  .di-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  /* feedback */
+  .feedback-section {
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+    margin-top: 4px;
+  }
+  .feedback-title {
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 12px;
+  }
+  .feedback-items { display: flex; flex-direction: column; gap: 8px; }
+  .fb-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .fb-ok { background: var(--green-light); color: #065f46; }
+  .fb-warn { background: var(--amber-light); color: #78350f; }
+  .fb-tip { background: #f0f9ff; color: #0c4a6e; }
+  .fb-icon { flex-shrink: 0; font-size: 15px; margin-top: 0px; }
+
+  /* botones de acción */
+  .acciones {
+    display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
+  }
+  .btn-accion {
+    flex: 1; min-width: 120px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-accion:hover { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+  .btn-accion.primary {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: white;
+  }
+  .btn-accion.primary:hover { background: var(--navy2); border-color: var(--navy2); }
+
+  /* ── panel copiar ── */
+  .copied-toast {
+    position: fixed;
+    bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--navy);
+    color: white;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .copied-toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── ejemplos rápidos ── */
+  .ejemplos-section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 22px;
+    margin-bottom: 16px;
+  }
+  .ejemplos-section h3 {
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+  }
+  .ej-cards { display: flex; flex-direction: column; gap: 8px; }
+  .ej-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .ej-card:hover { background: rgba(255,255,255,0.1); border-color: rgba(59,130,246,0.4); }
+  .ej-card .ej-titulo { font-size: 12px; font-weight: 600; color: #93c5fd; margin-bottom: 5px; }
+  .ej-card .ej-frase { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+  .ej-card .ej-frase .ep { color: #93c5fd; }
+  .ej-card .ej-frase .ee { color: #86efac; }
+  .ej-card .ej-frase .es { color: #fcd34d; }
+
+  /* ── progress dots ── */
+  .progress-bar {
+    display: flex; gap: 6px; justify-content: center;
+    margin-bottom: 24px;
+  }
+  .progress-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: all 0.3s;
+  }
+  .progress-dot.active { background: #2563eb; width: 24px; border-radius: 4px; }
+  .progress-dot.done { background: #10b981; }
+
+  /* ── responsive ── */
+  @media (max-width: 480px) {
+    .pes-pills { flex-direction: column; }
+    .acciones { flex-direction: column; }
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="badge">Enfermería Psiquiátrica · CENT N°74 ATSA</div>
+    <h1>Constructor de<br><em>Diagnóstico PES</em></h1>
+    <p>Completá los tres componentes y la herramienta arma tu diagnóstico de enfermería correctamente.</p>
+    <div class="cent-tag">Lic. Francisco Molina · Tercer año</div>
+  </header>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar">
+    <div class="progress-dot active" id="dot1"></div>
+    <div class="progress-dot" id="dot2"></div>
+    <div class="progress-dot" id="dot3"></div>
+  </div>
+
+  <!-- EXPLICACIÓN PES -->
+  <div class="pes-intro">
+    <h2>¿Cómo funciona el formato PES?</h2>
+    <div class="pes-pills">
+      <div class="pes-pill p">
+        <div class="letra">P</div>
+        <div class="nombre">Problema</div>
+        <div class="formula">"Alteración de..."</div>
+      </div>
+      <div class="pes-pill e">
+        <div class="letra">E</div>
+        <div class="nombre">Etiología</div>
+        <div class="formula">"Relacionado con..."</div>
+      </div>
+      <div class="pes-pill s">
+        <div class="letra">S</div>
+        <div class="nombre">Síntoma</div>
+        <div class="formula">"Manifestado por..."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EJEMPLOS RÁPIDOS -->
+  <div class="ejemplos-section">
+    <h3>💡 Cargá un ejemplo para ver cómo funciona</h3>
+    <div class="ej-cards">
+      <div class="ej-card" onclick="cargarEjemplo(0)">
+        <div class="ej-titulo">Ejemplo 1 — Abandono familiar / Depresión</div>
+        <div class="ej-frase">
+          <span class="ep">Alteración de la autoestima</span> / 
+          <span class="ee">abandono familiar</span> / 
+          <span class="es">llanto frecuente y frases como "no sirvo para nada"</span>
+        </div>
+      </div>
+      <div class="ej-card" onclick="cargarEjemplo(1)">
+        <div class="ej-titulo">Ejemplo 2 — Aislamiento / Esquizofrenia</div>
+        <div class="ej-frase">
+          <span class="ep">Alteración de la necesidad de amor y pertenencia</span> / 
+          <span class="ee">desconfianza hacia el entorno</span> / 
+          <span class="es">negativa a participar en actividades grupales y aislamiento</span>
+        </div>
+      </div>
+      <div class="ej-card" onclick="cargarEjemplo(2)">
+        <div class="ej-titulo">Ejemplo 3 — Rol / TOC</div>
+        <div class="ej-frase">
+          <span class="ep">Alteración de la autorrealización</span> / 
+          <span class="ee">abandono del rol laboral por rituales compulsivos</span> / 
+          <span class="es">ausencia al trabajo y expresiones de inutilidad</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO P -->
+  <div class="step-section step-p" id="secP">
+    <div class="step-header">
+      <div class="step-num">P</div>
+      <div class="step-header-text">
+        <h3>Problema — "Alteración de..."</h3>
+        <p>Elegí la necesidad de Maslow afectada o escribila</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <span class="necesidad-label">Necesidades frecuentes en Salud Mental</span>
+      <div class="necesidades-grid" id="btnsNecesidad">
+        <button class="nec-btn" onclick="selNecesidad('la autoestima')">Autoestima</button>
+        <button class="nec-btn" onclick="selNecesidad('la necesidad de amor y pertenencia')">Amor y pertenencia</button>
+        <button class="nec-btn" onclick="selNecesidad('la seguridad y protección emocional')">Seguridad emocional</button>
+        <button class="nec-btn" onclick="selNecesidad('la autorrealización')">Autorrealización</button>
+        <button class="nec-btn" onclick="selNecesidad('los procesos de pensamiento')">Procesos de pensamiento</button>
+        <button class="nec-btn" onclick="selNecesidad('el estado de ánimo')">Estado de ánimo</button>
+        <button class="nec-btn" onclick="selNecesidad('la comunicación e interacción social')">Comunicación social</button>
+        <button class="nec-btn" onclick="selNecesidad('la adaptación al entorno')">Adaptación al entorno</button>
+      </div>
+      <div class="field-wrap">
+        <textarea id="inputP" rows="2" placeholder="Ej: la autoestima / la necesidad de amor y pertenencia / los procesos de pensamiento..." oninput="onInputChange('P')"></textarea>
+        <div class="char-count" id="charP">0 palabras</div>
+      </div>
+      <div class="field-error" id="errP">⚠ Completá este campo antes de continuar.</div>
+      <div class="hint-box">
+        <strong>Tip</strong>
+        Siempre empieza con "Alteración de..." seguido de la necesidad de Maslow que está insatisfecha. En Salud Mental NO trabajamos necesidades fisiológicas (aire, agua, alimento).
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO E -->
+  <div class="step-section step-e" id="secE">
+    <div class="step-header">
+      <div class="step-num">E</div>
+      <div class="step-header-text">
+        <h3>Etiología — "Relacionado con..."</h3>
+        <p>¿Cuál es la CAUSA del problema?</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <span class="necesidad-label">Causas frecuentes</span>
+      <div class="necesidades-grid">
+        <button class="nec-btn" onclick="selEtiologia('el abandono familiar')">Abandono familiar</button>
+        <button class="nec-btn" onclick="selEtiologia('el aislamiento social')">Aislamiento social</button>
+        <button class="nec-btn" onclick="selEtiologia('la ruptura del vínculo afectivo')">Ruptura vincular</button>
+        <button class="nec-btn" onclick="selEtiologia('la desconfianza hacia el entorno')">Desconfianza</button>
+        <button class="nec-btn" onclick="selEtiologia('el deterioro cognitivo progresivo')">Deterioro cognitivo</button>
+        <button class="nec-btn" onclick="selEtiologia('los rituales compulsivos que limitan su vida')">Rituales compulsivos</button>
+        <button class="nec-btn" onclick="selEtiologia('la inestabilidad emocional del episodio agudo')">Episodio agudo</button>
+        <button class="nec-btn" onclick="selEtiologia('la pérdida de su rol social y laboral')">Pérdida de rol</button>
+      </div>
+      <div class="field-wrap">
+        <textarea id="inputE" rows="2" placeholder="Ej: el abandono familiar / la ruptura del vínculo con sus hijos / la desconfianza hacia el entorno..." oninput="onInputChange('E')"></textarea>
+        <div class="char-count" id="charE">0 palabras</div>
+      </div>
+      <div class="field-error" id="errE">⚠ Completá este campo antes de continuar.</div>
+      <div class="hint-box">
+        <strong>Tip</strong>
+        La etiología es la CAUSA. Debe explicar POR QUÉ existe el problema. Preguntate: ¿qué situación o factor generó esa necesidad insatisfecha en este paciente?
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO S -->
+  <div class="step-section step-s" id="secS">
+    <div class="step-header">
+      <div class="step-num">S</div>
+      <div class="step-header-text">
+        <h3>Síntoma — "Manifestado por..."</h3>
+        <p>¿Cómo se VE el problema? ¿Qué observás o escuchás?</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <span class="necesidad-label">Signos y síntomas frecuentes</span>
+      <div class="necesidades-grid">
+        <button class="nec-btn" onclick="addSintoma('llanto frecuente')">Llanto frecuente</button>
+        <button class="nec-btn" onclick="addSintoma('aislamiento social dentro del servicio')">Aislamiento</button>
+        <button class="nec-btn" onclick="addSintoma('expresiones verbales de desvalorización personal')">Desvalorización verbal</button>
+        <button class="nec-btn" onclick="addSintoma('negativa a participar en actividades grupales')">Negativa a actividades</button>
+        <button class="nec-btn" onclick="addSintoma('conducta agresiva o agitada')">Agitación</button>
+        <button class="nec-btn" onclick="addSintoma('descuido de la higiene personal')">Descuido del aseo</button>
+        <button class="nec-btn" onclick="addSintoma('desorientación temporoespacial')">Desorientación</button>
+        <button class="nec-btn" onclick="addSintoma('verbalizaciones de desesperanza')">Desesperanza</button>
+      </div>
+      <div class="field-wrap">
+        <textarea id="inputS" rows="3" placeholder="Ej: llanto frecuente, aislamiento y frases como 'no sirvo para nadie'..." oninput="onInputChange('S')"></textarea>
+        <div class="char-count" id="charS">0 palabras</div>
+      </div>
+      <div class="field-error" id="errS">⚠ Completá este campo antes de continuar.</div>
+      <div class="hint-box">
+        <strong>Tip</strong>
+        Los síntomas son OBSERVABLES. Incluí lo que ves (comportamiento, aspecto) y lo que escuchás (frases textuales del paciente entre comillas). Podés combinar varios síntomas separados por comas.
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTÓN GENERAR -->
+  <button class="btn-generar" onclick="generarDiagnostico()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    Generar diagnóstico PES
+  </button>
+
+  <!-- RESULTADO -->
+  <div id="resultado">
+    <div class="resultado-header">
+      <div class="check-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div>
+        <h2>Tu diagnóstico de enfermería</h2>
+        <p>Revisá el resultado y leé las sugerencias</p>
+      </div>
+    </div>
+
+    <div class="resultado-body">
+      <!-- Frase completa -->
+      <div class="diag-completo">
+        <p id="fraseCompleta"></p>
+      </div>
+
+      <!-- Desglose PES -->
+      <div class="desglose">
+        <div class="desglose-item di-p">
+          <div class="di-badge">P</div>
+          <div class="di-content">
+            <div class="di-label">Problema</div>
+            <div class="di-text" id="desgP"></div>
+          </div>
+        </div>
+        <div class="desglose-item di-e">
+          <div class="di-badge">E</div>
+          <div class="di-content">
+            <div class="di-label">Etiología</div>
+            <div class="di-text" id="desgE"></div>
+          </div>
+        </div>
+        <div class="desglose-item di-s">
+          <div class="di-badge">S</div>
+          <div class="di-content">
+            <div class="di-label">Síntoma / Evidencia</div>
+            <div class="di-text" id="desgS"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback inteligente -->
+      <div class="feedback-section">
+        <div class="feedback-title">Análisis de tu diagnóstico</div>
+        <div class="feedback-items" id="feedbackItems"></div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="acciones">
+        <button class="btn-accion" onclick="copiarDiagnostico()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copiar texto
+        </button>
+        <button class="btn-accion" onclick="limpiarTodo()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 .49-3.95"></path>
+          </svg>
+          Nuevo diagnóstico
+        </button>
+        <button class="btn-accion primary" onclick="scrollTop()">
+          ↑ Volver al inicio
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="copied-toast" id="toast">✓ Diagnóstico copiado al portapapeles</div>
+
+<script>
+// ── datos de ejemplos ──────────────────────────────────────────────────────
+const ejemplos = [
+  {
+    p: "la autoestima",
+    e: "el abandono familiar durante la internación",
+    s: "llanto frecuente en silencio, frases como \"no sirvo para nada\" y descuido del arreglo personal"
+  },
+  {
+    p: "la necesidad de amor y pertenencia",
+    e: "la desconfianza extrema hacia el entorno relacionada con su cuadro psicótico",
+    s: "negativa a participar en actividades grupales, aislamiento en su habitación y rechazo al contacto con otros pacientes"
+  },
+  {
+    p: "la autorrealización",
+    e: "el abandono del rol laboral por rituales compulsivos que limitan su vida cotidiana",
+    s: "ausencia prolongada al trabajo, expresiones de inutilidad como \"antes era buena en lo que hacía\" y sentimiento de vergüenza"
+  }
+];
+
+// ── helpers ─────────────────────────────────────────────────────────────────
+function getP() { return document.getElementById('inputP').value.trim(); }
+function getE() { return document.getElementById('inputE').value.trim(); }
+function getS() { return document.getElementById('inputS').value.trim(); }
+
+function wordCount(str) {
+  return str.trim() === '' ? 0 : str.trim().split(/\s+/).length;
+}
+
+function updateChar(field) {
+  const val = document.getElementById('input' + field).value.trim();
+  const wc = wordCount(val);
+  document.getElementById('char' + field).textContent = wc + (wc === 1 ? ' palabra' : ' palabras');
+}
+
+function onInputChange(field) {
+  updateChar(field);
+  // quitar error si tiene contenido
+  if (document.getElementById('input' + field).value.trim()) {
+    document.getElementById('err' + field).classList.remove('show');
+  }
+  updateDots();
+}
+
+function updateDots() {
+  const p = getP() !== '';
+  const e = getE() !== '';
+  const s = getS() !== '';
+  const d1 = document.getElementById('dot1');
+  const d2 = document.getElementById('dot2');
+  const d3 = document.getElementById('dot3');
+  d1.className = 'progress-dot ' + (p ? 'done' : 'active');
+  d2.className = 'progress-dot ' + (e ? 'done' : (p ? 'active' : ''));
+  d3.className = 'progress-dot ' + (s ? 'done' : (e ? 'active' : ''));
+}
+
+// ── selección rápida ────────────────────────────────────────────────────────
+function selNecesidad(txt) {
+  document.getElementById('inputP').value = txt;
+  updateChar('P');
+  // highlight botón
+  document.querySelectorAll('#btnsNecesidad .nec-btn').forEach(b => b.classList.remove('active-p'));
+  event.target.classList.add('active-p');
+  onInputChange('P');
+}
+
+function selEtiologia(txt) {
+  document.getElementById('inputE').value = txt;
+  updateChar('E');
+  onInputChange('E');
+}
+
+function addSintoma(txt) {
+  const ta = document.getElementById('inputS');
+  if (ta.value.trim() === '') {
+    ta.value = txt;
+  } else {
+    ta.value = ta.value.trimEnd() + ', ' + txt;
+  }
+  updateChar('S');
+  onInputChange('S');
+}
+
+// ── ejemplos ────────────────────────────────────────────────────────────────
+function cargarEjemplo(idx) {
+  const ej = ejemplos[idx];
+  document.getElementById('inputP').value = ej.p;
+  document.getElementById('inputE').value = ej.e;
+  document.getElementById('inputS').value = ej.s;
+  ['P','E','S'].forEach(f => updateChar(f));
+  updateDots();
+  // scroll suave al primer paso
+  document.getElementById('secP').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── generar ──────────────────────────────────────────────────────────────────
+function generarDiagnostico() {
+  const p = getP(), e = getE(), s = getS();
+  let ok = true;
+
+  if (!p) { document.getElementById('errP').classList.add('show'); ok = false; }
+  if (!e) { document.getElementById('errE').classList.add('show'); ok = false; }
+  if (!s) { document.getElementById('errS').classList.add('show'); ok = false; }
+
+  if (!ok) {
+    // scroll al primer error
+    ['P','E','S'].forEach(f => {
+      if (!document.getElementById('input'+f).value.trim()) {
+        document.getElementById('sec'+f).scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+    });
+    return;
+  }
+
+  // armar frase
+  const pFrase = capitalize(p);
+  const eFrase = e.charAt(0).toLowerCase() + e.slice(1);
+  const sFrase = s.charAt(0).toLowerCase() + s.slice(1);
+
+  const frase = `Alteración de ${pFrase}, relacionado con ${eFrase}, manifestado por ${sFrase}.`;
+
+  // mostrar frase con colores
+  document.getElementById('fraseCompleta').innerHTML =
+    `<span class="parte-p">Alteración de ${pFrase}</span>, <span class="parte-e">relacionado con ${eFrase}</span>, <span class="parte-s">manifestado por ${sFrase}.</span>`;
+
+  document.getElementById('desgP').textContent = `Alteración de ${pFrase}`;
+  document.getElementById('desgE').textContent = `Relacionado con ${eFrase}`;
+  document.getElementById('desgS').textContent = `Manifestado por ${sFrase}`;
+
+  // feedback inteligente
+  const feedbacks = generarFeedback(p, e, s);
+  const fbContainer = document.getElementById('feedbackItems');
+  fbContainer.innerHTML = '';
+  feedbacks.forEach(fb => {
+    const div = document.createElement('div');
+    div.className = `fb-item fb-${fb.tipo}`;
+    div.innerHTML = `<span class="fb-icon">${fb.icon}</span><span>${fb.texto}</span>`;
+    fbContainer.appendChild(div);
+  });
+
+  // guardar texto plano para copiar
+  document.getElementById('resultado').dataset.texto = frase;
+
+  // mostrar resultado
+  const res = document.getElementById('resultado');
+  res.style.display = 'block';
+  setTimeout(() => res.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// ── feedback inteligente ────────────────────────────────────────────────────
+function generarFeedback(p, e, s) {
+  const fbs = [];
+  const pL = p.toLowerCase();
+  const eL = e.toLowerCase();
+  const sL = s.toLowerCase();
+
+  // Check necesidad no vital
+  const fisiologicas = ['oxígeno','aire','respiración','alimento','agua','sed','sueño','temperatura','dolor','eliminación'];
+  const tieneFisio = fisiologicas.some(f => pL.includes(f));
+  if (tieneFisio) {
+    fbs.push({ tipo:'warn', icon:'⚠️', texto:'Revisá tu P: en Salud Mental no trabajamos necesidades fisiológicas (aire, alimento, sueño...). Esas ya están cubiertas en internación. Buscá una necesidad emocional o social.' });
+  } else {
+    fbs.push({ tipo:'ok', icon:'✓', texto:'Tu P (problema) refiere a una necesidad no vital. ¡Correcto para Salud Mental!' });
+  }
+
+  // Check longitud P
+  if (wordCount(p) < 2) {
+    fbs.push({ tipo:'warn', icon:'⚠️', texto:'Tu P es muy corto. Asegurate de nombrar claramente la necesidad afectada, por ejemplo: "la autoestima" o "la necesidad de amor y pertenencia".' });
+  }
+
+  // Check etiología
+  if (wordCount(e) < 3) {
+    fbs.push({ tipo:'warn', icon:'⚠️', texto:'Tu E (etiología) parece incompleta. La causa debe ser específica para este paciente: ¿por qué tiene ese problema? Ej: "el abandono familiar durante la internación".' });
+  } else {
+    fbs.push({ tipo:'ok', icon:'✓', texto:'Tu E (causa) tiene suficiente detalle para ser específica.' });
+  }
+
+  // Check si E y P son muy similares
+  const wordsP = new Set(pL.split(/\s+/));
+  const wordsE = new Set(eL.split(/\s+/));
+  let overlap = 0;
+  wordsP.forEach(w => { if (w.length > 4 && wordsE.has(w)) overlap++; });
+  if (overlap >= 2) {
+    fbs.push({ tipo:'warn', icon:'⚠️', texto:'Tus campos P y E parecen muy similares. El problema (P) es la necesidad afectada; la causa (E) es por qué está afectada. Son cosas distintas.' });
+  }
+
+  // Check síntoma observable
+  const observables = ['llanto','aisla','expresa','dice','refiere','manifiesta','negativa','descuid','agit','desorien','verbaliza','frases','comunica','participa','reclama','golpea','grita','sonríe'];
+  const tieneObservable = observables.some(o => sL.includes(o));
+  if (tieneObservable) {
+    fbs.push({ tipo:'ok', icon:'✓', texto:'Tus síntomas incluyen datos observables o verbalizaciones del paciente. ¡Muy bien!' });
+  } else {
+    fbs.push({ tipo:'tip', icon:'💡', texto:'Tip: un buen S incluye comportamientos observables ("llanto frecuente", "aislamiento") o frases textuales del paciente entre comillas. Así es más fácil de evaluar.' });
+  }
+
+  // Tip general
+  fbs.push({ tipo:'tip', icon:'📝', texto:'Recordá: este diagnóstico lo tenés que escribir a mano en tu TP. Copialo en tu cuaderno exactamente como aparece arriba.' });
+
+  return fbs;
+}
+
+// ── copiar ──────────────────────────────────────────────────────────────────
+function copiarDiagnostico() {
+  const texto = document.getElementById('resultado').dataset.texto;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(texto).then(() => mostrarToast());
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    mostrarToast();
+  }
+}
+
+function mostrarToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── limpiar ──────────────────────────────────────────────────────────────────
+function limpiarTodo() {
+  ['P','E','S'].forEach(f => {
+    document.getElementById('input'+f).value = '';
+    updateChar(f);
+    document.getElementById('err'+f).classList.remove('show');
+  });
+  document.querySelectorAll('.nec-btn').forEach(b => {
+    b.classList.remove('active-p','active-e','active-s');
+  });
+  document.getElementById('resultado').style.display = 'none';
+  updateDots();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function scrollTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
