@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia Biofísica Química — Lic. Francisco Molina</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --c1:#5b21b6;--c2:#7c3aed;--cl:#ede9fe;
+    --g1:#065f46;--g2:#10b981;--gl:#d1fae5;
+    --red:#ef4444;--redl:#fee2e2;
+    --text:#1e1b4b;--muted:#6b7280;--border:#e5e7eb;
+    --card:#fff;--bg:#f5f3ff;
+    --radius:16px;--rsm:10px;
+  }
+  body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#ede9fe 0%,#d1fae5 60%,#fef3c7 100%);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem 1rem 3rem}
+  #app{width:100%;max-width:700px}
+
+  /* HEADER */
+  .hdr{background:var(--card);border-radius:var(--radius);padding:1.4rem 1.5rem 1.2rem;margin-bottom:1.2rem;text-align:center;box-shadow:0 4px 24px rgba(91,33,182,.12);position:relative;overflow:hidden}
+  .hdr::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#5b21b6,#10b981,#f59e0b)}
+  .hdr-icon{font-size:2.4rem;margin-bottom:.35rem;display:block}
+  .hdr h1{font-family:'Montserrat',sans-serif;font-size:1.45rem;font-weight:900;color:var(--text);letter-spacing:1px;text-transform:uppercase}
+  .hdr .prof{font-size:.95rem;font-weight:700;color:var(--c1);margin-top:.3rem}
+  .hdr .inst{font-size:.8rem;color:var(--muted);margin-top:.45rem;line-height:1.6}
+  .hdr .badge{display:inline-block;margin-top:.7rem;background:var(--cl);color:var(--c1);font-size:.75rem;font-weight:700;padding:4px 16px;border-radius:99px;letter-spacing:.5px;text-transform:uppercase}
+
+  /* MENÚ */
+  .menu-card{background:var(--card);border-radius:var(--radius);padding:1.4rem;margin-bottom:1rem;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+  .menu-card h2{font-family:'Montserrat',sans-serif;font-size:1.1rem;font-weight:900;color:var(--text);margin-bottom:1rem;text-align:center}
+  .all-btn{width:100%;padding:13px;font-size:.95rem;font-family:'Nunito',sans-serif;font-weight:800;border:none;border-radius:var(--rsm);background:linear-gradient(90deg,var(--c1),var(--g1));color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(91,33,182,.25);transition:opacity .15s,transform .15s;margin-bottom:10px}
+  .all-btn:hover{opacity:.92;transform:translateY(-1px)}
+  .sep{margin:10px 0;font-size:.82rem;color:var(--muted);text-align:center;font-weight:700}
+  .tema-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tema-btn{padding:10px 12px;font-size:.8rem;font-family:'Nunito',sans-serif;font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);background:var(--card);color:var(--text);cursor:pointer;text-align:center;transition:all .15s;line-height:1.35}
+  .tema-btn:hover{border-color:var(--c2);background:var(--cl)}
+
+  /* PROGRESO */
+  .prog-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+  .prog-wrap{flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--c2),var(--g2));border-radius:99px;transition:width .4s ease}
+  .prog-lbl{font-size:.82rem;color:var(--muted);font-weight:700;min-width:52px;text-align:right}
+
+  /* PREGUNTA */
+  .q-card{background:var(--card);border-radius:var(--radius);padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+  .q-meta{font-size:.74rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:.5rem}
+  .q-txt{font-size:.98rem;color:var(--text);font-weight:700;line-height:1.55}
+
+  /* TEMPORIZADOR */
+  .timer-row{display:flex;align-items:center;gap:14px;margin-bottom:1rem;background:var(--card);border-radius:var(--rsm);padding:.75rem 1rem;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+  .tcircle{position:relative;width:60px;height:60px;flex-shrink:0}
+  .tcircle svg{transform:rotate(-90deg)}
+  .tnum{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;color:var(--text)}
+  .tinfo{flex:1}
+  .tinfo .tlbl{font-size:.85rem;color:var(--muted)}
+  .tinfo .tmsg{font-size:.78rem;color:var(--muted);margin-top:2px}
+
+  /* OPCIONES */
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+  .opt{padding:12px 14px;font-size:.86rem;font-family:'Nunito',sans-serif;font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);background:var(--card);color:var(--text);cursor:pointer;text-align:left;line-height:1.45;transition:all .15s ease;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+  .opt:hover:not(:disabled){border-color:var(--c2);background:var(--cl);transform:translateY(-1px)}
+  .opt.ok{background:var(--gl);border-color:var(--g2);color:var(--g1)}
+  .opt.wrong{background:var(--redl);border-color:var(--red);color:#7f1d1d}
+  .opt:disabled{cursor:default;transform:none}
+
+  /* FEEDBACK */
+  .fb{min-height:40px;font-size:.9rem;font-weight:700;margin-bottom:.75rem;padding:0 .25rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .fb.ok{color:var(--g1)}
+  .fb.fail{color:#b91c1c}
+
+  /* BOTONES */
+  .nav-btn{width:100%;padding:13px;font-size:1rem;font-family:'Nunito',sans-serif;font-weight:800;border:none;border-radius:var(--rsm);background:linear-gradient(90deg,var(--c1),var(--g1));color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(91,33,182,.25);transition:opacity .15s,transform .15s}
+  .nav-btn:hover{opacity:.93;transform:translateY(-1px)}
+  .sec-btn{width:100%;padding:11px;font-size:.95rem;font-family:'Nunito',sans-serif;font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);background:var(--card);color:var(--text);cursor:pointer;margin-top:10px;transition:background .15s}
+  .sec-btn:hover{background:var(--bg)}
+
+  /* RESULTADO */
+  .result{background:var(--card);border-radius:var(--radius);padding:2.2rem 1.5rem;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+  .result h2{font-family:'Montserrat',sans-serif;font-size:1.4rem;font-weight:900;color:var(--text);margin-bottom:.5rem}
+  .score-big{font-family:'Montserrat',sans-serif;font-size:4rem;font-weight:900;color:var(--c1);line-height:1;margin:1rem 0 .25rem}
+  .score-sub{font-size:.95rem;color:var(--muted);margin-bottom:1rem}
+  .result-msg{font-size:1rem;font-weight:700;color:var(--text);padding:.75rem 1rem;background:var(--bg);border-radius:var(--rsm);margin-bottom:1.5rem}
+  .result-foot{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem}
+
+  @media(max-width:480px){
+    .opts{grid-template-columns:1fr}
+    .tema-grid{grid-template-columns:1fr}
+    .hdr h1{font-size:1.2rem}
+    .score-big{font-size:3rem}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <span class="hdr-icon">⚗️</span>
+    <h1>Trivia Biofísica Química</h1>
+    <div class="prof">Lic. Francisco Molina</div>
+    <div class="inst">CENT N° 74 — ATSA<br>Carrera de Enfermero Profesional — 1° Año</div>
+    <div class="badge">🔬 Repaso · Biofísica Química</div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+const TIME = 35;
+
+const temas = [
+  "Tema 1 — Metabolismo",
+  "Tema 2 — Glúcidos",
+  "Tema 3 — Lípidos",
+  "Tema 4 — Proteínas",
+  "Tema 6 — Agua, Minerales y Membranas"
+];
+
+// Cada pregunta: t=índice de tema, q=pregunta, opts=[4 opciones], a=índice de la correcta
+const allQ = [
+
+// ─── TEMA 1 ─── Metabolismo (3 preguntas)
+{t:0,
+ q:"¿Qué es el metabolismo?",
+ opts:[
+   "Serie de reacciones químicas enzimáticas que producen metabolitos intermediarios",
+   "Solo la síntesis de proteínas dentro del núcleo celular",
+   "El proceso exclusivo de obtención de energía del sol",
+   "La digestión de alimentos en el tubo digestivo"
+ ],a:0},
+
+{t:0,
+ q:"En el anabolismo, ¿qué ocurre con la energía?",
+ opts:[
+   "Se almacena en ATP (reacciones endorgónicas) para sintetizar sustancias complejas",
+   "Se libera siempre en forma de calor sin ningún aprovechamiento",
+   "Se consume solo durante la digestión de grasas",
+   "Se genera por degradación de moléculas complejas en simples"
+ ],a:0},
+
+{t:0,
+ q:"El catabolismo produce reacciones oxidativas que:",
+ opts:[
+   "Consumen energía para construir moléculas complejas",
+   "Degradan moléculas complejas en simples y liberan energía acumulada en ATP",
+   "Solo ocurren en el núcleo de la célula",
+   "Sintetizan glucógeno a partir de glucosa"
+ ],a:1},
+
+// ─── TEMA 2 ─── Glúcidos (3 preguntas)
+{t:1,
+ q:"¿Cuál es la función principal de los glúcidos en el organismo?",
+ opts:[
+   "Formar las membranas celulares",
+   "Proporcionar energía de uso inmediato",
+   "Transportar el oxígeno en la sangre",
+   "Regular la síntesis de hormonas"
+ ],a:1},
+
+{t:1,
+ q:"La sacarosa es un disacárido formado por:",
+ opts:[
+   "Dos unidades de glucosa",
+   "D-galactosa y glucosa",
+   "Glucosa y fructosa",
+   "Dos unidades de fructosa"
+ ],a:2},
+
+{t:1,
+ q:"¿Qué es la gluconeogénesis?",
+ opts:[
+   "La síntesis de glucógeno a partir de glucosa",
+   "La oxidación de glucosa a piruvato (glucólisis)",
+   "La síntesis de glucosa a partir de precursores no glucídicos como proteínas o lípidos",
+   "El paso de glucógeno a glucosa libre"
+ ],a:2},
+
+// ─── TEMA 3 ─── Lípidos (5 preguntas)
+{t:2,
+ q:"¿Cuál es la característica principal de los lípidos?",
+ opts:[
+   "Son hidrofóbicos (insolubles en agua) y solubles en disolventes orgánicos",
+   "Son solubles en agua e insolubles en solventes orgánicos",
+   "Son exclusivamente de origen vegetal",
+   "Siempre son líquidos a temperatura ambiente"
+ ],a:0},
+
+{t:2,
+ q:"¿Qué cantidad de energía produce 1 gramo de grasa?",
+ opts:[
+   "4,1 kilocalorías, igual que los glúcidos",
+   "7,0 kilocalorías",
+   "9,4 kilocalorías",
+   "2,5 kilocalorías"
+ ],a:2},
+
+{t:2,
+ q:"Los fosfolípidos cumplen principalmente una función:",
+ opts:[
+   "De reserva energética a largo plazo en tejido adiposo",
+   "Estructural, formando las bicapas de las membranas celulares",
+   "Hormonal, actuando como mensajeros químicos",
+   "De transporte de oxígeno en la sangre"
+ ],a:1},
+
+{t:2,
+ q:"La aterosclerosis se caracteriza por:",
+ opts:[
+   "Inflamación aguda de las articulaciones",
+   "Depósito de placas de colesterol y lípidos en las paredes arteriales que estrechan la luz del vaso",
+   "Disolución del colesterol en la sangre sin daño vascular",
+   "Aumento exclusivo de proteínas en plasma"
+ ],a:1},
+
+{t:2,
+ q:"¿Qué son los ácidos grasos esenciales?",
+ opts:[
+   "Los que el organismo puede sintetizar internamente sin necesidad de la dieta",
+   "Solo los ácidos grasos saturados de origen animal",
+   "Aquellos que no pueden producirse en el organismo y deben ingerirse con la dieta",
+   "Los que forman exclusivamente las hormonas esteroideas"
+ ],a:2},
+
+// ─── TEMA 4 ─── Proteínas (5 preguntas)
+{t:3,
+ q:"¿Cuál es la unidad estructural básica de las proteínas?",
+ opts:[
+   "Los nucleótidos",
+   "Los aminoácidos",
+   "Los ácidos grasos",
+   "Los monosacáridos"
+ ],a:1},
+
+{t:3,
+ q:"El enlace peptídico resulta de la unión entre:",
+ opts:[
+   "El grupo carboxilo de un aminoácido y el grupo amino del siguiente",
+   "Dos grupos amino de aminoácidos distintos",
+   "El grupo hidroxilo y el grupo fosfato de un aminoácido",
+   "Dos grupos carboxilo de aminoácidos consecutivos"
+ ],a:0},
+
+{t:3,
+ q:"Las proteínas globulares se caracterizan por:",
+ opts:[
+   "Ser insolubles en agua y formar tejido conjuntivo como tendones y huesos",
+   "Tener forma esférica, ser solubles en agua e incluir enzimas, anticuerpos y hemoglobina",
+   "Estar formadas exclusivamente por ácidos grasos y carbohidratos",
+   "Solo existir en el núcleo celular como material genético"
+ ],a:1},
+
+{t:3,
+ q:"¿Qué son las LDL en relación con las dislipoproteinemias?",
+ opts:[
+   "Lipoproteínas de alta densidad que protegen contra la aterosclerosis",
+   "Lipoproteínas de baja densidad que transportan colesterol a tejidos periféricos y aumentan el riesgo cardiovascular",
+   "Enzimas encargadas de degradar las grasas en el intestino",
+   "Proteínas estructurales que forman la membrana celular"
+ ],a:1},
+
+{t:3,
+ q:"¿Qué son las HDL y cuál es su rol en el organismo?",
+ opts:[
+   "Lipoproteínas de baja densidad que depositan colesterol en las arterias",
+   "Enzimas digestivas que degradan proteínas en el estómago",
+   "Lipoproteínas de alta densidad que retiran colesterol de los tejidos y lo llevan al hígado para su excreción",
+   "Hormonas producidas por el páncreas para regular la glucosa"
+ ],a:2},
+
+// ─── TEMA 6 ─── Agua, Minerales y Membranas (7 preguntas)
+{t:4,
+ q:"¿Cuál es el rango normal de pH arterial en el ser humano?",
+ opts:[
+   "6,80 a 7,10",
+   "7,35 a 7,45",
+   "7,50 a 7,80",
+   "7,00 a 7,20"
+ ],a:1},
+
+{t:4,
+ q:"¿Qué ocurre con una célula animal en un medio hipotónico?",
+ opts:[
+   "Pierde agua, se arruga y sufre crenación",
+   "No cambia porque el medio es igual al interior celular",
+   "Absorbe agua, se hincha y puede estallar (citólisis)",
+   "Mantiene la misma forma sin movimiento de agua"
+ ],a:2},
+
+{t:4,
+ q:"La diálisis renal funciona gracias al principio de:",
+ opts:[
+   "Transporte activo que consume energía ATP",
+   "Difusión de solutos a través de una membrana semipermeable a favor del gradiente de concentración",
+   "Presión hidrostática que impulsa el líquido contra el gradiente",
+   "Ósmosis inversa que concentra la sangre"
+ ],a:1},
+
+{t:4,
+ q:"¿Qué es la presión osmótica?",
+ opts:[
+   "La presión que ejerce el corazón sobre la sangre",
+   "La presión necesaria para detener el flujo neto de solvente a través de una membrana semipermeable",
+   "La fuerza de gravedad sobre los líquidos corporales",
+   "La resistencia del hueso a la compresión mecánica"
+ ],a:1},
+
+{t:4,
+ q:"En el líquido intracelular, el catión más abundante es:",
+ opts:[
+   "Sodio (Na⁺) con 142 mEq/L",
+   "Calcio (Ca²⁺) con 5 mEq/L",
+   "Potasio (K⁺) con 150 mEq/L",
+   "Cloro (Cl⁻) con 103 mEq/L"
+ ],a:2},
+
+{t:4,
+ q:"La acidosis metabólica puede producirse cuando:",
+ opts:[
+   "Se producen vómitos y se pierde el contenido ácido del estómago",
+   "Se retiene CO₂ por hipoventilación pulmonar",
+   "Se consumen muchas grasas que se digieren produciendo ácidos, o en diabéticos que queman grasa",
+   "Se administra bicarbonato en exceso por vía intravenosa"
+ ],a:2},
+
+{t:4,
+ q:"¿Cuál es la principal diferencia entre difusión simple y transporte activo?",
+ opts:[
+   "La difusión va a favor del gradiente sin gastar energía; el transporte activo va en contra del gradiente usando ATP",
+   "El transporte activo siempre va a favor del gradiente sin gasto energético",
+   "Ambos procesos consumen la misma cantidad de energía",
+   "La difusión solo ocurre en los pulmones y el transporte activo solo en los riñones"
+ ],a:0},
+
+];
+
+// Estado del juego
+let temaSeleccionado = null;
+let questions=[], current=0, score=0;
+let timer=null, timeLeft=TIME, answered=false;
+
+// ─── Utilidades ───
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function prepQ(pool){
+  return shuffle(pool).map(q=>{
+    const correct=q.opts[q.a];
+    const opts=shuffle([...q.opts]);
+    return{...q,shuffled:opts,correct};
+  });
+}
+
+// ─── Pantallas ───
+function renderStart(){
+  clearInterval(timer);
+  const total=allQ.length; // 23
+  const btns=temas.map((t,i)=>{
+    const n=allQ.filter(q=>q.t===i).length;
+    return `<button class="tema-btn" onclick="selTema(${i})">${t}<br><span style="font-size:.72rem;font-weight:600;color:var(--muted)">${n} preguntas</span></button>`;
+  }).join('');
+  document.getElementById('content').innerHTML=`
+    <div class="menu-card">
+      <h2>Elegí el modo de juego</h2>
+      <button class="all-btn" onclick="iniciarTodos()">🎯 Todas las preguntas — ${total} en total (orden aleatorio)</button>
+      <div class="sep">── O practicá por tema ──</div>
+      <div class="tema-grid">${btns}</div>
+    </div>`;
+}
+
+function selTema(idx){
+  temaSeleccionado=idx;
+  const pool=allQ.filter(q=>q.t===idx);
+  questions=prepQ(pool);
+  current=0;score=0;renderQ();
+}
+
+function iniciarTodos(){
+  temaSeleccionado=null;
+  questions=prepQ(allQ);
+  current=0;score=0;renderQ();
+}
+
+function renderQ(){
+  answered=false;timeLeft=TIME;
+  clearInterval(timer);
+  const q=questions[current];
+  const total=questions.length;
+  const pct=Math.round((current/total)*100);
+  const C=2*Math.PI*26;
+
+  document.getElementById('content').innerHTML=`
+    <div class="prog-row">
+      <div class="prog-wrap"><div class="prog-fill" id="pbar" style="width:${pct}%"></div></div>
+      <div class="prog-lbl">${current+1} / ${total}</div>
+    </div>
+    <div class="q-card">
+      <div class="q-meta">${temas[q.t]}</div>
+      <div class="q-txt">${q.q}</div>
+    </div>
+    <div class="timer-row">
+      <div class="tcircle">
+        <svg width="60" height="60" viewBox="0 0 60 60">
+          <circle cx="30" cy="30" r="26" fill="none" stroke="#e5e7eb" stroke-width="5"/>
+          <circle id="tarc" cx="30" cy="30" r="26" fill="none" stroke="#7c3aed" stroke-width="5"
+            stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="0" stroke-linecap="round"/>
+        </svg>
+        <div class="tnum" id="tnum">${TIME}</div>
+      </div>
+      <div class="tinfo">
+        <div class="tlbl" id="tlbl">Segundos restantes</div>
+        <div class="tmsg">¡Elegí tu respuesta!</div>
+      </div>
+    </div>
+    <div class="opts" id="opts">
+      ${q.shuffled.map((o,i)=>`<button class="opt" onclick="choose(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="fb" id="fb"></div>
+    <button class="nav-btn" id="nb" style="display:none" onclick="next()">${current+1<total?'Siguiente pregunta →':'Ver resultados'}</button>`;
+
+  timer=setInterval(()=>{
+    timeLeft--;
+    const el=document.getElementById('tnum');
+    const arc=document.getElementById('tarc');
+    const lbl=document.getElementById('tlbl');
+    if(el)el.textContent=timeLeft;
+    if(arc){
+      arc.style.strokeDashoffset=(C*(1-timeLeft/TIME)).toFixed(1);
+      arc.style.stroke=timeLeft<=7?'#ef4444':'#7c3aed';
+    }
+    if(lbl)lbl.style.color=timeLeft<=7?'#b91c1c':'';
+    if(timeLeft<=0){clearInterval(timer);if(!answered)timeUp();}
+  },1000);
+}
+
+function choose(idx){
+  if(answered)return;
+  answered=true;clearInterval(timer);
+  const q=questions[current];
+  const btns=document.querySelectorAll('.opt');
+  const fb=document.getElementById('fb');
+  const nb=document.getElementById('nb');
+  btns.forEach(b=>b.disabled=true);
+  btns.forEach((b,i)=>{if(q.shuffled[i]===q.correct)b.classList.add('ok');});
+  if(q.shuffled[idx]===q.correct){
+    score++;btns[idx].classList.add('ok');
+    fb.innerHTML='✅ ¡Correcto!';fb.className='fb ok';
+  }else{
+    btns[idx].classList.add('wrong');
+    fb.innerHTML='❌ Incorrecto. La respuesta correcta está marcada en verde.';fb.className='fb fail';
+  }
+  nb.style.display='block';
+}
+
+function timeUp(){
+  answered=true;
+  const q=questions[current];
+  const btns=document.querySelectorAll('.opt');
+  const fb=document.getElementById('fb');
+  const nb=document.getElementById('nb');
+  btns.forEach(b=>b.disabled=true);
+  btns.forEach((b,i)=>{if(q.shuffled[i]===q.correct)b.classList.add('ok');});
+  fb.innerHTML='⏱️ ¡Tiempo! La respuesta correcta está marcada en verde.';fb.className='fb fail';
+  nb.style.display='block';
+}
+
+function next(){
+  current++;
+  if(current>=questions.length)renderResult();
+  else renderQ();
+}
+
+function renderResult(){
+  clearInterval(timer);
+  const total=questions.length;
+  const pct=Math.round((score/total)*100);
+  let msg='';
+  if(pct>=85)msg='🏆 ¡Excelente! Muy bien preparado/a.';
+  else if(pct>=60)msg='👍 Bien. Repasá los temas donde fallaste.';
+  else msg='📖 Seguí estudiando, ¡podés mejorar!';
+  const nombre=temaSeleccionado!==null?temas[temaSeleccionado]:'Todos los temas';
+  document.getElementById('content').innerHTML=`
+    <div class="result">
+      <h2>Trivia finalizada</h2>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">${nombre}</div>
+      <div class="score-big">${score}/${total}</div>
+      <div class="score-sub">${pct}% de respuestas correctas</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-foot">Biofísica Química · Lic. Francisco Molina<br>CENT N° 74 — ATSA — 1° Año</div>
+      <button class="nav-btn" onclick="renderStart()">Volver al menú principal</button>
+      ${temaSeleccionado!==null
+        ?`<button class="sec-btn" onclick="selTema(${temaSeleccionado})">Repetir este tema</button>`
+        :`<button class="sec-btn" onclick="iniciarTodos()">Jugar de nuevo</button>`}
+    </div>`;
+}
+
+renderStart();
+</script>
+</body>
+</html>
