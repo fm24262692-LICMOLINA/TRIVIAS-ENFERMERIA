@@ -1,0 +1,311 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .trivia-wrap { padding: 1.5rem 0; }
+  .header { text-align: center; margin-bottom: 2rem; }
+  .header h1 { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; background: #E6F1FB; color: #0C447C; }
+
+  .topic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+  .topic-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; text-align: center; }
+  .topic-card:hover { border-color: #378ADD; background: var(--color-background-secondary); }
+  .topic-card .t-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .topic-card .t-num { font-size: 11px; color: var(--color-text-secondary); }
+  .topic-card .t-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-top: 2px; }
+
+  .btn { background: transparent; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 8px 18px; font-size: 14px; cursor: pointer; color: var(--color-text-primary); transition: background 0.12s; }
+  .btn:hover { background: var(--color-background-secondary); }
+  .btn-primary { background: #185FA5; color: #fff; border-color: #185FA5; }
+  .btn-primary:hover { background: #0C447C; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num-badge { font-size: 12px; color: var(--color-text-secondary); }
+  .progress-bar { height: 4px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
+  .progress-fill { height: 100%; background: #185FA5; border-radius: 4px; transition: width 0.3s; }
+  .topic-label { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; background: #E6F1FB; color: #0C447C; }
+
+  .question-text { font-size: 15px; font-weight: 500; color: var(--color-text-primary); line-height: 1.6; margin-bottom: 1.25rem; }
+  .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+  .opt-btn { text-align: left; padding: 10px 14px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; color: var(--color-text-primary); background: var(--color-background-primary); transition: all 0.12s; line-height: 1.5; }
+  .opt-btn:hover:not(:disabled) { border-color: #378ADD; background: var(--color-background-secondary); }
+  .opt-btn.correct { background: #EAF3DE; border-color: #639922; color: #27500A; }
+  .opt-btn.wrong { background: #FCEBEB; border-color: #A32D2D; color: #501313; }
+  .opt-btn.reveal { background: #EAF3DE; border-color: #639922; color: #27500A; }
+  .opt-btn:disabled { cursor: default; }
+
+  .feedback-box { padding: 10px 14px; border-radius: var(--border-radius-md); font-size: 13px; line-height: 1.6; margin-bottom: 1rem; }
+  .feedback-box.ok { background: #EAF3DE; color: #27500A; border: 0.5px solid #639922; }
+  .feedback-box.fail { background: #FCEBEB; color: #501313; border: 0.5px solid #A32D2D; }
+
+  .nav-row { display: flex; justify-content: flex-end; gap: 8px; }
+
+  .score-card { text-align: center; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 2rem; margin-bottom: 1.5rem; }
+  .score-big { font-size: 56px; font-weight: 500; color: #185FA5; line-height: 1; }
+  .score-label { font-size: 14px; color: var(--color-text-secondary); margin-top: 4px; }
+  .score-msg { font-size: 15px; color: var(--color-text-primary); margin-top: 1rem; font-weight: 500; }
+  .topic-scores { display: flex; flex-direction: column; gap: 6px; margin-top: 1rem; }
+  .ts-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--color-text-secondary); padding: 6px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .ts-row:last-child { border-bottom: none; }
+  .actions-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+</style>
+
+<div class="trivia-wrap">
+  <div class="header">
+    <div class="badge">Repaso · Primer Parcial</div>
+    <h1>Trivia de Farmacología General y Especial</h1>
+    <p>Lic. Francisco Molina · CENT N° 74 ATSA</p>
+  </div>
+
+  <div id="screen-home" class="screen active">
+    <p style="font-size:14px;color:var(--color-text-secondary);margin-bottom:1rem;text-align:center;">Elegí el tema con el que querés repasar:</p>
+    <div class="topic-grid">
+      <div class="topic-card" onclick="startTopic(0)">
+        <span class="t-icon">💊</span>
+        <div class="t-num">Tema 1</div>
+        <div class="t-name">Farmacología básica</div>
+      </div>
+      <div class="topic-card" onclick="startTopic(1)">
+        <span class="t-icon">🌿</span>
+        <div class="t-num">Tema 2</div>
+        <div class="t-name">Farmacognosia y farmacotecnia</div>
+      </div>
+      <div class="topic-card" onclick="startTopic(2)">
+        <span class="t-icon">🫁</span>
+        <div class="t-num">Tema 10</div>
+        <div class="t-name">Farmacología respiratoria</div>
+      </div>
+      <div class="topic-card" onclick="startTopic(3)">
+        <span class="t-icon">❤️</span>
+        <div class="t-num">Tema 11</div>
+        <div class="t-name">Farmacología cardiovascular</div>
+      </div>
+      <div class="topic-card" onclick="startTopic(4)">
+        <span class="t-icon">🫙</span>
+        <div class="t-num">Tema 12</div>
+        <div class="t-name">Farmacología digestiva</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:1.25rem;">
+      <button class="btn btn-primary" onclick="startAll()">Jugar todos los temas (35 preguntas)</button>
+    </div>
+  </div>
+
+  <div id="screen-quiz" class="screen">
+    <div class="q-meta">
+      <span class="q-num-badge" id="q-counter"></span>
+      <span class="topic-label" id="q-topic-label"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="q-progress"></div></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options" id="q-options"></div>
+    <div id="q-feedback" style="display:none;"></div>
+    <div class="nav-row">
+      <button class="btn btn-primary" id="btn-next" style="display:none;" onclick="nextQuestion()">Siguiente →</button>
+    </div>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <div class="score-card">
+      <div class="score-big" id="res-score"></div>
+      <div class="score-label" id="res-total"></div>
+      <div class="score-msg" id="res-msg"></div>
+    </div>
+    <div class="topic-scores" id="res-breakdown"></div>
+    <div class="actions-row" style="margin-top:1.5rem;">
+      <button class="btn" onclick="goHome()">← Elegir otro tema</button>
+      <button class="btn btn-primary" onclick="retryTopic()">Reintentar este tema</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOPICS = [
+  { id: 0, label: "Tema 1", name: "Farmacología básica" },
+  { id: 1, label: "Tema 2", name: "Farmacognosia" },
+  { id: 2, label: "Tema 10", name: "Farmacología respiratoria" },
+  { id: 3, label: "Tema 11", name: "Farmacología cardiovascular" },
+  { id: 4, label: "Tema 12", name: "Farmacología digestiva" },
+];
+
+const QUESTIONS = [
+  // ── TEMA 1 – Farmacología básica (7 preguntas) ──
+  { t:0, q:"¿Qué estudia la farmacodinamia?", opts:["La absorción y excreción del fármaco en el organismo","La acción del fármaco en los seres vivos","La composición química de las drogas naturales","Los efectos genéticos sobre los fármacos"], ans:1, exp:"La farmacodinamia es el estudio de la acción del fármaco en los seres vivos." },
+  { t:0, q:"Según la OMS, ¿qué es un fármaco?", opts:["Una droga de origen exclusivamente sintético usada en cirugía","Toda sustancia que introducida en el organismo puede modificar una o más de sus funciones","Una materia prima de origen biológico para elaborar medicamentos","Un producto exclusivamente natural con propiedades terapéuticas comprobadas"], ans:1, exp:"Según la OMS: fármaco es toda sustancia que introducida en el organismo vivo puede modificar una o más de sus funciones." },
+  { t:0, q:"¿Cuál de las siguientes ramas de la farmacología estudia los venenos?", opts:["Farmacogenética","Terapéutica","Toxicología","Farmacognosia"], ans:2, exp:"La toxicología estudia los venenos o tóxicos." },
+  { t:0, q:"La farmacología aplicada se ocupa de:", opts:["Investigar toxicidad en animales de laboratorio","Estudiar fármacos sin discriminar su utilidad terapéutica","Solo las drogas de posible empleo terapéutico para tratar y prevenir enfermedades","Analizar variaciones genéticas ante distintos fármacos"], ans:2, exp:"La farmacología aplicada solo se ocupa de drogas de posible empleo terapéutico." },
+  { t:0, q:"¿Qué es el principio activo de una droga?", opts:["El nombre comercial registrado del medicamento","La sustancia responsable de la actividad farmacológica de la droga","El excipiente que le da forma al medicamento","El acondicionamiento primario del fármaco"], ans:1, exp:"El principio activo es la sustancia responsable de la actividad farmacológica de la droga." },
+  { t:0, q:"Las drogas de origen mineral incluyen:", opts:["Insulina y estrógeno","Ácido acetilsalicílico y cloranfenicol","Azufre, bicarbonato de sodio y cloruro de potasio","Raíces, tallos y hojas de plantas"], ans:2, exp:"Las drogas de origen mineral son minerales químicamente puros como el azufre, bicarbonato de sodio y cloruro de potasio." },
+  { t:0, q:"El acondicionamiento primario de un medicamento es:", opts:["La caja exterior con el prospecto y el nombre del producto","El envase en contacto directo con el fármaco (blíster, frasco, tubo)","El sistema de dispensación utilizado en la farmacia hospitalaria","El nombre genérico asignado por instituciones académicas"], ans:1, exp:"El acondicionamiento primario es el envase u otra forma de acondicionamiento en contacto directo con el fármaco." },
+
+  // ── TEMA 2 – Farmacognosia (7 preguntas) ──
+  { t:1, q:"La fitoterapia es una rama terapéutica de la farmacognosia que:", opts:["Utiliza drogas de origen animal para tratar enfermedades","Se dedica exclusivamente a la síntesis química de principios activos","Utiliza drogas de origen vegetal para el tratamiento de enfermedades","Estudia las variaciones genéticas frente a los fármacos"], ans:2, exp:"Fitoterapia: rama que utiliza drogas de origen vegetal para el tratamiento de enfermedades." },
+  { t:1, q:"¿Qué son las farmacopeas?", opts:["Sistemas automatizados para la dispensación de medicamentos","Códigos oficiales con lista seleccionada de drogas definidas por origen, potencia, pureza, valoración, conservación y dosis","Equipos utilizados para la extracción de principios activos industriales","Registros de nombre comercial de los medicamentos de cada país"], ans:1, exp:"Las farmacopeas son códigos oficiales que contienen una lista seleccionada de drogas con todos sus parámetros estandarizados." },
+  { t:1, q:"En el sistema de dispensación por stock en la unidad de enfermería, ¿cuál es su principal desventaja?", opts:["No permite el acceso inmediato a los medicamentos de urgencia","El farmacéutico evalúa diariamente la terapia medicamentosa del paciente","Excesivo tiempo administrativo del personal de enfermería y alto costo por inventarios elevados con riesgo de vencimientos","Requiere carros individualizados por paciente enviados desde farmacia"], ans:2, exp:"La desventaja del sistema stock es el excesivo tiempo administrativo y el alto costo por inventarios elevados con riesgo de vencimientos." },
+  { t:1, q:"¿Qué innovación introduce el SDMDU (sistema de dispensación en dosis unitaria)?", opts:["Elimina la participación del farmacéutico para agilizar la dispensación","Incorpora la participación activa del farmacéutico que evalúa diariamente dosis, vías, reacciones e interacciones","Permite solo dispensar medicamentos de bajo costo sin control especial","Es un sistema centralizado exclusivo para servicios de cirugía"], ans:1, exp:"El SDMDU incorpora la participación activa del farmacéutico que evalúa diariamente la terapia medicamentosa del paciente." },
+  { t:1, q:"En la secuencia de investigación de farmacognosia, ¿qué considera la etapa de recolección?", opts:["Solo el registro bibliográfico de la especie vegetal","La edad de la planta, la estación del año, el momento del día y el periodo del ciclo biológico para prevenir pérdida del principio activo","La desinfección y embalaje del material extraído","La molienda del material para disminuir el tamaño de partículas"], ans:1, exp:"La recolección considera la edad de la planta, la estación del año, el momento del día y el ciclo biológico para evitar la pérdida del principio activo." },
+  { t:1, q:"¿Cuántos nombres posee una droga o preparado farmacéutico según el Tema 2?", opts:["Uno: el nombre genérico universal","Dos: genérico y comercial","Tres: nombre químico o molecular, nombre genérico y nombre comercial","Cuatro: molecular, genérico, comercial y OMS"], ans:2, exp:"Las drogas poseen tres nombres: nombre químico o molecular, nombre genérico y nombre comercial." },
+  { t:1, q:"La estabilización en la secuencia de investigación de farmacognosia consiste en:", opts:["Disminuir el tamaño de las partículas para facilitar el transporte","Estrategias adoptadas para prevenir la posible inactivación de los componentes de la droga","La extracción del principio activo por técnicas especializadas","El registro del hábitat y condiciones climáticas de la especie estudiada"], ans:1, exp:"La estabilización consiste en las estrategias adoptadas para prevenir la posible inactivación de los componentes." },
+
+  // ── TEMA 10 – Farmacología respiratoria (7 preguntas) ──
+  { t:2, q:"¿Cuál es el mecanismo de acción del salbutamol?", opts:["Bloquea los receptores colinérgicos muscarínicos bronquiales","Es un corticoide que inhibe los procesos inflamatorios en la mucosa bronquial","Es un broncodilatador beta-2 agonista que relaja la musculatura lisa bronquial","Actúa en el centro de la tos del sistema nervioso central suprimiéndolo"], ans:2, exp:"El salbutamol es un beta-2 agonista que broncodilata relajando la musculatura lisa bronquial." },
+  { t:2, q:"¿Por qué los antitusígenos están contraindicados en la tos productiva?", opts:["Porque producen broncoespasmo severo en tos con expectoración","Porque el reflejo de tos es necesario para expulsar las secreciones acumuladas en las vías respiratorias","Porque solo son eficaces en crisis asmáticas agudas","Porque producen depresión respiratoria grave en pacientes con tos productiva"], ans:1, exp:"El reflejo de tos es necesario para expulsar secreciones; suprimirlo en tos productiva puede ser perjudicial." },
+  { t:2, q:"La codeína como antitusígeno se caracteriza por:", opts:["No tener acción analgésica y ser de elección en el embarazo","Ser el prototipo de los antitusígenos, con acción analgésica central y acción antidiarreica además de antitusígena","Actuar exclusivamente sobre la rama eferente del reflejo de la tos sin efecto central","Estar indicada exclusivamente en pacientes terminales con tos dolorosa"], ans:1, exp:"La codeína es el prototipo de antitusígenos, con eficacia reconocida, acción analgésica central y acción antidiarreica." },
+  { t:2, q:"¿Qué es un mucolítico y un ejemplo del Tema 10?", opts:["Fármaco que suprime el reflejo de la tos; ejemplo: dextrometorfano","Sustancia que destruye las estructuras de las secreciones bronquiales anormales disminuyendo su viscosidad; ejemplo: ambroxol","Fármaco que dilata los bronquios actuando sobre receptores beta-2; ejemplo: bromuro de ipratropio","Corticoide que reduce la inflamación de la mucosa; ejemplo: budesónida"], ans:1, exp:"Mucolítico: destruye estructuras de secreciones bronquiales anormales, disminuye la viscosidad. Ejemplo: ambroxol." },
+  { t:2, q:"En el manejo inicial del asma agudo, ¿con qué frecuencia se administra el salbutamol en la primera hora?", opts:["Un puff cada 30 minutos","2 puff cada 10 minutos","2 puff cada 20 minutos","4 puff cada 5 minutos"], ans:1, exp:"El protocolo del Tema 10 indica 2 puff de salbutamol cada 10 minutos durante la primera hora." },
+  { t:2, q:"Las reacciones adversas del bromuro de ipratropio incluyen:", opts:["Taquicardia, hipertensión y nerviosismo","Tos, nerviosismo, náuseas, cefaleas, sequedad de boca, palpitaciones y rash cutáneo","Depresión respiratoria, miosis y constipación","Broncoespasmo paradójico e hipotensión severa"], ans:1, exp:"Las reacciones adversas del ipratropio son tos, nerviosismo, náuseas, cefaleas, sequedad de boca, palpitaciones y rash cutáneo." },
+  { t:2, q:"El dextrometorfano es el antitusígeno de elección en pediatría y embarazo porque:", opts:["Tiene efecto analgésico potente que lo hace seguro en estas poblaciones","No posee acción analgésica y no produce depresión respiratoria, a diferencia de la codeína","Actúa como anestésico local en la mucosa bronquial sin absorción sistémica","Es un corticoide de bajo perfil que no cruza la barrera placentaria"], ans:1, exp:"El dextrometorfano no produce depresión respiratoria y carece de acción analgésica, lo que lo hace seguro en pediatría y embarazo." },
+
+  // ── TEMA 11 – Farmacología cardiovascular (7 preguntas) ──
+  { t:3, q:"¿Cómo actúan los diuréticos tiazídicos según el Tema 11?", opts:["En el asa de Henle inhibiendo la reabsorción de sodio, cloro y potasio","En los túbulos contorneados distales, impidiendo la reabsorción de sodio, cloro y potasio, y disminuyendo la excreción renal de calcio","En los túbulos colectores permitiendo la absorción del potasio","En el glomérulo aumentando el filtrado glomerular"], ans:1, exp:"Los diuréticos tiazídicos actúan en los túbulos contorneados distales impidiendo la reabsorción de Na, Cl y K, y disminuyendo la excreción de calcio." },
+  { t:3, q:"Los ARA II (antagonistas de los receptores de angiotensina II) incluyen:", opts:["Enalapril, benzapril y ramipril","Losartán, telmisartán, candesartán y valsartán","Furosemida, espironolactona y hidroclorotiazida","Atenolol, bisoprolol y nebivolol"], ans:1, exp:"Los ARA II son losartán, telmisartán, candesartán y valsartán. Los IECA son enalapril y benzapril." },
+  { t:3, q:"En el tratamiento del síndrome coronario agudo, ¿qué función tienen las estatinas?", opts:["Disuelven el trombo coronario actuando como fibrinolíticos","Bloquean los receptores adrenérgicos reduciendo la frecuencia cardíaca","Son hipocolesterolemiantes; ejemplos: atorvastatina y simvastatina","Inhiben la agregación plaquetaria como el AAS y el clopidogrel"], ans:2, exp:"Las estatinas (atorvastatina, simvastatina) son hipocolesterolemiantes utilizados en el síndrome coronario agudo." },
+  { t:3, q:"Los beta bloqueantes no selectivos actúan sobre:", opts:["Solo receptores b1 cardíacos y renales","Solo receptores b2 pulmonares y uterinos","Receptores b1 y b2; ejemplos: carvedilol, labetalol y propranolol","Receptores b3 del tejido adiposo exclusivamente"], ans:2, exp:"Los beta bloqueantes no selectivos actúan sobre b1 y b2; ejemplos: carvedilol, labetalol, propranolol." },
+  { t:3, q:"¿Cuál es el mecanismo de acción de los bloqueantes cálcicos?", opts:["Bloquean los receptores de angiotensina II disminuyendo la vasoconstricción","Impiden que el calcio penetre en las células musculares del corazón y vasos, produciendo relajación y descenso de la presión arterial","Inhiben la enzima convertidora de angiotensina reduciendo la angiotensina II","Bloquean los receptores adrenérgicos b1 reduciendo la frecuencia cardíaca"], ans:1, exp:"Los bloqueantes cálcicos impiden que el calcio entre en las células musculares, relajando el músculo liso y bajando la presión arterial." },
+  { t:3, q:"El tratamiento no farmacológico de la insuficiencia cardíaca según el Tema 11 incluye:", opts:["Administrar diuréticos de asa a demanda del paciente","Abandono del tabaco y alcohol, dieta baja en sal, no abandonar la medicación y pesarse diariamente","Restringir completamente la actividad física en todas las etapas de la enfermedad","Solo el uso de dispositivos de asistencia ventricular"], ans:1, exp:"El Tema 11 indica: abandono del tabaco/alcohol, dieta baja en sal, no abandonar la medicación y control diario del peso." },
+  { t:3, q:"La insuficiencia cardíaca sistólica se caracteriza por:", opts:["Dificultad en el llenado del ventrículo izquierdo por deterioro de la relajación","Disminución del gasto cardíaco por deterioro de la contractilidad miocárdica","Obstrucción mecánica del flujo sanguíneo de entrada al ventrículo","Aumento patológico del gasto cardíaco con hipertensión severa"], ans:1, exp:"La IC sistólica se produce por disminución del gasto cardíaco por deterioro de la contractilidad miocárdica." },
+
+  // ── TEMA 12 – Farmacología digestiva (7 preguntas) ──
+  { t:4, q:"¿Qué son los medicamentos procinéticos y para qué se usan?", opts:["Fármacos que reducen la acidez gástrica bloqueando los receptores H2","Medicamentos que mejoran el tránsito intestinal mejorando el vaciado gástrico y la función de los esfínteres; usados para reflujo, náuseas y dispepsia","Fármacos que destruyen el Helicobacter pylori como primer tratamiento","Sustancias que retienen agua en el colon para ablandar las heces"], ans:1, exp:"Los procinéticos mejoran el tránsito intestinal, el vaciado gástrico y la función de esfínteres; se usan en reflujo, náuseas y dispepsia." },
+  { t:4, q:"Los inhibidores de la bomba de protones (IBP) como el omeprazol actúan:", opts:["Neutralizando el ácido ya producido en el estómago (antiácidos)","Bloqueando el receptor H2 para disminuir la producción de ácido","Bloqueando la bomba de hidrógeno, evitando que los protones se combinen con el cloro para formar HCl; una dosis inhibe la acidez 24 hs","Eliminando el Helicobacter pylori como antibiótico de primera línea"], ans:2, exp:"Los IBP bloquean la bomba de protones impidiendo la formación de HCl; una dosis diaria en ayunas inhibe la acidez 24 horas." },
+  { t:4, q:"La metoclopramida se diferencia de la domperidona en que:", opts:["La metoclopramida es un IBP y la domperidona es un bloqueante H2","La metoclopramida tiene efectos sicotrópicos (ansiedad, sedación) además de procinéticos; la domperidona es antidopaminérgica pura sin esos efectos","La metoclopramida se usa solo para estreñimiento y la domperidona para diarrea","La metoclopramida es un antiácido y la domperidona un antiespasmódico"], ans:1, exp:"La metoclopramida tiene efectos antidopaminérgicos y sicotrópicos; la domperidona es antidopaminérgica pura sin efectos sicotrópicos." },
+  { t:4, q:"¿Cuál es la diferencia entre un laxante y un purgante según el Tema 12?", opts:["El laxante actúa en 15 minutos y el purgante entre 24 y 72 horas","El laxante tiene acción suave (24-72 hs) y el purgante acción fuerte con evacuación en 15 minutos","El laxante se usa solo en adultos mayores y el purgante en pediatría","No hay diferencia, son sinónimos en farmacología digestiva"], ans:1, exp:"Laxante: acción suave en 24-72 hs. Purgante: acción fuerte con evacuación a los 15 minutos." },
+  { t:4, q:"¿Cuándo está indicada la rehidratación oral en diarrea, según el Tema 12?", opts:["Siempre que haya diarrea, incluso leve, se indica vía intravenosa exclusivamente","En diarreas leves o moderadas, la reposición oral es más eficiente y mejor tolerada que la intravenosa","Solo en diarreas graves con deshidratación severa y acidosis","La rehidratación oral está contraindicada si se suspende la alimentación"], ans:1, exp:"En diarreas leves o moderadas, la rehidratación oral es más eficiente y de mayor tolerancia que la IV." },
+  { t:4, q:"¿Por qué no deben usarse soluciones para deportistas en la rehidratación por diarrea?", opts:["Porque contienen demasiada glucosa y producen hiperglucemia","Porque resultan hiperosmóticas y no están diseñadas para reponer las pérdidas intestinales","Porque solo contienen sodio y no incluyen potasio ni bicarbonato","Porque están contraindicadas en menores de 18 años"], ans:1, exp:"Las soluciones para deportistas son hiperosmóticas y no están diseñadas para la rehidratación por diarrea." },
+  { t:4, q:"Los laxantes osmóticos como la lactulosa actúan:", opts:["Estimulando el peristaltismo al aumentar el volumen fecal por retención de agua","Siendo poco absorbidos en el sistema GI y atrayendo agua hacia la luz del intestino, aumentando el líquido y produciendo distensión de la musculatura","Inhibiendo la reabsorción de azúcares y agua de acción rápida a los 15-20 minutos","Ablandando las heces rehidratándolas sin aumentar el volumen intestinal"], ans:1, exp:"Los laxantes osmóticos (lactulosa) son poco absorbidos y atraen agua hacia la luz intestinal, produciendo distensión y evacuación." },
+];
+
+let currentQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+let lastTopicId = null;
+let topicScores = {};
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function startTopic(topicId) {
+  lastTopicId = topicId;
+  const qs = shuffle(QUESTIONS.filter(q => q.t === topicId).map(q => Object.assign({}, q)));
+  beginQuiz(qs);
+}
+
+function startAll() {
+  lastTopicId = null;
+  const qs = shuffle(QUESTIONS.map(q => Object.assign({}, q)));
+  beginQuiz(qs);
+}
+
+function beginQuiz(qs) {
+  currentQuestions = qs;
+  currentIndex = 0;
+  score = 0;
+  topicScores = {};
+  TOPICS.forEach(t => { topicScores[t.id] = { right: 0, total: 0 }; });
+  show('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+  const total = currentQuestions.length;
+  document.getElementById('q-counter').textContent = 'Pregunta ' + (currentIndex + 1) + ' de ' + total;
+  document.getElementById('q-topic-label').textContent = TOPICS[q.t].label + ' · ' + TOPICS[q.t].name;
+  document.getElementById('q-progress').style.width = ((currentIndex / total) * 100) + '%';
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'none';
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = String.fromCharCode(65 + i) + '. ' + opt;
+    btn.onclick = () => selectAnswer(i);
+    optsEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = currentQuestions[currentIndex];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[q.ans].classList.add('correct');
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.ans) {
+    score++;
+    topicScores[q.t].right++;
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback-box ok';
+    fb.innerHTML = '<strong>✓ ¡Correcto!</strong> ' + q.exp;
+  } else {
+    btns[idx].classList.add('wrong');
+    fb.className = 'feedback-box fail';
+    fb.innerHTML = '<strong>✗ Incorrecto.</strong> La respuesta correcta es <strong>' + String.fromCharCode(65 + q.ans) + '</strong>. ' + q.exp;
+  }
+  topicScores[q.t].total++;
+  fb.style.display = 'block';
+  document.getElementById('btn-next').style.display = 'inline-block';
+  document.getElementById('btn-next').textContent = currentIndex + 1 < currentQuestions.length ? 'Siguiente →' : 'Ver resultados →';
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex < currentQuestions.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  const total = currentQuestions.length;
+  const pct = Math.round((score / total) * 100);
+  document.getElementById('res-score').textContent = score + '/' + total;
+  document.getElementById('res-total').textContent = pct + '% de respuestas correctas';
+  let msg = '';
+  if (pct >= 90) msg = '¡Excelente! Dominás el tema.';
+  else if (pct >= 75) msg = 'Muy bien. Repasá los errores y estás listo.';
+  else if (pct >= 55) msg = 'Bien encaminado. Reforzá los temas con errores.';
+  else msg = 'Seguí repasando. ¡Podés mejorar!';
+  document.getElementById('res-msg').textContent = msg;
+  const breakdown = document.getElementById('res-breakdown');
+  breakdown.innerHTML = '<div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px;">Detalle por tema:</div>';
+  TOPICS.forEach(t => {
+    if (!topicScores[t.id] || topicScores[t.id].total === 0) return;
+    const row = document.createElement('div');
+    row.className = 'ts-row';
+    const pctT = Math.round((topicScores[t.id].right / topicScores[t.id].total) * 100);
+    row.innerHTML = '<span>' + t.label + ' · ' + t.name + '</span><span style="font-weight:500;color:' + (pctT >= 70 ? '#639922' : '#A32D2D') + '">' + topicScores[t.id].right + '/' + topicScores[t.id].total + ' (' + pctT + '%)</span>';
+    breakdown.appendChild(row);
+  });
+  show('result');
+}
+
+function retryTopic() {
+  if (lastTopicId !== null) startTopic(lastTopicId);
+  else startAll();
+}
+
+function goHome() {
+  show('home');
+}
+</script>
