@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia Anatomofisiología — Prof. Lic. Francisco Molina</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p1:#1e3a5f;--p2:#2563eb;--pl:#dbeafe;
+  --g1:#14532d;--g2:#16a34a;--gl:#dcfce7;
+  --r1:#991b1b;--rl:#fee2e2;--re:#ef4444;
+  --amber:#92400e;--ambl:#fef3c7;
+  --text:#0f172a;--muted:#64748b;--border:#e2e8f0;
+  --card:#fff;--bg:#f8fafc;
+  --radius:16px;--rsm:10px;
+}
+body{
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(135deg,#dbeafe 0%,#dcfce7 45%,#fef3c7 100%);
+  min-height:100vh;display:flex;align-items:flex-start;justify-content:center;
+  padding:1.5rem 1rem 3rem;
+}
+#app{width:100%;max-width:720px}
+
+/* ── HEADER ── */
+.hdr{
+  background:var(--card);border-radius:var(--radius);
+  padding:1.5rem 1.5rem 1.2rem;margin-bottom:1.2rem;
+  text-align:center;box-shadow:0 4px 24px rgba(37,99,235,.12);
+  position:relative;overflow:hidden;
+}
+.hdr::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,#1e3a5f,#16a34a,#d97706,#dc2626);
+}
+.hdr-icon{font-size:2.6rem;margin-bottom:.3rem;display:block}
+.hdr h1{font-family:'Montserrat',sans-serif;font-size:1.45rem;font-weight:900;color:var(--text);letter-spacing:1px;text-transform:uppercase}
+.hdr .prof{font-size:.95rem;font-weight:700;color:var(--p1);margin-top:.3rem}
+.hdr .inst{font-size:.8rem;color:var(--muted);margin-top:.4rem;line-height:1.6}
+.hdr .badge{display:inline-block;margin-top:.65rem;background:var(--pl);color:var(--p1);font-size:.74rem;font-weight:700;padding:4px 16px;border-radius:99px;letter-spacing:.5px;text-transform:uppercase}
+
+/* ── MENÚ ── */
+.menu{background:var(--card);border-radius:var(--radius);padding:1.4rem;box-shadow:0 2px 16px rgba(0,0,0,.06);margin-bottom:1rem}
+.menu h2{font-family:'Montserrat',sans-serif;font-size:1.05rem;font-weight:900;color:var(--text);margin-bottom:1rem;text-align:center}
+.all-btn{
+  width:100%;padding:14px;font-size:.95rem;font-family:'Nunito',sans-serif;
+  font-weight:800;border:none;border-radius:var(--rsm);
+  background:linear-gradient(90deg,var(--p1),var(--g1));
+  color:#fff;cursor:pointer;margin-bottom:10px;
+  box-shadow:0 4px 14px rgba(30,58,95,.22);
+  transition:opacity .15s,transform .15s;
+}
+.all-btn:hover{opacity:.92;transform:translateY(-1px)}
+.sep{font-size:.8rem;color:var(--muted);text-align:center;font-weight:700;margin:8px 0}
+.tema-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tema-btn{
+  padding:11px 12px;font-size:.79rem;font-family:'Nunito',sans-serif;
+  font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);
+  background:var(--card);color:var(--text);cursor:pointer;
+  text-align:center;line-height:1.4;transition:all .15s;
+}
+.tema-btn:hover{border-color:var(--p2);background:var(--pl)}
+.tema-btn .cnt{display:block;font-size:.68rem;font-weight:600;color:var(--muted);margin-top:2px}
+
+/* ── PROGRESO ── */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.prog-wrap{flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--p2),var(--g2));border-radius:99px;transition:width .4s ease}
+.prog-lbl{font-size:.8rem;color:var(--muted);font-weight:700;min-width:52px;text-align:right}
+
+/* ── PREGUNTA ── */
+.q-card{background:var(--card);border-radius:var(--radius);padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.q-meta{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:.45rem}
+.q-txt{font-size:.97rem;color:var(--text);font-weight:700;line-height:1.55}
+
+/* ── TIMER ── */
+.timer-row{display:flex;align-items:center;gap:14px;margin-bottom:1rem;background:var(--card);border-radius:var(--rsm);padding:.7rem 1rem;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.tcirc{position:relative;width:58px;height:58px;flex-shrink:0}
+.tcirc svg{transform:rotate(-90deg)}
+.tnum{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:800;color:var(--text)}
+.tinfo{flex:1}
+.tlbl{font-size:.83rem;color:var(--muted)}
+.tmsg{font-size:.76rem;color:var(--muted);margin-top:2px}
+
+/* ── OPCIONES ── */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.opt{
+  padding:11px 13px;font-size:.85rem;font-family:'Nunito',sans-serif;
+  font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);
+  background:var(--card);color:var(--text);cursor:pointer;
+  text-align:left;line-height:1.45;
+  transition:all .15s ease;box-shadow:0 1px 4px rgba(0,0,0,.05);
+}
+.opt:hover:not(:disabled){border-color:var(--p2);background:var(--pl);transform:translateY(-1px)}
+.opt.ok{background:var(--gl);border-color:var(--g2);color:var(--g1)}
+.opt.wrong{background:var(--rl);border-color:var(--re);color:var(--r1)}
+.opt:disabled{cursor:default;transform:none}
+
+/* ── FEEDBACK ── */
+.fb{min-height:40px;font-size:.9rem;font-weight:700;margin-bottom:.75rem;padding:0 .25rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.fb.ok{color:var(--g1)}
+.fb.fail{color:var(--r1)}
+
+/* ── NAV ── */
+.nav-btn{width:100%;padding:13px;font-size:1rem;font-family:'Nunito',sans-serif;font-weight:800;border:none;border-radius:var(--rsm);background:linear-gradient(90deg,var(--p1),var(--g1));color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(30,58,95,.22);transition:opacity .15s,transform .15s}
+.nav-btn:hover{opacity:.93;transform:translateY(-1px)}
+.sec-btn{width:100%;padding:11px;font-size:.93rem;font-family:'Nunito',sans-serif;font-weight:700;border:2px solid var(--border);border-radius:var(--rsm);background:var(--card);color:var(--text);cursor:pointer;margin-top:10px;transition:background .15s}
+.sec-btn:hover{background:var(--bg)}
+
+/* ── RESULTADO ── */
+.result{background:var(--card);border-radius:var(--radius);padding:2.2rem 1.5rem;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.result h2{font-family:'Montserrat',sans-serif;font-size:1.4rem;font-weight:900;color:var(--text);margin-bottom:.5rem}
+.score-big{font-family:'Montserrat',sans-serif;font-size:4rem;font-weight:900;color:var(--p1);line-height:1;margin:1rem 0 .25rem}
+.score-sub{font-size:.95rem;color:var(--muted);margin-bottom:1rem}
+.result-msg{font-size:1rem;font-weight:700;color:var(--text);padding:.75rem 1rem;background:var(--bg);border-radius:var(--rsm);margin-bottom:1.5rem}
+.result-foot{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem}
+
+@media(max-width:480px){
+  .opts,.tema-grid{grid-template-columns:1fr}
+  .hdr h1{font-size:1.2rem}
+  .score-big{font-size:3rem}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <span class="hdr-icon">🦴</span>
+    <h1>Trivia Anatomofisiología</h1>
+    <div class="prof">Prof. Lic. Francisco Molina</div>
+    <div class="inst">CENT N° 74 — ATSA · Enfermero Profesional — 1° Año</div>
+    <div class="badge">📖 Repaso · Primer Parcial</div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+const TIME = 35;
+
+const temas = [
+  "Tema 1 — La Célula",
+  "Tema 2 — Elementos Conceptuales",
+  "Tema 3 — Angiología",
+  "Tema 4 — Columna y Sistema Cardiovascular",
+  "Tema 7 — Aparato Cardiovascular"
+];
+
+/* ─────────────────────────────────────────
+   BANCO DE PREGUNTAS
+   a = índice de la opción correcta dentro de opts[]
+   Las opts[] se mezclan en tiempo de ejecución
+───────────────────────────────────────── */
+const allQ = [
+
+// ═══════════ TEMA 1 — LA CÉLULA (8) ═══════════
+{t:0, q:"¿Quién acuñó el término «célula» al observar tejido vegetal en 1665?",
+ opts:["Robert Hooke","Robert Brown","Anton van Leeuwenhoek","Rudolf Virchow"], a:0},
+
+{t:0, q:"¿Qué postulado de Rudolf Virchow complementó la teoría celular con la frase Omnis cellula ex cellula?",
+ opts:["Toda célula contiene ADN hereditario","Toda célula deriva de una célula precedente","Las funciones vitales ocurren dentro de las células","Las células son la unidad morfológica de todo ser vivo"], a:1},
+
+{t:0, q:"Las células se clasifican según la presencia de membrana nuclear en:",
+ opts:["Microscópicas y macroscópicas","Somáticas y sexuales","Eucariotas (con membrana nuclear) y procariotas (sin ella)","Simples y complejas"], a:2},
+
+{t:0, q:"La MITOSIS es un tipo de reproducción celular cuya función principal es:",
+ opts:["Originar células haploides para la reproducción sexual","Producir cuatro células hijas con la mitad de la carga genética","Crecer, renovar y reparar tejidos en células somáticas","Unir óvulo y espermatozoide en la fecundación"], a:2},
+
+{t:0, q:"¿Cuál es la función de la membrana plasmática descrita como «función de bomba»?",
+ opts:["Filtrar solutos según tamaño a través de poros","Acarrear sodio y potasio en contra del gradiente, con gasto de energía","Permitir el paso de moléculas pequeñas sin gasto energético","Recibir neurotransmisores en la superficie celular"], a:1},
+
+{t:0, q:"El ion más abundante en el compartimento INTRACELULAR (LIC) es:",
+ opts:["Sodio (Na⁺)","Cloro (Cl⁻)","Potasio (K⁺)","Calcio (Ca²⁺)"], a:2},
+
+{t:0, q:"La DIFUSIÓN FACILITADA se diferencia de la difusión simple porque:",
+ opts:["Requiere gasto de energía (ATP)","Mueve moléculas en contra del gradiente de concentración","Está mediada por una proteína transportadora para moléculas de mayor tamaño","Solo transporta iones de sodio y potasio"], a:2},
+
+{t:0, q:"¿Cuál tejido nervioso NO se regenera mediante mitosis?",
+ opts:["Tejido hepático","Tejido nervioso","Células sanguíneas","Células de la piel"], a:1},
+
+// ═══════════ TEMA 2 — ELEMENTOS CONCEPTUALES (8) ═══════════
+{t:1, q:"¿Cuál es la definición etimológica de Anatomía?",
+ opts:["Estudio de las funciones de los seres vivos","Ciencia que estudia el cuerpo en corte: «ana» = nuevo, «tomía» = corte","Estudio microscópico de células y tejidos","Ciencia que estudia las enfermedades del cuerpo humano"], a:1},
+
+{t:1, q:"El CORTE SAGITAL divide al cuerpo en:",
+ opts:["Mitad superior e inferior","Mitad anterior y posterior","Mitad derecha e izquierda","Secciones oblicuas del tórax"], a:2},
+
+{t:1, q:"La POSICIÓN ANATÓMICA estándar se describe como:",
+ opts:["Decúbito dorsal, brazos sobre el pecho, palmas hacia abajo","De pie, erguido, miembros superiores a los lados, palmas hacia el frente, pies paralelos","Sentado, vista al frente, manos sobre las rodillas","De pie, de espaldas al observador, palmas hacia atrás"], a:1},
+
+{t:1, q:"En osteología, ¿cómo se llama la membrana fibroelástica que recubre el hueso compacto y tiene importante vascularización?",
+ opts:["Endostio","Cartílago articular","Periostio","Tejido hematopoyético"], a:2},
+
+{t:1, q:"Las articulaciones DIARTROSIS se caracterizan por:",
+ opts:["No tener movimiento, como los huesos del cráneo","Escaso movimiento, como las vértebras entre sí","Poseer muchos movimientos; ej.: cadera y hombro","Ser exclusivas de la columna vertebral"], a:2},
+
+{t:1, q:"¿Cuántos huesos tiene el adulto humano según el módulo?",
+ opts:["206","208","212","200"], a:1},
+
+{t:1, q:"En el HUESO LARGO, las dos zonas que se observan en un corte coronal son:",
+ opts:["Periostio y endostio","Epífisis proximal y distal","Hueso compacto y hueso esponjoso","Diáfisis y médula ósea roja"], a:2},
+
+{t:1, q:"La neurona recibe estímulos a través de sus:",
+ opts:["Axones","Nódulos de Ranvier","Células de Schwann","Dendritas"], a:3},
+
+// ═══════════ TEMA 3 — ANGIOLOGÍA (8) ═══════════
+{t:2, q:"¿Qué estudia la Angiología?",
+ opts:["Las articulaciones y su clasificación","Los vasos: conductos con pared y luz por donde circula sangre o linfa","El sistema nervioso central y periférico","Los huesos y su histología"], a:1},
+
+{t:2, q:"Las ARTERIAS se diferencian de las VENAS principalmente porque:",
+ opts:["Las arterias tienen dirección centrípeta y transportan sangre carbooxigenada","Las arterias tienen dirección centrífuga, paredes más gruesas con tres capas y transportan sangre oxigenada","Las arterias son más delgadas y solo aparecen en los pulmones","Las arterias carecen de tejido muscular en su pared"], a:1},
+
+{t:2, q:"El CAPILAR es el vaso de intercambio porque:",
+ opts:["Tiene tres capas concéntricas en su pared","Su pared es solo de tejido endotelial, lo que permite el intercambio de gases y nutrientes con los tejidos","Conduce sangre desde la periferia hacia el corazón","Posee válvulas para evitar el retroceso de la sangre"], a:1},
+
+{t:2, q:"El valor normal del HEMATOCRITO en el varón es:",
+ opts:["55%","43%","45%","60%"], a:2},
+
+{t:2, q:"El ERITROCITO tiene forma de:",
+ opts:["Esfera sólida sin núcleo","Lente bicóncava anucleada de 10 micras de diámetro","Lente biconvexa con núcleo visible","Estructura irregular con prolongaciones"], a:1},
+
+{t:2, q:"El individuo con grupo sanguíneo TIPO O se considera donador universal porque:",
+ opts:["Tiene aglutinógenos A y B en sus glóbulos rojos","Tiene aglutinina anti A y anti B pero no posee aglutinógenos en sus glóbulos rojos","Solo puede recibir sangre del grupo AB","Tiene anticuerpos anti Rh en su plasma"], a:1},
+
+{t:2, q:"La HEMOSTASIA incluye tres variables principales; ¿cuáles son?",
+ opts:["Leucocitosis, fibrinólisis y coagulación","Vasoconstricción, agregación plaquetaria y formación de fibrina","Diapédesis, quimiotaxis y fagocitosis","Eritropoyesis, trombopoyesis y leucopoyesis"], a:1},
+
+{t:2, q:"Los NEUTRÓFILOS son glóbulos blancos que:",
+ opts:["Producen anticuerpos (gammaglobulinas) contra virus","Reaccionan ante parásitos como el piojo y el áscaris","Reconocen bacterias comunes, las fagocitan y producen pus como exudado purulento","Median reacciones alérgicas liberando histamina y heparina"], a:2},
+
+// ═══════════ TEMA 4 — COLUMNA Y SISTEMA CARDIOVASCULAR (8) ═══════════
+{t:3, q:"La TENSIÓN ARTERIAL se define como:",
+ opts:["El volumen de sangre que bombea el corazón por minuto","La fuerza o resistencia que opone el vaso arterial al desplazamiento de la sangre; valor normal: 120/70 mmHg","La velocidad con que la sangre circula por los capilares","La presión que ejerce el ventrículo derecho sobre la arteria pulmonar"], a:1},
+
+{t:3, q:"El MÉTODO AUSCULTATORIO para medir la tensión arterial utiliza:",
+ opts:["Solo la palpación del pulso radial para obtener la tensión sistólica","El brazalete de Riva-Rocci con manómetro y estetoscopio para obtener tensión sistólica y diastólica","Una cánula introducida en la arteria (método invasivo)","Una pulsera digital sin esfigmomanómetro"], a:1},
+
+{t:3, q:"Se considera HIPERTENSIÓN ARTERIAL cuando:",
+ opts:["La sistólica supera 100 mmHg y la diastólica supera 60 mmHg","La sistólica está sobre 140 mmHg y/o la diastólica sobre 90 mmHg","La sistólica es menor de 120 mmHg en reposo","La frecuencia cardíaca supera 100 latidos por minuto"], a:1},
+
+{t:3, q:"La COLUMNA VERTEBRAL es un tallo óseo formado por la superposición de huesos llamados:",
+ opts:["Coxales","Vértebras","Costillas","Escápulas"], a:1},
+
+{t:3, q:"¿Cuál es la diferencia entre el LINFOCITO B y el LINFOCITO T?",
+ opts:["Ambos producen anticuerpos; solo difieren en tamaño","El linfocito B produce gammaglobulinas (anticuerpos); el T es responsable de la inmunidad celular contra virus, bacterias específicas y hongos","El linfocito B fagocita bacterias; el T produce histamina","No existe diferencia funcional entre ambos tipos"], a:1},
+
+{t:3, q:"La TÉTRADA DE CELSO describe los cuatro signos de la inflamación, que son:",
+ opts:["Fiebre, taquicardia, leucocitosis y linfadenopatía","Rubor, calor, dolor y tumor (tumefacción) en el tejido afectado","Edema, pus, necrosis y cicatrización del tejido dañado","Palidez, cianosis, ictericia y rubor generalizado"], a:1},
+
+{t:3, q:"La INMUNIDAD ADQUIRIDA ACTIVA se obtiene a través de:",
+ opts:["Sueros con anticuerpos preformados","Vacunas que estimulan al sistema inmune a producir sus propios anticuerpos","La leche materna en el recién nacido","La transmisión de inmunoglobulinas por vía placentaria"], a:1},
+
+{t:3, q:"Las PLAQUETAS (trombocitos) tienen como función principal:",
+ opts:["Transportar oxígeno unidas a la hemoglobina","Fagocitar bacterias y gérmenes en el tejido inflamado","Producir anticuerpos de tipo IgM e IgG","Formar el tapón temporario en la hemostasia y participar en la coagulación"], a:3},
+
+// ═══════════ TEMA 7 — APARATO CARDIOVASCULAR (8) ═══════════
+{t:4, q:"El AXIOMA GENERAL de la circulación establece que:",
+ opts:["De las aurículas salen arterias y a los ventrículos llegan venas","A las aurículas llegan venas; de los ventrículos salen arterias","El corazón izquierdo maneja la circulación pulmonar","Arterias y venas entran y salen indistintamente de aurículas y ventrículos"], a:1},
+
+{t:4, q:"La HEMATOSIS o respiración externa es el proceso por el cual:",
+ opts:["El corazón impulsa la sangre hacia la aorta","La sangre venosa es purificada en el pulmón: incorpora O₂ y libera CO₂ a nivel alveolo-capilar","Los glóbulos rojos se producen en la médula ósea","La sangre arterial se oxigena a nivel de los tejidos periféricos"], a:1},
+
+{t:4, q:"Las tres capas histológicas del corazón, de afuera hacia adentro, son:",
+ opts:["Endocardio, miocardio y pericardio","Pericardio, miocardio y endocardio","Epicardio, miocardio y pleura","Miocardio, endocardio y pericardio"], a:1},
+
+{t:4, q:"El NÓDULO SINUSAL se denomina «marcapaso funcional» porque:",
+ opts:["Conduce el impulso eléctrico desde los ventrículos hacia las aurículas","Determina la cantidad de despolarizaciones que animan al corazón en cada momento","Solo actúa cuando el nódulo auriculoventricular falla","Genera el complejo QRS del electrocardiograma"], a:1},
+
+{t:4, q:"La VÁLVULA MITRAL (bicúspide) controla el flujo de sangre entre:",
+ opts:["La aurícula derecha y el ventrículo derecho","El ventrículo derecho y la arteria pulmonar","La aurícula izquierda y el ventrículo izquierdo","El ventrículo izquierdo y la arteria aorta"], a:2},
+
+{t:4, q:"En el ECG, la ONDA P representa:",
+ opts:["La despolarización ventricular","La repolarización ventricular","La despolarización auricular e indica la indemnidad del nódulo sinusal","El período refractario del miocardio"], a:2},
+
+{t:4, q:"El VOLUMEN MINUTO CIRCULATORIO se calcula como:",
+ opts:["Frecuencia cardíaca dividida por el volumen sistólico","Volumen sistólico (70-90 ml) multiplicado por la frecuencia cardíaca (~70 latidos/min), resultando ~5000 ml/min","La diferencia entre sístole y diástole en segundos","La presión sistólica menos la presión diastólica"], a:1},
+
+{t:4, q:"El SHOCK se define como:",
+ opts:["Un aumento brusco de la presión arterial por encima de 140 mmHg","Estado clínico por inadecuada llegada de sangre a los tejidos, con privación de oxígeno y signos como estupor y taquicardia","Una arritmia cardíaca con frecuencia menor a 40 latidos por minuto","Un bloqueo completo de las arterias coronarias sin síntomas previos"], a:1},
+];
+
+/* ─── Estado ─── */
+let temaSel=null, questions=[], current=0, score=0;
+let timer=null, timeLeft=TIME, answered=false;
+
+/* ─── Utilidades ─── */
+function shuffle(a){
+  const r=[...a];
+  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}
+  return r;
+}
+function prepQ(pool){
+  return shuffle(pool).map(q=>{
+    const correct=q.opts[q.a];
+    const mixed=shuffle([...q.opts]);
+    return{...q,mixed,correct};
+  });
+}
+
+/* ─── Pantallas ─── */
+function renderStart(){
+  clearInterval(timer);
+  const grid=temas.map((t,i)=>{
+    const n=allQ.filter(q=>q.t===i).length;
+    return `<button class="tema-btn" onclick="selTema(${i})">${t}<span class="cnt">${n} preguntas</span></button>`;
+  }).join('');
+  document.getElementById('content').innerHTML=`
+  <div class="menu">
+    <h2>Elegí el modo de juego</h2>
+    <button class="all-btn" onclick="iniciarTodos()">🎯 Todos los temas — ${allQ.length} preguntas en orden aleatorio</button>
+    <div class="sep">── O practicá tema por tema ──</div>
+    <div class="tema-grid">${grid}</div>
+  </div>`;
+}
+
+function selTema(idx){
+  temaSel=idx;
+  questions=prepQ(allQ.filter(q=>q.t===idx));
+  current=0;score=0;renderQ();
+}
+function iniciarTodos(){
+  temaSel=null;
+  questions=prepQ(allQ);
+  current=0;score=0;renderQ();
+}
+
+function renderQ(){
+  answered=false;timeLeft=TIME;clearInterval(timer);
+  const q=questions[current], total=questions.length;
+  const pct=Math.round((current/total)*100);
+  const C=2*Math.PI*25;
+  document.getElementById('content').innerHTML=`
+  <div class="prog-row">
+    <div class="prog-wrap"><div class="prog-fill" id="pb" style="width:${pct}%"></div></div>
+    <div class="prog-lbl">${current+1} / ${total}</div>
+  </div>
+  <div class="q-card">
+    <div class="q-meta">${temas[q.t]}</div>
+    <div class="q-txt">${q.q}</div>
+  </div>
+  <div class="timer-row">
+    <div class="tcirc">
+      <svg width="58" height="58" viewBox="0 0 58 58">
+        <circle cx="29" cy="29" r="25" fill="none" stroke="#e2e8f0" stroke-width="5"/>
+        <circle id="arc" cx="29" cy="29" r="25" fill="none" stroke="#2563eb" stroke-width="5"
+          stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="0" stroke-linecap="round"/>
+      </svg>
+      <div class="tnum" id="tn">${TIME}</div>
+    </div>
+    <div class="tinfo">
+      <div class="tlbl" id="tlbl">Segundos restantes</div>
+      <div class="tmsg">¡Elegí tu respuesta!</div>
+    </div>
+  </div>
+  <div class="opts" id="opts">
+    ${q.mixed.map((o,i)=>`<button class="opt" onclick="choose(${i})">${o}</button>`).join('')}
+  </div>
+  <div class="fb" id="fb"></div>
+  <button class="nav-btn" id="nb" style="display:none" onclick="next()">${current+1<total?'Siguiente pregunta →':'Ver resultados'}</button>`;
+
+  timer=setInterval(()=>{
+    timeLeft--;
+    const el=document.getElementById('tn');
+    const arc=document.getElementById('arc');
+    const lbl=document.getElementById('tlbl');
+    if(el)el.textContent=timeLeft;
+    if(arc){arc.style.strokeDashoffset=(C*(1-timeLeft/TIME)).toFixed(1);arc.style.stroke=timeLeft<=7?'#ef4444':'#2563eb';}
+    if(lbl)lbl.style.color=timeLeft<=7?'#991b1b':'';
+    if(timeLeft<=0){clearInterval(timer);if(!answered)timeUp();}
+  },1000);
+}
+
+function choose(idx){
+  if(answered)return;
+  answered=true;clearInterval(timer);
+  const q=questions[current];
+  const btns=document.querySelectorAll('.opt');
+  const fb=document.getElementById('fb');
+  const nb=document.getElementById('nb');
+  btns.forEach(b=>b.disabled=true);
+  btns.forEach((b,i)=>{if(q.mixed[i]===q.correct)b.classList.add('ok');});
+  if(q.mixed[idx]===q.correct){
+    score++;btns[idx].classList.add('ok');
+    fb.innerHTML='✅ ¡Correcto!';fb.className='fb ok';
+  }else{
+    btns[idx].classList.add('wrong');
+    fb.innerHTML='❌ Incorrecto. La respuesta correcta está en verde.';fb.className='fb fail';
+  }
+  nb.style.display='block';
+}
+
+function timeUp(){
+  answered=true;
+  const q=questions[current];
+  const btns=document.querySelectorAll('.opt');
+  btns.forEach(b=>b.disabled=true);
+  btns.forEach((b,i)=>{if(q.mixed[i]===q.correct)b.classList.add('ok');});
+  document.getElementById('fb').innerHTML='⏱️ ¡Tiempo! La respuesta correcta está en verde.';
+  document.getElementById('fb').className='fb fail';
+  document.getElementById('nb').style.display='block';
+}
+
+function next(){
+  current++;
+  if(current>=questions.length)renderResult();
+  else renderQ();
+}
+
+function renderResult(){
+  clearInterval(timer);
+  const total=questions.length, pct=Math.round((score/total)*100);
+  let msg=pct>=85?'🏆 ¡Excelente! Estás muy preparado/a para el parcial.':pct>=60?'👍 Bien. Repasá los temas donde fallaste.':'📖 Seguí estudiando, ¡vas a mejorar!';
+  const nombre=temaSel!==null?temas[temaSel]:'Todos los temas';
+  document.getElementById('content').innerHTML=`
+  <div class="result">
+    <h2>Trivia finalizada</h2>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">${nombre}</div>
+    <div class="score-big">${score}/${total}</div>
+    <div class="score-sub">${pct}% de respuestas correctas</div>
+    <div class="result-msg">${msg}</div>
+    <div class="result-foot">Anatomofisiología · Prof. Lic. Francisco Molina<br>CENT N° 74 — ATSA · Enfermero Profesional — 1° Año</div>
+    <button class="nav-btn" onclick="renderStart()">Volver al menú principal</button>
+    ${temaSel!==null
+      ?`<button class="sec-btn" onclick="selTema(${temaSel})">Repetir este tema</button>`
+      :`<button class="sec-btn" onclick="iniciarTodos()">Jugar de nuevo</button>`}
+  </div>`;
+}
+
+renderStart();
+</script>
+</body>
+</html>
