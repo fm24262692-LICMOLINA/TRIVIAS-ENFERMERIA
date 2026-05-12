@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia – Enfermería Psiquiátrica y Salud Mental | 1° Parcial</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --accent: #3fb950;
+    --accent2: #58a6ff;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --correct: #2ea043;
+    --wrong: #da3633;
+    --timer-ok: #3fb950;
+    --timer-warn: #e3b341;
+    --timer-danger: #da3633;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    max-width: 760px;
+    width: 100%;
+  }
+  .header .badge {
+    display: inline-block;
+    background: #21262d;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .08em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .header p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .header .prof {
+    font-size: 12px;
+    color: var(--accent4);
+    margin-top: 4px;
+  }
+
+  /* THEME SELECTOR */
+  #theme-screen {
+    max-width: 760px;
+    width: 100%;
+  }
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .theme-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .2s, background .2s;
+    color: var(--text);
+  }
+  .theme-btn:hover {
+    border-color: var(--accent2);
+    background: var(--surface2);
+  }
+  .theme-btn .num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .theme-btn .ttitle {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .theme-btn .tsub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* QUIZ SCREEN */
+  #quiz-screen { display: none; max-width: 760px; width: 100%; }
+
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .back-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+    transition: border-color .2s, color .2s;
+  }
+  .back-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .quiz-meta {
+    flex: 1;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .quiz-meta strong { color: var(--text); }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: var(--surface);
+    border-radius: 4px;
+    height: 4px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent2);
+    border-radius: 4px;
+    transition: width .4s ease;
+  }
+
+  /* TIMER */
+  .timer-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .timer-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    min-width: 52px;
+    transition: color .3s;
+  }
+  .timer-bar-wrap {
+    flex: 1;
+    background: var(--surface);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .timer-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width .9s linear, background .5s;
+  }
+
+  /* QUESTION */
+  .question-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .question-text {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  /* OPTIONS */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 520px) {
+    .options-grid { grid-template-columns: 1fr; }
+  }
+  .option-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text);
+    transition: border-color .15s, background .15s;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent2);
+    background: var(--surface2);
+  }
+  .option-btn .opt-letter {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent2);
+    min-width: 16px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(46,160,67,.12);
+  }
+  .option-btn.correct .opt-letter { color: var(--correct); }
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(218,54,51,.1);
+  }
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+  .option-btn.reveal {
+    border-color: var(--correct);
+    background: rgba(46,160,67,.08);
+  }
+  .option-btn:disabled { cursor: default; }
+
+  /* FEEDBACK */
+  .feedback {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback strong { color: var(--text); }
+
+  /* NEXT BTN */
+  .next-btn {
+    background: var(--accent2);
+    color: #0d1117;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 28px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: none;
+    transition: opacity .2s;
+  }
+  .next-btn:hover { opacity: .88; }
+  .next-btn.show { display: inline-block; }
+
+  /* RESULT SCREEN */
+  #result-screen { display: none; max-width: 760px; width: 100%; text-align: center; padding: 40px 0; }
+  .result-score {
+    font-family: 'Space Mono', monospace;
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .result-label { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
+  .result-msg { font-size: 18px; font-weight: 600; margin-bottom: 32px; }
+  .result-details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 28px;
+    text-align: left;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row span:last-child { color: var(--text); font-weight: 600; }
+  .result-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .result-btns button {
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity .2s;
+  }
+  .btn-retry { background: var(--accent2); color: #0d1117; border: none; }
+  .btn-home { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-retry:hover, .btn-home:hover { opacity: .8; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">Enfermería Psiquiátrica y Salud Mental</div>
+  <h1>Trivia — 1° Parcial</h1>
+  <p>Seleccioná un tema para comenzar el repaso</p>
+  <p class="prof">Prof. Lic. Francisco Molina — CENT N°74 ATSA Tucumán</p>
+</div>
+
+<!-- PANTALLA: SELECCIÓN DE TEMA -->
+<div id="theme-screen">
+  <div class="theme-grid">
+    <button class="theme-btn" onclick="startQuiz(0)">
+      <span class="num">Tema 2</span>
+      <div class="ttitle">El Equipo Psiquiátrico</div>
+      <div class="tsub">Miembros, funciones y características de la enfermería psiquiátrica</div>
+    </button>
+    <button class="theme-btn" onclick="startQuiz(1)">
+      <span class="num">Tema 3</span>
+      <div class="ttitle">Salud y Enfermedad Mental</div>
+      <div class="tsub">Concepto de normalidad, cultura, etiología y clasificación</div>
+    </button>
+    <button class="theme-btn" onclick="startQuiz(2)">
+      <span class="num">Tema 4</span>
+      <div class="ttitle">Exploración del Estado Mental I</div>
+      <div class="tsub">Aspecto externo, conducta motora, conciencia, orientación</div>
+    </button>
+    <button class="theme-btn" onclick="startQuiz(3)">
+      <span class="num">Tema 5</span>
+      <div class="ttitle">Exploración del Estado Mental II</div>
+      <div class="tsub">Lenguaje, pensamiento, afectividad, memoria, inteligencia</div>
+    </button>
+    <button class="theme-btn" onclick="startQuiz(4)">
+      <span class="num">Tema 6</span>
+      <div class="ttitle">La Entrevista Psiquiátrica</div>
+      <div class="tsub">Tipos, pasos, anamnesis y relación enfermero-paciente</div>
+    </button>
+    <button class="theme-btn" onclick="startQuiz(5)">
+      <span class="num">Tema 7</span>
+      <div class="ttitle">Técnicas de Comunicación</div>
+      <div class="tsub">Comunicación verbal, no verbal y técnicas terapéuticas</div>
+    </button>
+    <button class="theme-btn" onclick="startQuiz(6)">
+      <span class="num">Tema 8</span>
+      <div class="ttitle">Problemas de la Relación Enf-Pte</div>
+      <div class="tsub">Indiferencia, alucinaciones, abatimiento, manipulación, suicidio</div>
+    </button>
+    <button class="theme-btn" onclick="startQuiz(7)">
+      <span class="num">Tema 11</span>
+      <div class="ttitle">Psicofarmacología</div>
+      <div class="tsub">Antipsicóticos, benzodiacepinas, antidepresivos, estabilizadores</div>
+    </button>
+  </div>
+</div>
+
+<!-- PANTALLA: QUIZ -->
+<div id="quiz-screen">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="goHome()">← Temas</button>
+    <div class="quiz-meta">
+      <strong id="quiz-theme-label">—</strong><br>
+      Pregunta <span id="q-current">1</span> de <span id="q-total">10</span>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--accent)">
+      ✓ <span id="score-display">0</span>/<span id="score-total">10</span>
+    </div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="timer-row">
+    <div class="timer-label" id="timer-label">35</div>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-fill" id="timer-fill" style="width:100%;background:var(--timer-ok)"></div>
+    </div>
+  </div>
+  <div class="question-num" id="question-num">Pregunta 1</div>
+  <div class="question-text" id="question-text">—</div>
+  <div class="options-grid" id="options-container"></div>
+  <div class="feedback" id="feedback-box"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Siguiente →</button>
+</div>
+
+<!-- PANTALLA: RESULTADO -->
+<div id="result-screen">
+  <div class="result-score" id="res-score">0/10</div>
+  <div class="result-label">Respuestas correctas</div>
+  <div class="result-msg" id="res-msg">—</div>
+  <div class="result-details" id="res-details"></div>
+  <div class="result-btns">
+    <button class="btn-retry" onclick="retryTheme()">Repetir tema</button>
+    <button class="btn-home" onclick="goHome()">Elegir otro tema</button>
+  </div>
+</div>
+
+<script>
+const TOTAL_TIME = 35;
+const LETTERS = ['A','B','C','D'];
+
+/* ══════════════════════════════════════════════════
+   BANCO DE PREGUNTAS — 10 por cada tema
+   Formato: { q, opts:[str,str,str,str], answer:0-3, exp }
+   Los opts ya están en el orden aleatorio definitivo
+   (respuesta correcta en posición variable según
+   distribución de tamaños acordada)
+══════════════════════════════════════════════════ */
+const BANKS = [
+
+/* ─── TEMA 2: El Equipo Psiquiátrico ─── */
+[
+  {
+    q: "¿Con qué nombre se designa al conjunto de personas que trabajan en unidad, aportando distintos conocimientos y técnicas, con la finalidad común de asistir y curar al enfermo mental?",
+    opts:[
+      "Red de asistencia social comunitaria con enfoque bio-psico-social",
+      "Equipo psiquiátrico",
+      "Equipo de atención primaria y salud mental integrada",
+      "Grupo terapéutico multisectorial de internación"
+    ],
+    answer: 1,
+    exp: "El término 'equipo psiquiátrico' designa a ese conjunto de personas multidisciplinarias que trabajan en unidad con la finalidad de asistir y curar al enfermo mental."
+  },
+  {
+    q: "¿Cuál es la primera función del asistente social durante la internación del paciente psiquiátrico?",
+    opts:[
+      "Supervisar la medicación administrada por enfermería",
+      "Elaborar el plan de alta médica en conjunto con el psiquiatra jefe",
+      "La recepción del enfermo al ingresar, procurando su adaptación y conocimiento desde el mismo momento del ingreso",
+      "Dirigir las reuniones de equipo interdisciplinario"
+    ],
+    answer: 2,
+    exp: "El asistente social asume la recepción del enfermo al ingresar para favorecer su adaptación inmediata, además de organizar actividades sociales y resolver problemas extrahospitalarios."
+  },
+  {
+    q: "El objetivo fundamental de la enfermería psiquiátrica es:",
+    opts:[
+      "Aplicar tratamientos farmacológicos prescritos por el psiquiatra jefe",
+      "Ayudar a los enfermos a aceptarse a sí mismos y a mejorar las relaciones con otros individuos",
+      "Realizar la exploración psicopatológica y formular el diagnóstico de enfermería",
+      "Garantizar el cumplimiento del reglamento hospitalario durante las 24 horas"
+    ],
+    answer: 1,
+    exp: "Según el texto, el objetivo fundamental de la enfermería psiquiátrica es ayudar a los enfermos a aceptarse a sí mismos y a mejorar las relaciones con otros individuos."
+  },
+  {
+    q: "¿Qué es la acatisia en el contexto de los efectos secundarios de los medicamentos antipsicóticos?",
+    opts:[
+      "Estado de rigidez muscular y estupor mental propio de la catatonía",
+      "Efecto secundario que consiste en la imposibilidad del paciente para permanecer sentado, con necesidad de deambulación permanente sin control voluntario adecuado",
+      "Temblor involuntario de las extremidades inferiores",
+      "Disminución brusca de la presión arterial al incorporarse"
+    ],
+    answer: 1,
+    exp: "La acatisia es un efecto secundario a medicamentos antipsicóticos que consiste en la imposibilidad del paciente para permanecer sentado, con deambulación permanente sin adecuado control voluntario."
+  },
+  {
+    q: "En el sistema de trabajo en equipo, ¿qué actitud debe adoptar el psiquiatra jefe respecto a las opiniones de los demás miembros?",
+    opts:[
+      "Reservarse el diagnóstico final",
+      "Aceptar las opiniones de todos y ocasionalmente saber mudar de opinión e incluso de actuación, fomentando reuniones de discusión",
+      "Delegar la decisión terapéutica al médico residente",
+      "Filtrar las opiniones antes de la reunión de equipo"
+    ],
+    answer: 1,
+    exp: "El psiquiatra jefe debe aceptar las opiniones de todos los miembros y saber modificar su postura, fomentando reuniones de discusión e integrando las conclusiones de miembros no psiquiátricos."
+  },
+  {
+    q: "Según el texto, la administración de medicamentos en psiquiatría:",
+    opts:[
+      "Puede ser delegada al auxiliar de enfermería bajo supervisión",
+      "Es una tarea exclusiva del personal de enfermería y constituye una oportunidad para favorecer una buena relación terapéutica",
+      "Debe realizarse de forma rutinaria para asegurar eficiencia",
+      "Corresponde al médico residente en turno nocturno"
+    ],
+    answer: 1,
+    exp: "La administración de medicamentos es una tarea exclusiva del personal de enfermería, no puede delegarse y además constituye una oportunidad para favorecer la relación terapéutica."
+  },
+  {
+    q: "¿Qué entiende el texto por 'empatía' en el contexto de las características del enfermero psiquiátrico?",
+    opts:[
+      "Sentir exactamente lo mismo que el paciente siente en cada momento",
+      "Ser simpático y expresar solidaridad ante el sufrimiento del paciente",
+      "La capacidad de ver la percepción del mundo que tiene el otro, entender cómo se siente y transmitirle esa comprensión con objetividad",
+      "Compartir experiencias personales para generar confianza"
+    ],
+    answer: 2,
+    exp: "La empatía es entender lo que el otro siente y responder en consecuencia, no sentir lo mismo que el paciente. Implica ponerse en su lugar pero con objetividad, y se diferencia de la simpatía."
+  },
+  {
+    q: "En la alimentación del paciente psiquiátrico, ¿cuál es UNA función clave del enfermero durante las comidas?",
+    opts:[
+      "Suministrar la medicación durante el horario de comidas para ahorrar tiempo",
+      "Observar cómo comen los pacientes y cómo utilizan los cubiertos, contribuyendo a crear un ambiente de tranquilidad",
+      "Restringir el acceso al comedor a los pacientes agitados",
+      "Registrar el peso corporal antes de cada comida"
+    ],
+    answer: 1,
+    exp: "La presencia del enfermero en el comedor permite observar cómo comen los pacientes, cómo usan los cuchillos, y contribuye a crear un ambiente de tranquilidad. Las comidas son momentos relacionales importantes."
+  },
+  {
+    q: "El terapeuta ocupacional aporta al equipo psiquiátrico:",
+    opts:[
+      "Diagnósticos psiquiátricos formales",
+      "Toda la información que recoge del enfermo a lo largo de la jornada laboral, dato precioso porque en la relación laboral el enfermo se produce de forma muy diferente que en la entrevista médica",
+      "La formulación del plan farmacológico",
+      "El registro de enfermería y las notas de evolución clínica"
+    ],
+    answer: 1,
+    exp: "El terapeuta ocupacional aporta información valiosa recopilada durante la jornada laboral, ya que el enfermo se expresa de forma diferente en ese contexto que en la entrevista médica, revelando síntomas o posibilidades insospechadas."
+  },
+  {
+    q: "Las funciones de enfermería en el equipo psiquiátrico se dividen en:",
+    opts:[
+      "Técnicas y humanísticas",
+      "Asistenciales, preventivas y docentes",
+      "Técnicas, humanas y sociales",
+      "Clínicas, administrativas y comunitarias"
+    ],
+    answer: 2,
+    exp: "Según el texto, las funciones de enfermería en el equipo psiquiátrico se dividen en técnicas, humanas y sociales."
+  }
+],
+
+/* ─── TEMA 3: Salud y Enfermedad Mental ─── */
+[
+  {
+    q: "Según la OMS (2001), la salud se define como:",
+    opts:[
+      "Ausencia de enfermedad orgánica o mental diagnosticable",
+      "Estado de bienestar físico confirmado por estudios clínicos",
+      "Un estado de completo bienestar físico, mental y social y no solamente la ausencia de enfermedad o dolencia",
+      "Adaptación eficaz del individuo al entorno sociocultural"
+    ],
+    answer: 2,
+    exp: "En 2001, la OMS definió la salud como 'un estado de completo bienestar físico, mental y social y no solamente la ausencia de enfermedad o dolencia'."
+  },
+  {
+    q: "¿Qué sostiene Sigmund Freud respecto a la normalidad?",
+    opts:[
+      "Es un estado de equilibrio psíquico verificable por tests estandarizados",
+      "La normalidad es una ficción ideal; el individuo normal es aquel que no reniega de su realidad sino que sabe enfrentarla y transformarla",
+      "La normalidad depende exclusivamente de la adaptación social del individuo",
+      "Es la ausencia comprobada de psicopatología según criterios biológicos"
+    ],
+    answer: 1,
+    exp: "Freud sostuvo que 'la normalidad es una ficción ideal'. Para él, una persona normal enfrenta y transforma su realidad; quienes no poseen estas características presentan algún trastorno emocional como la neurosis."
+  },
+  {
+    q: "El criterio estadístico de normalidad implica que:",
+    opts:[
+      "Se juzga la conducta según su adaptación a las normas sociales",
+      "Cualquier conducta fuera del promedio estadístico se clasifica como anormal, incluyendo tanto la conducta hiposexualizada como la hipersexualizada en los extremos de la curva de normalidad",
+      "La anormalidad equivale siempre a un estado de sufrimiento personal",
+      "La patología solo se diagnostica cuando altera el funcionamiento biológico"
+    ],
+    answer: 1,
+    exp: "El criterio estadístico define como anormal lo que se ubica en los extremos de la curva de normalidad, tanto por exceso como por defecto. Tiene la limitación de que lo inusual no siempre es patológico."
+  },
+  {
+    q: "Los factores endógenos generales que predisponen a trastornos mentales incluyen:",
+    opts:[
+      "Alcohol y plomo",
+      "Edad y sexo",
+      "Sífilis y tuberculosis",
+      "Traumatismos craneales"
+    ],
+    answer: 1,
+    exp: "Entre los factores endógenos generales se encuentran la edad (infancia, pubertad, juventud, adultez, climaterio, senectud) y el sexo, que predisponen a distintos tipos de trastornos sin ser causa directa."
+  },
+  {
+    q: "¿Qué caracteriza al criterio de normalidad como adaptación?",
+    opts:[
+      "La conducta se juzga únicamente por su conformidad con normas culturales",
+      "La normalidad se define por la obtención y transmisión de información del ambiente y por la transformación del entorno mediante el conocimiento; la conducta anormal es un fracaso en los sistemas de adaptación",
+      "El individuo adaptado es aquel que cumple las normas impuestas por la cultura dominante",
+      "La adaptación equivale a la ausencia de toda forma de desviación estadística"
+    ],
+    answer: 1,
+    exp: "La normalidad como adaptación implica que el individuo obtiene información del ambiente y lo transforma mediante el aprendizaje. La conducta anormal equivale a un fracaso adaptativo."
+  },
+  {
+    q: "El factor tóxico monóxido de carbono puede provocar trastornos mentales porque:",
+    opts:[
+      "Destruye las células gliales de la médula espinal",
+      "Se fija a la hemoglobina formando carboxihemoglobina, disminuyendo el aporte de oxígeno a los tejidos, afectando las neuronas y provocando estado confusional y demencia",
+      "Altera la síntesis de serotonina a nivel del sistema límbico",
+      "Produce desmielinización progresiva del sistema nervioso central"
+    ],
+    answer: 1,
+    exp: "El monóxido de carbono se fija a la hemoglobina formando carboxihemoglobina, lo que disminuye el aporte de oxígeno a los tejidos, afecta las neuronas y puede provocar estado confusional y demencia."
+  },
+  {
+    q: "La rubéola materna durante la gestación puede generar en la descendencia:",
+    opts:[
+      "Esquizofrenia de inicio temprano",
+      "Trastornos disociativos de la personalidad",
+      "Oligofrenias",
+      "Trastorno bipolar tipo I"
+    ],
+    answer: 2,
+    exp: "Las mujeres en gestación que padecen rubéola tienen descendencia con oligofrenias, según los factores infecciosos descritos en la etiología de los trastornos mentales."
+  },
+  {
+    q: "La cultura influye en la salud mental porque:",
+    opts:[
+      "Determina genéticamente la vulnerabilidad a los trastornos psiquiátricos",
+      "Los valores, creencias e identidad cultural moldean el comportamiento, el sentido de pertenencia y la percepción de la realidad; la exclusión o marginación del grupo puede desencadenar conductas desadaptativas",
+      "Estandariza los criterios diagnósticos en distintas poblaciones",
+      "Protege siempre al individuo de los factores de riesgo ambiental"
+    ],
+    answer: 1,
+    exp: "La cultura moldea el comportamiento y la percepción de la realidad. Cuando el individuo se siente excluido o marginado, puede desarrollar conductas desadaptativas como adicciones o delincuencia."
+  },
+  {
+    q: "En el criterio sociocultural, ¿qué se considera para calificar una conducta como normal o anormal?",
+    opts:[
+      "Su adaptación o desviación respecto de las normas sociales del grupo de pertenencia",
+      "El resultado de pruebas neuropsicológicas estandarizadas",
+      "La presencia de sufrimiento subjetivo",
+      "El grado de alteración del funcionamiento biológico"
+    ],
+    answer: 0,
+    exp: "El criterio sociocultural juzga la conducta según su grado de adaptación o desviación de las normas sociales; no es universal porque cada sociedad tiene sus propias normas."
+  },
+  {
+    q: "¿Cuál es el principal problema del criterio subjetivo de normalidad?",
+    opts:[
+      "Ignora el sufrimiento personal del individuo",
+      "Las personas no siempre son conscientes de sus propios problemas, y no tiene en cuenta el efecto del comportamiento anormal dentro del contexto social",
+      "Depende exclusivamente de pruebas estadísticas",
+      "No permite formular diagnósticos basados en criterios internacionales"
+    ],
+    answer: 1,
+    exp: "El criterio subjetivo se concentra en el individuo y sus vivencias, pero su principal problema es que las personas no siempre son conscientes de sus dificultades, y no considera el impacto social de la conducta."
+  }
+],
+
+/* ─── TEMA 4: Exploración del Estado Mental I ─── */
+[
+  {
+    q: "El signo de Veraguth, observable en la depresión, consiste en:",
+    opts:[
+      "La contracción forzada de los pliegues horizontales de la frente con fisura palpebral amplia y pupilas dilatadas",
+      "La angulación del párpado superior",
+      "La reducción de la mímica facial y desaparición de los surcos nasolabiales",
+      "Un temblor fino e involuntario de los párpados inferiores"
+    ],
+    answer: 1,
+    exp: "El signo de Veraguth consiste en la angulación del párpado superior y es un signo mímico observable en la depresión."
+  },
+  {
+    q: "La flexibilidad cérea es un síntoma de la esquizofrenia catatónica que se caracteriza por:",
+    opts:[
+      "Resistencia a toda solicitud externa (negativismo extremo)",
+      "Todo el cuerpo puede ser colocado por el examinador en diversas posiciones y el paciente las mantiene con la moldeabilidad de la cera; es el grado extremo de la catalepsia",
+      "Movimientos involuntarios rápidos de cabeza y extremidades",
+      "Incapacidad del paciente para permanecer sentado"
+    ],
+    answer: 1,
+    exp: "La flexibilidad cérea es el grado extremo de la catalepsia; el cuerpo puede ser colocado en diversas posiciones por el examinador y el paciente las mantiene como si fuera de cera."
+  },
+  {
+    q: "¿Qué diferencia existe entre el 'estupor catatónico' y el 'estupor depresivo'?",
+    opts:[
+      "Son términos equivalentes que describen el mismo cuadro clínico",
+      "En el estupor catatónico hay ausencia de reactividad ante los estímulos externos; en el estupor depresivo el enfermo conserva cierta respuesta a estímulos como el doloroso, sin alteración cuantitativa de la conciencia",
+      "El estupor depresivo se acompaña de agitación y el catatónico de mutismo total",
+      "El estupor catatónico es propio de la depresión mayor y el depresivo, de la esquizofrenia"
+    ],
+    answer: 1,
+    exp: "En el estupor catatónico hay ausencia de reactividad a estímulos externos. En el estupor depresivo, a pesar de la inmovilidad y el mutismo, el paciente conserva respuesta a ciertos estímulos (como el doloroso) sin alteración cuantitativa de la conciencia."
+  },
+  {
+    q: "La distraibilidad (disprosexia) se define como:",
+    opts:[
+      "Disminución en el volumen de la atención",
+      "Falla en la estabilidad de la atención, con fluctuación ante diversos estímulos externos o internos, produciéndose cambios constantes en la localización de la misma; es propia de la excitación maniaca",
+      "Incapacidad total para mantener el estado de vigilia",
+      "Ausencia de concentración debida a déficit cognitivo en la demencia"
+    ],
+    answer: 1,
+    exp: "La distraibilidad o disprosexia es la falla en la estabilidad de la atención, con fluctuación constante. Es más propia de la excitación maniaca pero también aparece en intoxicaciones por estimulantes y estados infecciosos."
+  },
+  {
+    q: "La 'agitación catatónica' se diferencia de otras formas de agitación porque:",
+    opts:[
+      "Predomina en el horario diurno y mejora con la medicación oral",
+      "Alterna con fases de estupor y se manifiesta por vueltas en círculo, gritos, impulsos violentos y destructividad",
+      "Solo se presenta en pacientes con diagnóstico de trastorno bipolar",
+      "No produce alteraciones de la conducta motora visibles"
+    ],
+    answer: 1,
+    exp: "La agitación catatónica alterna con fases de estupor y se manifiesta por vueltas en círculo, gritos, impulsos violentos y destructividad, a diferencia de la agitación maniaca o confusional."
+  },
+  {
+    q: "Las ecopraxias son:",
+    opts:[
+      "Repetición irrelevante de las últimas palabras o frases escuchadas",
+      "Imitación automática e inmediata de los movimientos de las personas circundantes; cuando se trata de gestos se habla de ecomimia",
+      "Gestos breves y espasmódicos involuntarios en cara y cuello",
+      "Posturas mantenidas sin movimiento durante largos períodos"
+    ],
+    answer: 1,
+    exp: "Las ecopraxias son la imitación automática e inmediata de los movimientos de las personas circundantes. Cuando se imitan los gestos se habla de ecomimia; la repetición de palabras es la ecolalia."
+  },
+  {
+    q: "El 'estado crepuscular' se distingue de la obnubilación en que:",
+    opts:[
+      "Implica pérdida total de la conciencia",
+      "El compromiso de la conciencia es menor; se conserva cierta actividad mental y vinculación parcial al ambiente, con posibilidad de actividad compleja aunque con percepción incompleta del medio; es propio de la epilepsia del lóbulo temporal",
+      "Solo aparece en cuadros de intoxicación grave",
+      "Se caracteriza por agitación marcada y desorientación en persona"
+    ],
+    answer: 1,
+    exp: "El estado crepuscular es una variante de la obnubilación con menor compromiso de la conciencia; se conserva cierta actividad mental y vinculación parcial al ambiente, apareciendo en la epilepsia del lóbulo temporal."
+  },
+  {
+    q: "La hipomanía se define como:",
+    opts:[
+      "Estado maníaco extremo con desorientación y habla incoherente",
+      "Forma más atenuada de la manía, caracterizada por una etapa de actividad exagerada seguida de otra de depresión, con irritabilidad o excitación de aparición transitoria",
+      "Estado depresivo de intensidad moderada",
+      "Síndrome confusional de origen metabólico"
+    ],
+    answer: 1,
+    exp: "La hipomanía es la forma más atenuada de la manía, con una etapa de actividad exagerada seguida de depresión, manifestándose con irritabilidad o excitación transitoria."
+  },
+  {
+    q: "La orientación temporal se define en el texto como:",
+    opts:[
+      "Conocimiento del lugar donde se halla el paciente",
+      "Reconocimiento del individuo del tiempo actual (hora del día, día de la semana, mes del año) y del orden de sucesión de los hechos",
+      "Identificación del propio nombre y profesión",
+      "Capacidad de ubicarse en el espacio geográfico"
+    ],
+    answer: 1,
+    exp: "La orientación temporal es el reconocimiento del individuo del tiempo actual: hora, día, semana, mes y año, así como el orden de sucesión de los hechos."
+  },
+  {
+    q: "¿Cuál de las siguientes alternativas describe correctamente la 'hipermanía'?",
+    opts:[
+      "Forma atenuada de euforia sin agitación",
+      "Estado maníaco extremo que se caracteriza por actividad constante, conducta errática, desorientación y habla incoherente",
+      "Alternancia rápida entre euforia y tristeza",
+      "Aumento moderado del estado de ánimo sin alteración funcional"
+    ],
+    answer: 1,
+    exp: "La hipermanía es el estado maníaco extremo caracterizado por actividad constante, conducta errática, desorientación y habla incoherente."
+  }
+],
+
+/* ─── TEMA 5: Exploración del Estado Mental II ─── */
+[
+  {
+    q: "La 'fuga de ideas' se considera patognomónica de:",
+    opts:[
+      "La esquizofrenia paranoide",
+      "El trastorno obsesivo-compulsivo",
+      "El episodio maníaco",
+      "La depresión mayor con síntomas psicóticos"
+    ],
+    answer: 2,
+    exp: "La fuga de ideas, en la que el pensamiento salta de un concepto a otro en forma rápida y sucesiva, se considera uno de los pocos signos patognomónicos del episodio maníaco."
+  },
+  {
+    q: "¿Qué son las 'paramnesias'?",
+    opts:[
+      "Recuerdos compensadores para llenar lagunas amnésicas sin fantasía",
+      "Falseamientos o distorsiones de la memoria, como el déjà vu (ya visto) y el déjà vécu (ya vivido), que confunden el pasado con el presente; también incluyen los fenómenos opuestos de jamais vu y jamais vécu",
+      "Dificultad difusa para fijar o evocar información",
+      "Aumento exagerado de la capacidad de evocación de recuerdos remotos"
+    ],
+    answer: 1,
+    exp: "Las paramnesias son falseamientos o distorsiones de la memoria, que incluyen el déjà vu, déjà vécu (confunden pasado con presente) y sus opuestos jamais vu y jamais vécu."
+  },
+  {
+    q: "La 'anhedonia' se define como:",
+    opts:[
+      "Incapacidad para controlar las manifestaciones afectivas",
+      "Incapacidad de experimentar placer; es un síntoma negativo de la esquizofrenia y tiene interés especial en los trastornos depresivos como predictor de buena respuesta farmacológica",
+      "Estado de desinterés y falta de motivación sin relación con el placer",
+      "Cambio brusco del tono afectivo de euforia a llanto"
+    ],
+    answer: 1,
+    exp: "La anhedonia es la incapacidad de experimentar placer. Es un síntoma negativo de la esquizofrenia y adquiere especial interés en la depresión como predictor de buena respuesta farmacológica."
+  },
+  {
+    q: "En la afasia motriz, ¿qué capacidad se conserva y cuál se pierde?",
+    opts:[
+      "Se pierde la comprensión del lenguaje hablado pero se conserva la capacidad de hablar",
+      "Se pierde la capacidad de hablar pero subsiste la comprensión; la musculatura del lenguaje permanece indemne",
+      "Se pierden tanto la comprensión como la emisión de palabras",
+      "Solo se afecta la escritura, conservándose el lenguaje oral"
+    ],
+    answer: 1,
+    exp: "En la afasia motriz hay imposibilidad para emitir palabras con la musculatura del lenguaje indemne; subsiste la comprensión pero se ha perdido la capacidad de hablar."
+  },
+  {
+    q: "¿Qué es el 'pensamiento mágico' según el texto?",
+    opts:[
+      "Una creencia delirante que el sujeto no puede someter a la crítica lógica",
+      "Un tipo de pensamiento en el que lo semejante produce lo semejante o existe relación entre una persona y partes separadas de ella; deriva de supersticiones nacidas de la dificultad de explicar los fenómenos naturales",
+      "Un juicio prevalente por su sobrecarga afectiva que orienta la conducta personal",
+      "Un estado afectivo en el que la realidad se percibe como irreal"
+    ],
+    answer: 1,
+    exp: "El pensamiento mágico deriva de supersticiones basadas en la dificultad de explicar los fenómenos naturales; en él, lo semejante produce lo semejante o existe relación entre la persona y partes separadas de ella."
+  },
+  {
+    q: "La 'circunstancialidad' como trastorno de la expresión del pensamiento se caracteriza por:",
+    opts:[
+      "Respuestas que no llegan al tema central aunque estén relacionadas",
+      "Exceso de rodeos para llegar al tema central, sin distinción entre lo principal y lo superfluo, con minuciosidad y exceso de detalles; aparece en epilepsia y retraso mental",
+      "Repetición persistente de palabras con alusión al mismo tema",
+      "Mezcla incoherente de frases sin ilación lógica"
+    ],
+    answer: 1,
+    exp: "La circunstancialidad es un exceso de rodeos para llegar al tema central, sin distinción entre lo principal y lo accesorio, con abundancia de detalles. Aparece en epilepsia y retraso mental."
+  },
+  {
+    q: "¿Qué son los 'neologismos' en psicopatología?",
+    opts:[
+      "Palabras técnicas propias del vocabulario psiquiátrico",
+      "Repetición de la última sílaba de una palabra",
+      "Creación y uso de palabras o expresiones sin significado generalmente aceptado, a las que el paciente da una significación concreta; surgen típicamente en la esquizofrenia",
+      "Préstamos lingüísticos de otros idiomas utilizados por el paciente"
+    ],
+    answer: 2,
+    exp: "Los neologismos son palabras o expresiones creadas por el paciente sin significado generalmente aceptado, a las que asigna una significación concreta; son típicos de la esquizofrenia."
+  },
+  {
+    q: "La 'idea de influencia' como contenido delirante implica que:",
+    opts:[
+      "El paciente cree que sus capacidades están disminuidas",
+      "El sujeto se siente influido por fuerzas mágicas o naturales: brujería, ondas magnéticas, rayos láser o irradiaciones",
+      "El paciente percibe que los actos de los demás aluden a su persona",
+      "El individuo cree que tiene mayor poder, riqueza o situación social"
+    ],
+    answer: 1,
+    exp: "Las ideas de influencia implican que el sujeto se siente influido por fuerzas mágicas o naturales, como brujería, ondas magnéticas o rayos láser."
+  },
+  {
+    q: "La 'moria' que puede observarse en tumores del lóbulo frontal consiste en:",
+    opts:[
+      "Tristeza profunda con llanto incoercible",
+      "Estado morboso en el que los sujetos tienen inclinación a las bromas sin sentido ético y juegos de palabras, con humor eufórico y comportamiento extravagante",
+      "Aplanamiento afectivo progresivo con pérdida total de intereses",
+      "Labilidad afectiva con cambios bruscos de euforia a irritabilidad"
+    ],
+    answer: 1,
+    exp: "La moria es un estado morboso con inclinación a las bromas sin sentido ético y juegos de palabras; los sujetos tienen humor eufórico y disfrutan comportándose extravagantemente. Se observa en tumores del lóbulo frontal."
+  },
+  {
+    q: "La 'confabulación' que aparece en el síndrome de Korsakoff consiste en:",
+    opts:[
+      "Narración falseada con la finalidad de llamar la atención, sin trastornos amnésicos",
+      "Seudo-recuerdo compensador para llenar lagunas amnésicas; los hechos inventados no carecen de sentido y son posibles en la realidad, sin fantasía ni absurdo",
+      "Deformación de hechos pasados propia de los pacientes depresivos",
+      "Revivir etapas pasadas como si estuvieran presentes, propio de la demencia senil"
+    ],
+    answer: 1,
+    exp: "La confabulación es un seudo-recuerdo compensador que llena lagunas amnésicas; los hechos inventados son posibles y coherentes en la realidad. Aparece espontáneamente o inducida en el síndrome de Korsakoff y en la demencia."
+  }
+],
+
+/* ─── TEMA 6: Entrevista Psiquiátrica ─── */
+[
+  {
+    q: "Los dos elementos globales de la entrevista psiquiátrica son:",
+    opts:[
+      "La anamnesis y la exploración de la salud mental o psiquiátrica",
+      "El diagnóstico y el plan terapéutico",
+      "La exploración física y el examen del estado mental",
+      "La historia social y la evaluación neurológica"
+    ],
+    answer: 0,
+    exp: "Los dos elementos globales de la entrevista psiquiátrica son la anamnesis (historia clínica, relato subjetivo del paciente) y la exploración de la salud mental, que es la herramienta más objetiva del entrevistador."
+  },
+  {
+    q: "En la entrevista abierta, ¿qué característica fundamental la distingue de la entrevista cerrada?",
+    opts:[
+      "Las preguntas ya están previstas en un cuestionario estructurado",
+      "El entrevistador tiene amplia libertad para las preguntas, permitiendo la flexibilidad necesaria en cada caso particular",
+      "Solo puede realizarla el psiquiatra jefe del equipo",
+      "Tiene una duración máxima de 15 minutos por norma institucional"
+    ],
+    answer: 1,
+    exp: "En la entrevista abierta el entrevistador tiene amplia libertad para las preguntas, lo que le permite la flexibilidad necesaria en cada caso. En la cerrada, las preguntas ya están previstas en orden y forma."
+  },
+  {
+    q: "La 'etapa de preinteracción' en la relación enfermero-paciente consiste en:",
+    opts:[
+      "El primer encuentro cara a cara entre el enfermero y el paciente",
+      "Todo lo que el enfermero piensa, siente o hace antes de la primera interacción con su paciente; incluye adquirir conciencia de los propios pensamientos y concebir los objetivos de la primera interacción",
+      "La fase en que ambos se conocen progresivamente superando las barreras iniciales",
+      "La última etapa de la relación cuando el paciente recibe el alta"
+    ],
+    answer: 1,
+    exp: "La etapa de preinteracción incluye todo lo que el enfermero piensa, siente o hace antes de la primera interacción. Las tareas fundamentales son: adquirir conciencia de los propios pensamientos/sentimientos y concebir los objetivos de la primera interacción."
+  },
+  {
+    q: "¿Por qué los antecedentes familiares son fundamentales en la evaluación psiquiátrica?",
+    opts:[
+      "Solo se registran para fines administrativos",
+      "Muchas enfermedades psiquiátricas son familiares y un número significativo muestra predisposición genética; además, los antecedentes de suicidio son un factor de riesgo significativo para conductas suicidas en el paciente",
+      "Permiten calcular el grado de responsabilidad legal de la familia",
+      "Se utilizan exclusivamente para determinar el tipo de seguro médico"
+    ],
+    answer: 1,
+    exp: "Los antecedentes familiares son fundamentales porque muchas enfermedades psiquiátricas son familiares o tienen predisposición genética; además, los antecedentes de suicidio familiar constituyen un factor de riesgo significativo."
+  },
+  {
+    q: "La 'etapa de definición de identidades' en la relación enfermero-paciente comienza cuando:",
+    opts:[
+      "El paciente recibe el diagnóstico definitivo",
+      "Se han superado las barreras de la etapa introductoria y el enfermero y el paciente comienzan a verse uno al otro como un ser humano único",
+      "El enfermero completa la anamnesis",
+      "El paciente firma el consentimiento informado de tratamiento"
+    ],
+    answer: 1,
+    exp: "La etapa de definición de identidades comienza cuando se superan las barreras de la etapa introductoria; ambos empiezan a verse como seres humanos únicos, disminuye la angustia y se profundiza la relación."
+  },
+  {
+    q: "El texto establece que la entrevista psiquiátrica normalmente no debe durar más de:",
+    opts:[
+      "15 minutos",
+      "20 minutos",
+      "Una hora (entre 30 y 60 minutos)",
+      "Dos horas, considerando la anamnesis completa"
+    ],
+    answer: 2,
+    exp: "La entrevista no debe durar más de una hora (entre 30 y 60 minutos); la finalidad y las circunstancias que la rodean determinan su duración exacta."
+  },
+  {
+    q: "Las 'áreas críticas' que el paciente raramente menciona espontáneamente durante la entrevista psiquiátrica son:",
+    opts:[
+      "Memoria, orientación y concentración",
+      "El trabajo o estudio, el consumo de drogas o alcohol y la vida sexual",
+      "Los antecedentes familiares de enfermedades mentales",
+      "La presencia de alucinaciones y delirios activos"
+    ],
+    answer: 1,
+    exp: "Las tres áreas críticas que pocos pacientes mencionan espontáneamente son: el trabajo o estudio, el eventual consumo de drogas o alcohol, y la vida sexual."
+  },
+  {
+    q: "En la etapa introductoria o de orientación de la relación enfermero-paciente, ¿cuál es la primera tarea del enfermero en el encuentro inicial?",
+    opts:[
+      "Completar la historia clínica del paciente",
+      "Administrar la medicación prescrita",
+      "Hacer un pacto con el paciente con el propósito de ayudarlo a conseguir su recuperación social",
+      "Derivar al paciente al médico psiquiatra"
+    ],
+    answer: 2,
+    exp: "La primera tarea en el encuentro inicial es hacer un pacto con el paciente con el propósito de ayudar a conseguir su recuperación social. El enfermero se presenta e informa sobre la duración y frecuencia de las interacciones."
+  },
+  {
+    q: "La 'anamnesis' en la historia clínica psiquiátrica se define como:",
+    opts:[
+      "El diagnóstico provisional formulado en la primera consulta",
+      "El registro completo realizado a todo paciente psiquiátrico que se atiende por primera vez, incluyendo datos de filiación, relaciones afectivas, enfermedad actual y antecedentes personales y familiares",
+      "El examen del estado mental basado en la observación del comportamiento",
+      "El informe del asistente social sobre el entorno familiar"
+    ],
+    answer: 1,
+    exp: "La anamnesis es el registro completo realizado al paciente psiquiátrico en su primera consulta; incluye datos de filiación, relaciones afectivas, enfermedad actual, antecedentes personales y familiares."
+  },
+  {
+    q: "¿Qué se entiende por 'transferencia' en el contexto de la relación enfermero-paciente?",
+    opts:[
+      "Derivación del paciente a otro profesional de salud",
+      "Cuando la enfermera o el paciente ven al otro individuo como un duplicado de alguien importante en su pasado, por ejemplo que la enfermera vea al paciente mayor como su padre",
+      "Intercambio de información entre el equipo de enfermería de distintos turnos",
+      "El traslado del paciente entre diferentes servicios hospitalarios"
+    ],
+    answer: 1,
+    exp: "La transferencia ocurre cuando la enfermera o el paciente perciben al otro como un duplicado de alguien importante en su pasado, lo que constituye una barrera para establecer la relación terapéutica real."
+  }
+],
+
+/* ─── TEMA 7: Técnicas de Comunicación ─── */
+[
+  {
+    q: "Según la Regla 55-38-7, ¿en qué porcentaje recae el potencial de la comunicación en las palabras (lenguaje verbal)?",
+    opts:[
+      "55%",
+      "38%",
+      "7%",
+      "93%"
+    ],
+    answer: 2,
+    exp: "Según la regla 55-38-7, el lenguaje verbal representa solo el 7% de la comunicación; el 55% corresponde al lenguaje corporal y el 38% al lenguaje paraverbal (uso de la voz)."
+  },
+  {
+    q: "¿En qué condiciones se aplica la Regla 55-38-7?",
+    opts:[
+      "En cualquier tipo de conversación, independientemente del tema",
+      "Solo cuando se hable de datos objetivos y verificables",
+      "Solo cuando se hable de sentimientos o actitudes Y exista incoherencia en la comunicación (lo que se dice no coincide con cómo se dice)",
+      "Únicamente en entrevistas clínicas formales"
+    ],
+    answer: 2,
+    exp: "La regla 55-38-7 solo se aplica cuando se habla de sentimientos o actitudes y existe incoherencia en la comunicación; ante esa incoherencia el interlocutor da más importancia al lenguaje no verbal (93%) que al verbal (7%)."
+  },
+  {
+    q: "¿Cuál es la función del 'feedback' en el proceso de comunicación?",
+    opts:[
+      "Codificar el mensaje para adaptarlo al nivel del receptor",
+      "Información que devuelve el receptor al emisor sobre su propia comunicación, tanto en cuanto a su contenido como a la interpretación del mismo o sus consecuencias en el comportamiento de los interlocutores",
+      "Eliminar los ruidos y filtros que distorsionan el mensaje",
+      "Definir el canal más adecuado para la transmisión del mensaje"
+    ],
+    answer: 1,
+    exp: "El feedback es la información que devuelve el receptor al emisor sobre su comunicación, en cuanto a su contenido, interpretación y consecuencias en el comportamiento de los interlocutores."
+  },
+  {
+    q: "Linda Richards es reconocida en la enfermería psiquiátrica por:",
+    opts:[
+      "Publicar el primer manual de enfermería psiquiátrica en América",
+      "Ser la primera enfermera profesional en América; pensaba que el enfermo mental debe ser atendido con al menos el mismo cuidado que el que sufre una enfermedad física, y fue precursora en establecer escuelas de capacitación en hospitales",
+      "Introducir el método de la relación de persona a persona en enfermería",
+      "Desarrollar los primeros criterios diagnósticos en salud mental"
+    ],
+    answer: 1,
+    exp: "Linda Richards fue la primera enfermera profesional en América; pensaba que el enfermo mental debía recibir tanto cuidado como el que sufre una enfermedad física y fue precursora en establecer escuelas de capacitación."
+  },
+  {
+    q: "¿Qué se entiende por 'componentes paraverbales' de la comunicación?",
+    opts:[
+      "El contenido semántico de las palabras pronunciadas",
+      "Elementos que, al emplear el lenguaje, no alteran el contenido de las palabras aunque hacen variar el significado; comprenden el volumen, tono, velocidad, fluidez y pausas",
+      "Los gestos y expresiones faciales que acompañan el discurso",
+      "Las señales no verbales del cuerpo como postura y movimientos"
+    ],
+    answer: 1,
+    exp: "Los componentes paraverbales son los que al usar el lenguaje no alteran el contenido de las palabras pero hacen variar el significado; se refieren al 'cómo se dicen las cosas': volumen, tono, velocidad, fluidez, pausas."
+  },
+  {
+    q: "Cuando la enfermera ayuda al paciente a 'esclarecer', ¿cuál es el objetivo principal?",
+    opts:[
+      "Hacer un diagnóstico de enfermería preciso",
+      "Ayudar al paciente a aclarar el sentido y la naturaleza del mensaje que está transmitiendo, interrumpiendo el discurso cuando no comprende el significado de sus comentarios o el uso de pronombres indefinidos",
+      "Registrar la información para la historia clínica",
+      "Evaluar el nivel de insight del paciente"
+    ],
+    answer: 1,
+    exp: "Ayudar a esclarecer significa ayudar al paciente a aclarar el sentido de su mensaje; la enfermera interrumpe cuando no comprende el significado o el uso de pronombres como 'él', 'ella', 'ellos', para que el paciente sea más preciso."
+  },
+  {
+    q: "¿Qué representa el 'contexto' en los elementos del proceso de comunicación?",
+    opts:[
+      "El canal físico por el que se transmite el mensaje",
+      "La información que el receptor devuelve al emisor",
+      "Las circunstancias temporales, espaciales y socioculturales que rodean el acto comunicativo y permiten comprender el mensaje en su justa medida",
+      "El conjunto de claves y normas que sirven para transmitir el mensaje"
+    ],
+    answer: 2,
+    exp: "El contexto son las circunstancias temporales, espaciales y socioculturales que rodean el acto comunicativo y que permiten comprender el mensaje en su justa medida."
+  },
+  {
+    q: "Los 'filtros' en la comunicación enfermero-paciente se refieren a:",
+    opts:[
+      "Los aparatos electrónicos que interfieren en la comunicación verbal",
+      "Barreras mentales que surgen de los valores, experiencias, conocimientos, expectativas y prejuicios de emisor y receptor; en psiquiatría son muy importantes porque actúan incluso antes del encuentro",
+      "Los ruidos físicos del ambiente hospitalario",
+      "La dificultad del paciente para articular palabras"
+    ],
+    answer: 1,
+    exp: "Los filtros son barreras mentales que surgen de los valores, experiencias, conocimientos, expectativas y prejuicios de emisor y receptor. En psiquiatría son muy importantes porque actúan incluso antes del encuentro."
+  },
+  {
+    q: "Cuando la enfermera ayuda al paciente a 'identificar causas y efectos', ¿qué le está ayudando a hacer?",
+    opts:[
+      "Memorizar los síntomas de su enfermedad",
+      "Establecer lo que hizo o dijo antes, durante y después de una experiencia, para encontrar la razón de su conducta y comprender el por qué de sus reacciones",
+      "Diseñar el plan de alta hospitalaria",
+      "Seleccionar la medicación más adecuada para sus síntomas"
+    ],
+    answer: 1,
+    exp: "Ayudar a identificar causas y efectos implica que la enfermera ayude al paciente a establecer lo que hizo o dijo antes, durante y después de una experiencia, encontrando la causa de sus reacciones y el efecto que estas producen."
+  },
+  {
+    q: "Una persona con 'volumen de voz muy bajo, tartamudeos, dudas y errores' en la comunicación, según el texto, indica:",
+    opts:[
+      "Agresividad encubierta",
+      "Ansiedad y timidez o incomodidad",
+      "Superioridad intelectual y reflexión",
+      "Manía o hipomanía de grado leve"
+    ],
+    answer: 1,
+    exp: "Según el texto, un volumen muy bajo, tartamudeos, dudas y errores indican ansiedad y timidez o incomodidad en el hablante."
+  }
+],
+
+/* ─── TEMA 8: Problemas de la Relación Enfermero-Paciente ─── */
+[
+  {
+    q: "La 'actitud de no comprometerse' en el paciente psiquiátrico se caracteriza fundamentalmente por:",
+    opts:[
+      "La incapacidad orgánica para establecer vínculos afectivos",
+      "Renuencia a entablar relaciones significativas con otros seres humanos, que implica temor a la intimidad emocional; puede expresarse desde la indiferencia hasta el profundo repliegue alucinatorio",
+      "La decisión racional de no vincularse con el personal de salud",
+      "La negativa a tomar la medicación prescrita"
+    ],
+    answer: 1,
+    exp: "La actitud de no comprometerse implica renuencia a entablar relaciones significativas y temor a la intimidad emocional. Puede ir desde la indiferencia hasta el repliegue en la fantasía con alucinaciones."
+  },
+  {
+    q: "¿Por qué las alucinaciones tienden a disminuir a medida que la enfermera establece la relación con el paciente?",
+    opts:[
+      "Porque la medicación antipsicótica actúa más rápidamente en contexto terapéutico",
+      "Porque las alucinaciones son síntomas de perturbación mental que constituyen una estrategia autista para distorsionar una realidad dolorosa; cuando el paciente experimenta el calor de la relación con otro ser humano, su necesidad de alucinaciones puede disiparse",
+      "Porque el ruido ambiental del hospital bloquea las voces alucinatorias",
+      "Porque la enfermera aprende a ignorar las alucinaciones del paciente"
+    ],
+    answer: 1,
+    exp: "Las alucinaciones son estrategias autistas para distorsionar una realidad dolorosa. Cuando el paciente experimenta el calor de una relación humana real, su necesidad de recurrir a las alucinaciones tiende a disiparse."
+  },
+  {
+    q: "En el plan de cuidados del paciente con alucinaciones, ¿qué actitud NO debe tener la enfermera?",
+    opts:[
+      "Interrumpir el patrón alucinatorio ofreciendo conversación concreta",
+      "Aceptar que cree que las alucinaciones del paciente se basan en la realidad o conversar con las 'voces', reforzando la creencia del paciente",
+      "Proporcionar actividades fáciles de ejecutar con cumplimientos realistas",
+      "Buscar datos que indiquen que el paciente se encuentra alucinando"
+    ],
+    answer: 1,
+    exp: "La enfermera NO debe aceptar que cree que las alucinaciones son reales ni conversar con las 'voces', porque reforzaría la creencia del paciente. Tampoco debe negar que son muy reales para él."
+  },
+  {
+    q: "La dinámica detrás del 'abatimiento' (depresión) en el paciente psiquiátrico es la siguiente:",
+    opts:[
+      "El individuo sufre una pérdida que revive pérdidas anteriores; hay disminución de la autoestima, la ira se dirige contra sí mismo, aparecen autoacusaciones y la energía psíquica se vuelca hacia adentro restando disponibilidad para relaciones saludables",
+      "La depresión es consecuencia directa de un desequilibrio neuroquímico sin relación con experiencias relacionales",
+      "El paciente abatido utiliza la tristeza como mecanismo de manipulación consciente para obtener atención",
+      "La depresión aparece siempre como respuesta a una pérdida concreta y reciente"
+    ],
+    answer: 0,
+    exp: "La dinámica es: pérdida → revive pérdidas anteriores → disminuye la autoestima → ira que se vuelca hacia adentro → autoacusaciones y culpa → energía concentrada en el yo → depresión. También puede ser manipulación inconsciente."
+  },
+  {
+    q: "¿Qué señal indica que el paciente deprimido puede estar mejorando y simultáneamente representa una alerta de riesgo suicida?",
+    opts:[
+      "Que comience a dormir más horas",
+      "Que empiece a verbalizar ideas de culpa",
+      "Que el enfermero note que el paciente dirige su ira contra la enfermedad (externaliza la agresividad), porque indica que la energía que antes se dirigía hacia adentro ahora puede emplearse para cometer el suicidio",
+      "Que solicite reunirse con sus familiares"
+    ],
+    answer: 2,
+    exp: "Cuando el paciente dirige su ira contra la enfermedad, es positivo porque exterioriza agresividad, pero simultáneamente advierte que ha puesto en marcha su energía y puede emplearla para el suicidio. Se debe estar alerta."
+  },
+  {
+    q: "Las cuatro herramientas que prefieren las personas manipuladoras para influir en la enfermera son:",
+    opts:[
+      "Halagos, regalos, adulación y dependencia",
+      "La crítica, la culpa, la obligación y el miedo a la persona o miedo a no agradar",
+      "El silencio, la evasión, la amenaza y la seducción",
+      "La ironía, la comparación, el chantaje emocional y la justificación"
+    ],
+    answer: 1,
+    exp: "Las cuatro herramientas predilectas del paciente manipulador son la crítica (al otro), la culpa, la obligación y el miedo a la persona o miedo a no agradar."
+  },
+  {
+    q: "Según el texto, ¿qué condición permite que la manipulación del paciente tenga curso en la relación de enfermería?",
+    opts:[
+      "Que la enfermera carezca de formación académica suficiente",
+      "Que la enfermera cree un vínculo afectivo no profesional con el paciente, un aprecio particular que le dificultará negarse a pedidos para no perder ese vínculo especial",
+      "Que el paciente tenga una personalidad antisocial diagnosticada",
+      "Que el turno de trabajo sea nocturno y el control institucional sea menor"
+    ],
+    answer: 1,
+    exp: "La manipulación solo tiene curso si la enfermera crea un vínculo afectivo no profesional con el paciente; ese aprecio particular le dificultará negarse a sus pedidos por no querer perder ese vínculo."
+  },
+  {
+    q: "¿Cuáles son las fallas del enfermero en la 'acción de escuchar'?",
+    opts:[
+      "Solo hablar sin dejar tiempo para que el paciente se exprese",
+      "La acción de escuchar puede ser obstaculizada por la angustia del enfermero, o porque este está preocupado por acontecimiento de su propia vida y es incapaz de concentrarse en los problemas del paciente",
+      "Tomar notas durante la entrevista de manera excesiva",
+      "Utilizar un vocabulario técnico que el paciente no comprende"
+    ],
+    answer: 1,
+    exp: "La escucha puede fracasar por la angustia del enfermero o porque está preocupado por su propia vida, siendo incapaz de concentrarse en el paciente. No escuchar equivale a no tratar al paciente como ser humano con valor."
+  },
+  {
+    q: "¿Por qué el texto señala que el paciente con ideas suicidas que ha 'anunciado su intención' puede estar comunicando algo que parece un adiós?",
+    opts:[
+      "Porque las personas que piensan en suicidarse comunican sus intenciones por lo menos a una persona, a veces disfrazadas (un 'adiós' que indica que no lo volverá a ver)",
+      "Porque el lenguaje del paciente suicida siempre es metafórico",
+      "Porque solo los pacientes con diagnóstico formal de depresión mayor comunican su ideación suicida",
+      "Porque la comunicación del suicidio es siempre directa y explícita"
+    ],
+    answer: 0,
+    exp: "Las personas que piensan en suicidarse comunican sus intenciones al menos a una persona; estas intenciones pueden estar disfrazadas, como un 'adiós' que en realidad indica que no los volverá a ver."
+  },
+  {
+    q: "Las 'fallas por no infundir confianza' en el enfermero se deben principalmente a:",
+    opts:[
+      "Exceso de empatía que genera sobreidentificación con el paciente",
+      "Su propia angustia, falta de conocimiento o experiencia, o carencia de sensibilidad; la incapacidad de infundir confianza impide la comunicación",
+      "El tiempo excesivo dedicado a cada paciente",
+      "La excesiva formalidad en el trato con el paciente"
+    ],
+    answer: 1,
+    exp: "Las fallas para infundir confianza se deben a la propia angustia del enfermero, a la falta de conocimiento o experiencia, o a la carencia de sensibilidad. Esta incapacidad impide la comunicación terapéutica."
+  }
+],
+
+/* ─── TEMA 11: Psicofarmacología ─── */
+[
+  {
+    q: "¿Cuál es el mecanismo de acción de los antipsicóticos típicos (primera generación)?",
+    opts:[
+      "Bloqueo serotoninérgico en la zona mesocortical con activación dopaminérgica simultánea",
+      "Bloqueo dopaminérgico en la zona mesolímbica y mesocortical; su principal característica es producir mayor manifestación extrapiramidal y son eficaces para síntomas positivos (delirios y alucinaciones)",
+      "Inhibición selectiva de la recaptación de serotonina a nivel presináptico",
+      "Estabilización de la membrana neuronal mediante bloqueo de canales de sodio"
+    ],
+    answer: 1,
+    exp: "Los antipsicóticos típicos actúan mediante bloqueo dopaminérgico en la zona mesolímbica y mesocortical; producen mayor manifestación extrapiramidal y son eficaces para los síntomas positivos o floridos (delirios y alucinaciones), pero poco eficaces para los negativos."
+  },
+  {
+    q: "¿Qué diferencia principal existe entre los antipsicóticos típicos y los atípicos respecto a los síntomas de la esquizofrenia?",
+    opts:[
+      "Los típicos mejoran los síntomas negativos y los atípicos los positivos",
+      "Los típicos son eficaces para síntomas positivos (delirios y alucinaciones) pero poco para los negativos; los atípicos de segunda generación mejoran los síntomas negativos, tienen menor manifestación extrapiramidal y mejoran la función cognitiva",
+      "No existe diferencia clínica; la distinción es solo histórica",
+      "Los atípicos solo se usan en la depresión resistente"
+    ],
+    answer: 1,
+    exp: "Los típicos son eficaces para síntomas positivos pero no para los negativos. Los atípicos mejoran los síntomas negativos, tienen menor manifestación extrapiramidal y mejoran la función cognitiva del paciente esquizofrénico."
+  },
+  {
+    q: "El síndrome neuroléptico maligno se caracteriza por:",
+    opts:[
+      "Náuseas, vómitos y cefalea de inicio gradual",
+      "Alteración de la conciencia, hipertermia, rigidez muscular, alteración del pulso y taquicardia",
+      "Aumento de peso, galactorrea e hipotensión ortostática",
+      "Leucopenia y agranulocitosis potencialmente fatales"
+    ],
+    answer: 1,
+    exp: "El síndrome neuroléptico maligno se caracteriza por alteración de la conciencia, hipertermia, rigidez muscular, alteración del pulso y taquicardia. Es una emergencia médica."
+  },
+  {
+    q: "La Clozapina (Lapenax) es un antipsicótico atípico destacable porque:",
+    opts:[
+      "Es el más barato del mercado",
+      "No produce manifestaciones extrapiramidales, pero su principal reacción adversa es la leucopenia y agranulocitosis (ausencia de leucocitos)",
+      "Está contraindicada en la esquizofrenia",
+      "Solo se administra en forma de depósito mensual"
+    ],
+    answer: 1,
+    exp: "La Clozapina no produce manifestaciones extrapiramidales, pero su reacción adversa grave es la leucopenia y agranulocitosis (sin leucocitos), lo que requiere controles hematológicos periódicos."
+  },
+  {
+    q: "Las benzodiacepinas tienen las siguientes acciones farmacológicas:",
+    opts:[
+      "Antipsicótica, antidepresiva, antimaníaca y sedante",
+      "Ansiolítica, sedante, miorrelajante, hipnótica y anticonvulsivante",
+      "Antidepresiva y estabilizadora del ánimo exclusivamente",
+      "Anticolinérgica, antihistamínica y alfa-bloqueante"
+    ],
+    answer: 1,
+    exp: "Las benzodiacepinas tienen acción ansiolítica, sedante, miorrelajante, hipnótica y anticonvulsivante. Evitan que el foco epiléptico se propague y pueden inducir el sueño."
+  },
+  {
+    q: "El Sertindol (Serdolect) tiene contraindicaciones importantes porque:",
+    opts:[
+      "Produce agranulocitosis en el 5% de los pacientes",
+      "Produce cambios en el ECG con prolongación del intervalo QT, arritmias, taquicardia y muerte súbita; está contraindicado con antibióticos macrólidos y con otros antipsicóticos",
+      "Solo puede usarse en menores de 18 años",
+      "Provoca dependencia física a las dos semanas de tratamiento"
+    ],
+    answer: 1,
+    exp: "El Sertindol produce cambios en el ECG (prolongación del QT), arritmias, taquicardia y muerte súbita. Está contraindicado con antibióticos macrólidos (eritromicina, claritromicina) y con otros antipsicóticos."
+  },
+  {
+    q: "El 'chaleco químico' o 'cóctel lítico' consiste en la combinación de:",
+    opts:[
+      "Antidepresivos IRRS con benzodiacepinas",
+      "Antipsicóticos típicos: Haloperidol, Levomepromazina y Prometazina; la combinación 1-2-1 implica 1 ampolla de Haloperidol, 2 de Levomepromazina y 1 de Prometazina",
+      "Litio con ácido valproico y carbamazepina",
+      "Antipsicóticos atípicos con antiepilépticos"
+    ],
+    answer: 1,
+    exp: "El chaleco químico combina antipsicóticos típicos: Haloperidol, Levomepromazina y Prometazina. La combinación 1-2-1 = 1 amp. Haloperidol, 2 amp. Levomepromazina, 1 amp. Prometazina."
+  },
+  {
+    q: "La reacción adversa característica de la Risperidona (Risperin) incluye:",
+    opts:[
+      "Leucopenia y agranulocitosis",
+      "Prolongación del intervalo QT y muerte súbita",
+      "Aumento de peso, hipotensión ortostática, sedación y galactorrea",
+      "Síndrome de Stevens-Johnson"
+    ],
+    answer: 2,
+    exp: "Las reacciones adversas de la Risperidona incluyen: aumento de peso, hipotensión ortostática, sedación y galactorrea. Es un antipsicótico atípico de primera línea."
+  },
+  {
+    q: "Los síntomas negativos de la esquizofrenia incluyen:",
+    opts:[
+      "Delirios, alucinaciones e ideas de persecución",
+      "Pobreza afectiva, alogia, abulia, anhedonia, insociabilidad, ambivalencias e incongruencia afectiva",
+      "Agitación, logorrea e ideas de grandeza",
+      "Hipermanía, excitación catatónica y fuga de ideas"
+    ],
+    answer: 1,
+    exp: "Los síntomas negativos son: pobreza afectiva, alogia (empobrecimiento del pensamiento), abulia (falta de energía), anhedonia, insociabilidad, ambivalencias e incongruencia afectiva. Son menos alarmantes pero pueden confundirse con pereza."
+  },
+  {
+    q: "Los IRSS (inhibidores selectivos de la recaptación de serotonina) son eficaces para:",
+    opts:[
+      "Trastorno bipolar tipo I en fase maníaca",
+      "Síntomas extrapiramidales por antipsicóticos",
+      "Tratamiento de TOC, depresión, trastorno de ansiedad y trastorno de la conducta alimentaria; sus reacciones adversas incluyen ansiedad, agitación, náuseas, cefaleas y disfunción sexual",
+      "Epilepsia resistente y trastornos del movimiento"
+    ],
+    answer: 2,
+    exp: "Los IRSS (Fluoxetina, Sertralina, Paroxetina, Citalopram, Escitalopram) son eficaces para TOC, depresión, trastornos de ansiedad y de la conducta alimentaria. Sus RAM incluyen ansiedad, agitación, náuseas, cefaleas y disfunción sexual."
+  }
+]
+
+];
+
+/* ══════════════════════════════════════════════════
+   ESTADO DEL JUEGO
+══════════════════════════════════════════════════ */
+let currentTheme = -1;
+let currentQ = 0;
+let score = 0;
+let answered = false;
+let timerInterval = null;
+let timeLeft = TOTAL_TIME;
+let shuffledBank = [];
+let wrongAnswers = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(themeIdx) {
+  currentTheme = themeIdx;
+  currentQ = 0;
+  score = 0;
+  wrongAnswers = [];
+  shuffledBank = shuffle(BANKS[themeIdx]);
+
+  document.getElementById('theme-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+
+  const names = ['Tema 2: Equipo Psiquiátrico','Tema 3: Salud Mental','Tema 4: Exploración I','Tema 5: Exploración II','Tema 6: Entrevista','Tema 7: Comunicación','Tema 8: Relación Enf-Pte','Tema 11: Psicofarmacología'];
+  document.getElementById('quiz-theme-label').textContent = names[themeIdx];
+  document.getElementById('q-total').textContent = shuffledBank.length;
+  document.getElementById('score-total').textContent = shuffledBank.length;
+
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = shuffledBank[currentQ];
+  answered = false;
+
+  document.getElementById('q-current').textContent = currentQ + 1;
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('question-num').textContent = 'Pregunta ' + (currentQ + 1);
+  document.getElementById('question-text').textContent = q.q;
+
+  const progress = ((currentQ) / shuffledBank.length) * 100;
+  document.getElementById('progress-fill').style.width = progress + '%';
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+
+  document.getElementById('next-btn').className = 'next-btn';
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, btn);
+    container.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = TOTAL_TIME;
+  updateTimerUI();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) timeExpired();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const label = document.getElementById('timer-label');
+  const fill = document.getElementById('timer-fill');
+  const pct = (timeLeft / TOTAL_TIME) * 100;
+
+  label.textContent = timeLeft;
+  fill.style.width = pct + '%';
+
+  if (timeLeft > 18) {
+    fill.style.background = 'var(--timer-ok)';
+    label.style.color = 'var(--timer-ok)';
+  } else if (timeLeft > 8) {
+    fill.style.background = 'var(--timer-warn)';
+    label.style.color = 'var(--timer-warn)';
+  } else {
+    fill.style.background = 'var(--timer-danger)';
+    label.style.color = 'var(--timer-danger)';
+  }
+}
+
+function timeExpired() {
+  answered = true;
+  disableAll();
+  const q = shuffledBank[currentQ];
+  revealCorrect(q.answer);
+  showFeedback('⏱ Tiempo agotado.', q.exp, false);
+  wrongAnswers.push({ n: currentQ + 1, q: q.q });
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function selectAnswer(idx, btn) {
+  if (answered) return;
+  clearInterval(timerInterval);
+  answered = true;
+  disableAll();
+
+  const q = shuffledBank[currentQ];
+  const isCorrect = idx === q.answer;
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++;
+    document.getElementById('score-display').textContent = score;
+    showFeedback('✓ ¡Correcto!', q.exp, true);
+  } else {
+    btn.classList.add('wrong');
+    revealCorrect(q.answer);
+    showFeedback('✗ Incorrecto.', q.exp, false);
+    wrongAnswers.push({ n: currentQ + 1, q: q.q });
+  }
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function revealCorrect(answerIdx) {
+  const btns = document.querySelectorAll('.option-btn');
+  if (btns[answerIdx]) btns[answerIdx].classList.add('reveal');
+}
+
+function disableAll() {
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+}
+
+function showFeedback(prefix, exp, correct) {
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback show';
+  fb.innerHTML = `<strong>${prefix}</strong> ${exp}`;
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= shuffledBank.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult() {
+  clearInterval(timerInterval);
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  const total = shuffledBank.length;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('res-score').textContent = score + '/' + total;
+
+  let msg = '', color = '';
+  if (pct >= 90) { msg = '¡Excelente dominio del tema!'; color = 'var(--accent)'; }
+  else if (pct >= 70) { msg = 'Buen desempeño. Repasar los errores.'; color = 'var(--accent2)'; }
+  else if (pct >= 50) { msg = 'Regular. Se recomienda releer el tema.'; color = 'var(--timer-warn)'; }
+  else { msg = 'Necesitás repasar el tema con más profundidad.'; color = 'var(--timer-danger)'; }
+
+  document.getElementById('res-msg').textContent = msg;
+  document.getElementById('res-msg').style.color = color;
+
+  let detailsHTML = `
+    <div class="detail-row"><span>Respuestas correctas</span><span>${score}</span></div>
+    <div class="detail-row"><span>Respuestas incorrectas o sin respuesta</span><span>${total - score}</span></div>
+    <div class="detail-row"><span>Porcentaje de acierto</span><span>${pct}%</span></div>
+  `;
+  if (wrongAnswers.length > 0) {
+    detailsHTML += `<div style="margin-top:12px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Preguntas a repasar</div>`;
+    wrongAnswers.forEach(w => {
+      detailsHTML += `<div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:2px;"><span style="color:var(--timer-danger)">P${w.n}</span><span style="color:var(--muted);font-size:12px;line-height:1.4;">${w.q}</span></div>`;
+    });
+  }
+  document.getElementById('res-details').innerHTML = detailsHTML;
+}
+
+function retryTheme() {
+  startQuiz(currentTheme);
+}
+
+function goHome() {
+  clearInterval(timerInterval);
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('theme-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>
